@@ -1,0 +1,368 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+  breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+  breaklines=true,					% sets automatic line breaking
+  captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+  commentstyle=\color{mygreen},		% comment style
+  deletekeywords={...},				% if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+  extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,						% adds a frame around the code
+  keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},			% keyword style
+  language=Octave,					% the language of the code
+  morekeywords={*,...},				% if you want to add more keywords to the set
+%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+%   numbersep=6pt,						% how far the line-numbers are from the code
+%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+  rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,			% underline spaces within strings only
+  showtabs=false,					% show tabs within strings adding particular underscores
+  stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},		% string literal style
+  tabsize=2,							% sets default tabsize to 2 spaces
+  title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\octavescript}[2]{
+\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#2}
+\newcommand{\MNLabTitle}{Operaţii cu matrice în MATLAB. Rezolvarea eficientă a sistemelor de ecuații liniare. Factorizări LU.} 
+\newcommand{\MNAuthor}{Andrei STAN, Mădălina Hristache}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+\textmd{\textbf{\MNLabTitle}}
+\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{Introducere in MATLAB, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+\par În urma parcurgerii acestui laborator, studentul va fi capabil să:
+\begin{itemize}
+	\item factorizeze o matrice folosind una dintre metodele LU: Crout,
+	      Doolittle, Cholesky;
+	\item rezolve recursiv un sistem triunghiular;
+\end{itemize}
+
+\section{Noțiuni teoretice}
+
+\subsection{Complexitatea regulii Cramer}
+
+\par La liceu sistemele de ecuaţii se rezolvau folosing
+\textit{regula lui Cramer}. În continuare, demonstrăm de ce această abordare,
+este ineficientă computațional.
+
+\par Fie un sistem de $n$ ecuaţii cu $n$ necunoscute, $Ax = b$, cu $det(A) \neq 0$.
+Folosind regula lui Cramer urmează să calculăm $n$ determinanți pentru fiecare
+necuoscută, înlocuind pe rând coloane din $A$ cu $b$. În total, calculăm
+$n + 1$ determinanți.
+
+\par Determinantul unei matrici se poate calcula în două moduri:
+
+\begin{equation}
+	det(A) = \sum_{i = 1}^{n}{(-1)^{i + j} a_{ij} det(A_{ij})}, \quad \forall j \in \{1, 2, \ldots, n\}
+\end{equation}
+
+\begin{equation}
+	det(A) = \sum_{j = 1}^{n}{(-1)^{i + j} a_{ij} det(A_{ij})}, \quad \forall i \in \{1, 2, \ldots, n\}
+\end{equation}
+
+\par Cu $A_{ij}$ am notat matricea de dimensiune $(n - 1) \times (n - 1)$
+rezultată din suprimarea (eliminarea) liniei $i$ și a coloanei $j$. Cu alte
+cuvinte, pentru calcularea unui determinant de ordin $n$ trebuie să calculăm
+$n$ determinanți de ordin $n - 1$. În total, pentru calcularea determinantului
+de ordin $n$ am avea:
+
+\begin{equation}
+	n \cdot (n - 1) \cdot (n - 2) \cdot ... \cdot 1 = n!
+\end{equation}
+
+\par În cazul unui sistem de $n$ ecuații cu $n$ necunoscute, folosind ecuația 3,
+avem o complexitate de ordinul $O(n!)$. Pe mai departe, vom explora metode mai
+eficiente de calcul, de ordinul $O(n^3)$.
+
+\newpage
+\subsection{Factorizarea LU}
+
+\par Factorizarea (sau descomponerea) unei matrici are aplicabilitate foarte
+în analiza numerică. Pentru rezolvarea sistemelor liniare, vom discuta despre
+factorizarea LU și QR.
+
+\par Factorizarea LU presupune descompunerea unei matrici pătratice $A$ într-un
+produs de două matrici, $L$ și $U$, unde $L$ este o matrice inferior
+triunghiulară, iar $U$ este o matrice superior triunghiulară. Astfel, putem
+scrie $A = LU$. Astfel sistemul de ecuații $Ax = b$ se transformă în două
+sisteme:
+
+\begin{gather*}
+	Ly = b \\
+	Ux = y
+\end{gather*}
+
+\par Aceste sisteme se numesc \textit{triunghiulare} și se pot rezolva în $O(n^2)$.
+Astfel avem 2 pași de făcut:
+
+\begin{enumerate}
+	\item Descompunerea matricei $A$ în $L$ și $U$;
+	\item Rezolvarea sistemelor triunghiulare.
+\end{enumerate}
+
+\subsubsection{Descompunerea matricei în $L$ și $U$}
+
+\begin{equation*}
+	\begin{bmatrix}
+		a_{11} & a_{12} & \cdots & a_{1n} \\
+		a_{21} & a_{22} & \cdots & a_{2n} \\
+		\vdots & \vdots & \ddots & \dots  \\
+		a_{n1} & a_{n2} & \cdots & a_{nn} \\
+	\end{bmatrix} =
+	\begin{bmatrix}
+		l_{11} & 0      & \cdots & 0      \\
+		l_{21} & l_{22} & \cdots & 0      \\
+		\vdots & \vdots & \ddots & \dots  \\
+		l_{n1} & l_{n2} & \cdots & l_{nn} \\
+	\end{bmatrix} .
+	\begin{bmatrix}
+		u_{11} & u_{12} & \cdots & u_{1n} \\
+		0      & u_{22} & \cdots & u_{2n} \\
+		\vdots & \vdots & \ddots & \dots  \\
+		0      & 0      & \cdots & u_{nn} \\
+	\end{bmatrix}
+\end{equation*}
+
+\par Prin efectuarea deescompunerii direct, ar rezulta un sistem cu $n^2$
+ecuații și $n^2 + n$ necunoscute. Putem "scăpa" de necunoscutele în plus
+folosind mai multe metode, cele mai cunoscute fiind \textit{Crout},
+\textit{Doolittle} și \textit{Cholesky}.
+
+\textbf{Metoda Crout}
+
+\par Metoda Crout prespune ca toate elementele de pe diagonala matricei $U$ să
+fie egale cu 1. Astfel, pentru o matrice $3 \times 3$, putem scrie sistemul de
+ecuaţii:
+
+\begin{align*}
+	l_{11} & = a_{11} & l_{11}u_{12}          & = a_{12} & l_{11}u_{13}                         & = a_{13} \\
+	l_{21} & = a_{21} & l_{21}u_{12} + l_{22} & = a_{22} & l_{21}u_{13} + l_{22}u_{23}          & = a_{23} \\
+	l_{31} & = a_{31} & l_{31}u_{12} + l_{32} & = a_{32} & l_{31}u_{13} + l_{32}u_{23} + l_{33} & = a_{33}
+\end{align*}
+
+\par Algoritmul în MATLAB pentru Crout poate fi gândit astfel:
+
+\begin{enumerate}
+	\item Folosesc un indice $p$ cu care mă plimb pe coloane;
+	\item Observăm că pentru fiecare coloană avem două seturi de ecuaţii:
+	      \begin{itemize}
+		      \item Din primele $p - 1$ ecuații putem calcula $u_{ip}, \forall j \in \{1, 2, \ldots, p - 1\}$;
+		      \item Din restul, putem calcula $l_{ip}, \forall j \in \{p, p + 1, \ldots, n\}$.
+	      \end{itemize}
+\end{enumerate}
+
+\newpage
+\octavescript{./src/crout.m}{}
+
+\textbf{Metoda Doolittle}
+
+\par Metoda Doolittle presupune ca toate elementele de pe diagonala matricei $L$
+să fie egale cu 1. Astfel, pentru o matrice $3 \times 3$, putem scrie sistemul
+de ecuaţii:
+
+\begin{align*}
+	u_{11}       & = a_{11} & u_{12}                      & = a_{12} & u_{13}                              & = a_{13} \\
+	l_{21}u_{11} & = a_{21} & l_{21}u_{12} + u_{22}       & = a_{22} & l_{21}u_{13} + u_{23}               & = a_{23} \\
+	l_{31}u_{11} & = a_{31} & l_{31}u_{12} + l_{32}u_{22} & = a_{32} & l_{31}u_{13} + l_{32}u_{23} + u{33} & = a_{33}
+\end{align*}
+
+\par Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
+
+\begin{enumerate}
+	\item Folosesc un indice $p$ cu care mă plimb pe linii;
+	\item Observăm că pentru fiecare linie avem două seturi de ecuaţii:
+	      \begin{itemize}
+		      \item Din primele $p - 1$ ecuații putem calcula $l_{pi}, \forall i \in \{1, 2, \ldots, p - 1\}$;
+		      \item Din restul, putem calcula $u_{pi}, \forall i \in \{p, p + 1, \ldots, n\}$.
+	      \end{itemize}
+\end{enumerate}
+
+\newpage
+\octavescript{./src/doolittle.m}{}
+
+\textbf{Metoda Cholesky}
+
+\par Descompunerea Cholesky se remarcă prin faptul că matricea $U$ este setată
+ca fiind transpusa (sau hermitica) matricei $L$, adică $A = LL^*$.
+
+\par Fie o matrice $A$ simetrică de dimensiune $n \times n$.
+
+\begin{equation*}
+	A \ pozitiv-definita \Leftrightarrow \mathbf{x}^T A \mathbf{x} > 0, \forall \mathbf{x} \in \mathbb{R}^n \backslash \{\mathbf{0}\}
+\end{equation*}
+
+\par În același mod se poate defini și conceptul de matrice
+\textit{negativ-definită}, înlocuind semnul $>$ cu $<$.
+
+\par Descompunerea Cholesky se poate aplica doar pe matrici simetrice,
+pozitiv-definite.
+
+\textbf{Demonstrație.} Fie $A$ o matrice oarecare.
+
+\begin{equation*}
+	A = LL^* \implies A^* = LL^* \implies A = A^*
+\end{equation*}
+
+\par Demonstrăm acum că $A$ trebuie să fie pozitiv-definită. Fie $Ax = b$:
+
+\begin{align*}
+	Ax          & = b                             \\
+	x^* A x     & = x^* b                         \\
+	x^* L L^* x & = x^* b, \quad y \coloneq L^* x \\
+	y^* y       & = x^* b
+\end{align*}
+
+\par Cum $y^* y > 0 \quad \forall y \neq 0$, rezultă că $x^* b > 0$ și deci
+$x^* A x > 0$. $\blacksquare$
+
+\newpage
+\par Revenind, pentru o matrice $3 \times 3$, putem scrie sistemul de ecuaţii:
+
+\begin{align*}
+	l_{11}^2     & = a_{11} & l_{11}l_{21}                & = a_{12} & l_{11}l_{31}                   & = a_{13} \\
+	l_{11}l_{21} & = a_{21} & l_{21}^2 + l_{22}^2         & = a_{22} & l_{21}l_{31} + l_{22}l_{32}    & = a_{23} \\
+	l_{11}l_{31} & = a_{31} & l_{21}l_{31} + l_{22}l_{32} & = a_{32} & l_{31}^2 + l_{32}^2 + l_{33}^2 & = a_{33}
+\end{align*}
+
+\par Algoritmul în MATLAB pentru Cholesky poate fi gândit astfel:
+
+\begin{enumerate}
+	\item Folosesc un indice $p$ cu care mă plimb pe linii și cu $i$ pe coloane;
+	\item Observăm că avem 2 tipuri de ecuaţii:
+	      \begin{itemize}
+		      \item $i = p$: Putem calcula $l_{pp} = \sqrt{a_{pp} - \sum_{j = 1}^{i}{l_{pj}^2}}$;
+		      \item $t \neq p$: Putem calcula $l_{pi} = \frac{a_{pi} - \sum_{j = 1}^{i}{l_{pj} l_{ij}}}{l_{ii}}$.
+	      \end{itemize}
+	\item Pentru că matricea $A$ este simetrică, putem ignora partea de deasupra
+	      diagonalei principală a sistemului.
+	\item Se observă că cele două sume sunt echivalente atunci când $p = i$.
+\end{enumerate}
+
+\octavescript{./src/cholesky.m}{}
+
+\subsubsection{Rezolvarea sistemelor triunghiulare}
+
+\par Sisteme triunghiulare pot fi de 2 tipuri, \textit{superioare} sau
+\textit{inferioare}, în funcție de tipul matricei. Tratăm prima data cazul
+sistemelor superior triunghiulare.
+
+\begin{align*}
+	a_{11} x_1 + a_{12} x_2 + \ldots + a_{1n} x_n & = b_1 \\
+	a_{22} x_2 + \ldots + a_{2n} x_n              & = b_2 \\
+	\vdots                                                \\
+	a_{nn} x_n                                    & = b_n
+\end{align*}
+
+\par Pentru a rezolva un sistem superior triunghiular, putem folosi metoda
+\textit{substituției înapoi}:
+
+\begin{equation}
+	x_i = \frac{b_i - \sum_{j = i + 1}^{n}{a_{ij} x_j}}{a_{ii}}, \quad \forall i \in \{n, n - 1, \ldots, 1\}
+\end{equation}
+
+\octavescript{./src/superior.m}{}
+
+\par Sistemele inferior triunghiulare arată similar:
+
+\begin{align*}
+	a_{11} x_1                       & = b_1 \\
+	a_{21} x_1 + a_{22} x_2          & = b_2 \\
+	\vdots                                   \\
+	a_{n1} x_1 + \ldots + a_{nn} x_n & = b_n
+\end{align*}
+
+\par Pentru a rezolva un sistem inferior triunghiular, putem folosi metoda
+\textit{substituției înainte}:
+
+\begin{equation}
+	x_i = \frac{b_i - \sum_{j = 1}^{i - 1}{a_{ij} x_j}}{a_{ii}}, \quad \forall i \in \{1, 2, \ldots, n\}
+\end{equation}
+
+\octavescript{./src/inferior.m}{}
+
+\newpage
+\section{Probleme}
+
+\begin{questions}
+	\boxedpoints
+	\pointsinmargin
+
+	\question Pentru matricea dată mai jos, determinați matricele $L$ și $U$
+	folosind metoda Crout.
+
+	\begin{equation*}
+		\begin{bmatrix}
+			1 & 2  & 3  \\
+			2 & 8  & 11 \\
+			3 & 22 & 42
+		\end{bmatrix}
+	\end{equation*}
+
+	\question Pentru matricea de la exerciţiul anterior aplicați factorizarea
+	Doolittle.
+
+	\question Scrieți două funcții în MATLAB care să rezolve un sistem de
+	ecuații superior triunghiular, respectiv inferior triunghiular. Folosiți
+	următoarele prototipuri:
+
+	\begin{verbatim}
+	function x = superior(U, b)
+	function x = inferior(U, b)
+	\end{verbatim}
+
+\end{questions}
+
+\end{document}
