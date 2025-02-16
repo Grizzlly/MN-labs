@@ -1,0 +1,280 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+  breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+  breaklines=true,					% sets automatic line breaking
+  captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+  commentstyle=\color{mygreen},		% comment style
+  deletekeywords={...},				% if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+  extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,						% adds a frame around the code
+  keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},			% keyword style
+  language=Octave,					% the language of the code
+  morekeywords={*,...},				% if you want to add more keywords to the set
+%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+%   numbersep=6pt,						% how far the line-numbers are from the code
+%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+  rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,			% underline spaces within strings only
+  showtabs=false,					% show tabs within strings adding particular underscores
+  stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},		% string literal style
+  tabsize=2,							% sets default tabsize to 2 spaces
+  title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\octavescript}[2]{
+\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#3}
+\newcommand{\MNLabTitle}{Ortogonalitate. Transformări ortogonale. Polinoame ortogonale.}
+\newcommand{\MNLabTitleHeader}{Ortogonalitate} 
+\newcommand{\MNAuthor}{Andrei STAN, Mihaela-Andreea Vasile, Florin Pop}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+\textmd{\textbf{\MNLabTitle}}
+\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+\par În urma parcurgerii acestui laborator, studentul va fi capabil să:
+\begin{itemize}
+	\item definească noțiunile de vectori ortogonali și matrice ortogonală;
+	\item aplice metode de transformare ortogonală: Householder și Givens;
+	\item implementeze procesul Gram-Schmidt;
+	\item folosească polinoame ortogonale.
+\end{itemize}
+
+\section{Noțiuni teoretice}
+
+\subsection{Norme}
+
+\par Considerând un spațiu vectorial $V$ peste un corp $\mathbb{K}$, o normă pe
+$V$ este o funcție $||\cdot||: V \rightarrow \mathbb{R}$ care satisface
+următoarele proprietăți pentru orice $x, y \in V$ și $\alpha \in \mathbb{K}$:
+
+\begin{itemize}
+	\item $||x|| \geq 0$ și $||x|| = 0 \Leftrightarrow x = 0$ (pozitiv definită);
+	\item $||\alpha x|| = |\alpha| \cdot ||x||$;
+	\item $||x + y|| \leq ||x|| + ||y||$ (inegalitatea triunghiului).
+\end{itemize}
+
+\subsubsection{Norme vectoriale}
+
+\begin{itemize}
+	\item \textbf{Valoarea absolută.} Este o normă pe $\mathbb{R}$ sau
+	      $\mathbb{C}$. Numerele complexe formează un spațiu uni-dimensional
+	      peste $\mathbb{C}$ și unul bi-dimensional peste $\mathbb{R}$.
+	\item \textbf{Distanța Manhatten.} $||\mathbf{x}||_1 \coloneq \sum_{i} |x_i| $.
+	\item \textbf{Norma euclidiană.} Pe $\mathbb{R}^n$, norma euclidiană este
+	      definită ca $||\mathbf{x}||_2 \coloneq \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2}$. Luând
+	      în considerare numerele complexe, acestea se identifică cu $\mathbb{R}^2$.
+	\item \textbf{Norma infinit.} $||\mathbf{x}||_{\infty} \coloneq \max_i |x_i|$.
+	\item \textbf{Norma \textit{p}.} $||\mathbf{x}||_p \coloneq \left( \sum_{i} |x_i|^p \right)^{1/p}$.
+	      Normele de mai sus sunt particularizări ale normei \textit{p} pentru diferite valori ale lui \textit{p}.
+
+\end{itemize}
+
+\subsubsection{Norme matriceale}
+
+\par Multe norme matriceale mai au proprietatea de a fi \textit{submultiplicative}:
+
+\begin{equation*}
+	||AB|| \leq ||A|| \cdot ||B||
+\end{equation*}
+
+\begin{itemize}
+	\item \textbf{Norma \textit{p} matriceală.} Ea este indusă de norma \textit{p} a vectorilor. \\
+	      $||A||_p \coloneq \max_{x \neq 0} \frac{||Ax||_p}{||x||_p} = \max_{||x|| = 1} ||Ax||_p$.
+	      \begin{itemize}
+		      \item \textbf{p = 1.} $||A||_1 \coloneq \max_j \sum_i |a_{ij}|$. Este suma maximă a valorilor absolute
+		            de pe coloane.
+		      \item \textbf{p = 2. Norma/Raza spectrală.} $||A||_2 \coloneq \sqrt{\lambda_{max}(A^*A)}$.
+		            Este rădăcina patrată a celei mai mari valori proprii a matricei $A^*A$.
+		            Este egala cu cea mai mare valoare singulară a matricei $A$. \\
+		            \textbf{Demonstrație.} Fie $B = A^*A$. Atunci $B$ este
+		            simetrică și din teorema spectrală avem o bază ortonormată
+		            de vectori proprii $v_i$ și valori proprii $\lambda_i$.
+		            Fie $v = \sum_i \alpha_i v_i$ și $||v|| = 1$. Atunci:
+		            \begin{equation*}
+			            ||Av||^2_2 = \langle Av, Av \rangle = \langle v, A^*Av \rangle = \langle  \sum_{i} \alpha_i v_i, \sum_{i} \alpha_i \lambda_i v_i \rangle = \sum_{i} \lambda_i \alpha_i^2
+		            \end{equation*}
+		            Având constrângerea $||v|| = 1$, $\sum_{i} \alpha_i^2 = 1 \implies ||A||_2 = \lambda_{max}(A). \quad \blacksquare$
+
+		      \item \textbf{p = $\infty$.} $||A||_{\infty} \coloneq \max_i \sum_j |a_{ij}|$. Este suma maximă a valorilor
+		            absolute de pe rânduri.
+	      \end{itemize}
+	\item \textbf{Norma Frobenius.} $||A||_F \coloneq \sqrt{\sum_{i,j} |a_{ij}|^2} = \sqrt{trace(A^*A)}$.
+\end{itemize}
+
+\par \textbf{Teorema Gelfand.} Pentru orice normă matriceală avem:
+
+\begin{equation*}
+	\lim_{k \to \infty} ||A^k||^{1/k} = \rho(A)
+\end{equation*}
+
+\par Mai mult, $\rho(A) \leq ||A||$ pentru orice normă matriceală.
+
+\par \textbf{Demonstrație.} Fie $\lambda$ valoarea proprie cea mai mare a lui $A$ și $v$ un vector propriu asociat. Atunci:
+
+\begin{equation*}
+	||A|| \geq \frac{||Av||}{||v||} (\forall v) = \frac{||\lambda v||}{||v||} = |\lambda| \Rightarrow \rho(A) \leq ||A||
+\end{equation*}
+
+\par Ce ne indică normele matriceale induse de vectori? Ele ne dau o măsură a
+cât de mult se dilată un vector atunci când este aplicată o anumită transformare
+liniară. În \ref{fig:1} avem o reprezentare a vectorilor unitari.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{plot1}
+	\caption{Vectori unitate}
+	\label{fig:1}
+\end{figure}
+
+\newpage
+\par Ce se întâmplă dacă aplicăm transformarea $A1 = \begin{bmatrix} 3 & 2 \\ 1 & 4 \end{bmatrix}$?
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{plot2}
+	\caption{Transformarea $A1$}
+	\label{fig:2}
+\end{figure}
+
+\subsection{Produs scalar. Proiecții ortogonale.}
+
+\par Produsul scalar al unui spațiu vectorial $V$ peste $F$ este o funcție
+$\langle \cdot, \cdot \rangle: V \times V \rightarrow F$ care satisface
+următoarele proprietăți pentru orice $x, y, z \in V$ și $\alpha \in F$:
+
+\begin{itemize}
+	\item $\langle x, y \rangle = \overline{\langle y, x \rangle}$ (conjugare simetrică);
+	\item $\langle \alpha x + \beta y, z \rangle = \alpha \langle x, z \rangle + \beta \langle y, z \rangle$ (liniaritate);
+	\item $\langle x, x \rangle \geq 0$ și $\langle x, x \rangle = 0 \Leftrightarrow x = 0$ (pozitivitate).
+\end{itemize}
+
+\par Din aceastea rezultă și altele:
+
+\begin{itemize}
+	\item $\langle x, \alpha y + \beta z \rangle = \overline{\alpha} \langle x, y \rangle + \overline{\beta} \langle x, z \rangle$;
+	\item $\langle x + y, x + y \rangle = \langle x, x \rangle + 2 \Re(\langle x, y \rangle) +\langle y, y \rangle$;
+\end{itemize}
+
+\par Orice produs scalar induce o normă pe spațiul vectorial $V$ prin
+$||x|| = \sqrt{\langle x, x \rangle}$.
+
+\par Într-un spațiu euclidian, produsul
+scalar este definit ca $\langle x, y \rangle = x^Ty$.
+
+\subsubsection{Proiecții ortogonale}
+
+\subsection{Vectori ortogonali. Matrice unitară/ortogonală.}
+
+\par Doi vectori $x, y \in \mathbb{R}^n$ sunt ortogonali dacă produsul lor
+scalar este zero, adică $x^Ty = 0$. Cu alte cuvinte, direcțiile lor sunt
+perpendiculare. În plus, dacă $||x||_2 = ||y||_2 = 1$, atunci cei doi
+vectori sunt \textit{ortonormați}.
+
+\par O bază a unui spațiu vectorial se numește ortogonală, respectiv ortonormată,
+dacă vectorii acesteia sunt ortogonali, respectiv ortonormați.
+
+\par O matrice $A \in \mathbb{C}^{n \times n}$ se numește \textit{unitară} dacă
+$A^HA = AA^H = I_n$, unde $A^H$ este conjugata transpusă a lui $A$. Dacă $A$
+este reală, atunci matricea se numește \textit{ortogonală} și putem scrie
+$A^TA = AA^T = I_n$. Ele sunt foarte utilizate în diverse aplicații, precum
+descompunerea QR sau descompunerea valorilor singulare.
+
+\par O matrice $A \in \mathbb{C}^{n \times n}$ sau $\mathbb{R}^{n \times n}$
+unitară/ortogonală are următoarele proprietăți:
+
+\begin{itemize}
+	\item coloanele (rândurile) sale formează o bază ortonormată a spațiului
+	      vectorial $\mathbb{C}^n$ sau $\mathbb{R}^n$;
+	\item norma vectorilor coloană (rând) este 1;
+	\item $A^{-1} = A^H$ sau $A^{-1} = A^T$;
+	\item este normală, adică $A^HA = AA^H$;
+	\item este diagonalizabilă;
+	\item valorile proprii se află pe cercul unitate;
+	\item vectorii proprii sunt ortogonali;
+	\item $det(A) = \pm 1$;
+	\item conservă norma vectorilor: $||Ax|| = ||x||$;
+	\item $||A||_2 = 1$;
+	\item conservă produsul scalar: $(Ax)^H(Ay) = x^HA^HAy = x^Hy$;
+\end{itemize}
+
+\par Astfel, matricile ortogonale se pot interpreta geometric ca fiind rotații,
+reflecții, permutări, identități sau combinații ale acestora.
+
+\par Ce se întâmplă dacă aplicăm o matrice ortogonală asupra vectorilor unitari? \\
+Fie $A2 = \begin{bmatrix} \cos(\frac{\pi}{7}) & -sin(\frac{\pi}{7}) \\ sin(\frac{\pi}{7}) & cos(\frac{\pi}{7}) \end{bmatrix}$.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{plot3}
+	\caption{Transformarea $A2$}
+	\label{fig:3}
+\end{figure}
+
+\par Toți vectorii au fost rotiți cu un unghi de $\frac{\pi}{7}$. Nu s-a
+modificat nimic altceva! Norma vectorilor a rămas la fel și deci graficele
+coincid. În următoarea figură, aplicăm $A3 = 2 * A2$, matrice care nu mai este
+ortogonală.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{plot4}
+	\caption{Transformarea $A2$}
+	\label{fig:4}
+\end{figure}
+
+\section{Probleme}
+
+\end{document}
