@@ -10,6 +10,9 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{tkz-euclide}
+
+\usetikzlibrary{angles,quotes,calc}
 
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
@@ -189,7 +192,7 @@ liniară. În \ref{fig:1} avem o reprezentare a vectorilor unitari.
 	\label{fig:2}
 \end{figure}
 
-\subsection{Produs scalar. Proiecții ortogonale.}
+\subsection{Produs scalar. Proiecții.}
 
 \par Produsul scalar al unui spațiu vectorial $V$ peste $F$ este o funcție
 $\langle \cdot, \cdot \rangle: V \times V \rightarrow F$ care satisface
@@ -214,7 +217,56 @@ $||x|| = \sqrt{\langle x, x \rangle}$.
 \par Într-un spațiu euclidian, produsul
 scalar este definit ca $\langle x, y \rangle = x^Ty$.
 
-\subsubsection{Proiecții ortogonale}
+\subsubsection{Proiecții}
+
+\par \textbf{Teoremă.} $\langle x, y \rangle = u^Tv = ||u||||v||\cos(\theta)$, unde $\theta$ este unghiul dintre cei doi vectori.
+
+\par \textbf{Demonstrație.} Fie $\mathbf{r} = \mathbf{u} - \mathbf{v}$. Atunci,
+din teorema cosinusului avem:
+
+\begin{gather*}
+	||\mathbf{r}||^2 = ||\mathbf{u}||^2 + ||\mathbf{v}||^2 - 2||\mathbf{u}||||\mathbf{v}||\cos(\theta) \\
+	||\mathbf{u} - \mathbf{v}||^2 - ||\mathbf{u}||^2 - ||\mathbf{v}||^2 = -2||\mathbf{u}||||\mathbf{v}||\cos(\theta) \\
+	-2 \sum_{i} u_iv_i = -2||\mathbf{u}||||\mathbf{v}||\cos(\theta) \\
+	\sum_{i} u_iv_i = ||\mathbf{u}||||\mathbf{v}||\cos(\theta)
+\end{gather*}
+
+\par Astfel, putem scrie produsul scalar ca $\langle x, y \rangle = u^Tv = ||u||||v||\cos(\theta)$. $\blacksquare$
+
+\par Fie doi vectori $\mathbf{x}$ și $\mathbf{y}$, iar proiecția lui $\mathbf{x}$
+pe $\mathbf{y}$ este $\mathbf{x_y}$. Pentru a îl găsi pe $\mathbf{x_y}$, ne
+gândim astfel:
+
+\begin{itemize}
+	\item În primul rând, ne trebuie norma lui $\mathbf{x_y}$: $||\mathbf{x}||\cos(\theta)$.
+	\item Având norma, trebuie să avem și o direcție. Proiecția fiind pe $\mathbf{y}$,
+	      o putem găsi prin \textit{normalizare}: $\frac{\mathbf{y}}{||\mathbf{y}||}$.
+\end{itemize}
+
+\begin{center}
+	\begin{tikzpicture}[vect/.style={->,>={Straight Barb[angle=60:2pt 3]}}]
+		\tkzInit[xmin=0,xmax=4,ymin=0,ymax=2]% dimensions of the bounding box
+		\tkzDrawX[noticks,label=,draw=none]% coordinate system
+		\tkzDrawY[noticks,label=,draw=none]
+		\tkzDefPoint(0,0){O}
+		\tkzDefPoint[label=$\mathbf{x}$](3,2){A}
+		\tkzDefPoint[label=$\mathbf{y}$](4,0){B}
+		\tkzDefPoint[label=$\mathbf{x_y}$](3,0){C}
+		\tkzPointShowCoord[-,xlabel=$3$,ylabel=$4$,thin,gray,xstyle={below=4pt}](A)% show the coordonates
+		\tkzPointShowCoord[-,xlabel=$6$,ylabel=$2$,thin,gray,xstyle={below=4pt}](B)
+		\pic[draw, angle eccentricity=1.2, angle radius=1cm,, "$\theta$"] {angle=B--O--A};
+		\tkzDrawSegments[vect](O,A O,B)
+	\end{tikzpicture}
+\end{center}
+
+\par Avem și o interpretare geometrică a produsului scalar: produsul dintre
+norma proiecției pe un vector și norma vectorului pe care se proiectează.
+
+\par Definim operatorul de proiecție astfel: $proj_y x = \frac{||x|| \cos (\theta)}{||y||} y = \frac{\langle x, y \rangle}{\langle y, y \rangle} y$.
+
+\begin{equation*}
+	proj_y x = \frac{||x|| \cos (\theta)}{||y||} y = \frac{||y||||x|| \cos (\theta)}{||y||^2} y = \frac{\langle x, y \rangle}{\langle y, y \rangle} y
+\end{equation*}
 
 \subsection{Vectori ortogonali. Matrice unitară/ortogonală.}
 
@@ -227,7 +279,7 @@ vectori sunt \textit{ortonormați}.
 dacă vectorii acesteia sunt ortogonali, respectiv ortonormați.
 
 \par O matrice $A \in \mathbb{C}^{n \times n}$ se numește \textit{unitară} dacă
-$A^HA = AA^H = I_n$, unde $A^H$ este conjugata transpusă a lui $A$. Dacă $A$
+$A^*A = AA^H = I_n$, unde $A^*$ este conjugata transpusă a lui $A$. Dacă $A$
 este reală, atunci matricea se numește \textit{ortogonală} și putem scrie
 $A^TA = AA^T = I_n$. Ele sunt foarte utilizate în diverse aplicații, precum
 descompunerea QR sau descompunerea valorilor singulare.
@@ -239,15 +291,15 @@ unitară/ortogonală are următoarele proprietăți:
 	\item coloanele (rândurile) sale formează o bază ortonormată a spațiului
 	      vectorial $\mathbb{C}^n$ sau $\mathbb{R}^n$;
 	\item norma vectorilor coloană (rând) este 1;
-	\item $A^{-1} = A^H$ sau $A^{-1} = A^T$;
-	\item este normală, adică $A^HA = AA^H$;
+	\item $A^{-1} = A^*$ sau $A^{-1} = A^*$;
+	\item este normală, adică $A^*A = AA^*$;
 	\item este diagonalizabilă;
 	\item valorile proprii se află pe cercul unitate;
 	\item vectorii proprii sunt ortogonali;
 	\item $det(A) = \pm 1$;
 	\item conservă norma vectorilor: $||Ax|| = ||x||$;
 	\item $||A||_2 = 1$;
-	\item conservă produsul scalar: $(Ax)^H(Ay) = x^HA^HAy = x^Hy$;
+	\item conservă produsul scalar: $(Ax)^*(Ay) = x^*A^*Ay = x^*y$;
 \end{itemize}
 
 \par Astfel, matricile ortogonale se pot interpreta geometric ca fiind rotații,
@@ -263,6 +315,7 @@ Fie $A2 = \begin{bmatrix} \cos(\frac{\pi}{7}) & -sin(\frac{\pi}{7}) \\ sin(\frac
 	\label{fig:3}
 \end{figure}
 
+\newpage
 \par Toți vectorii au fost rotiți cu un unghi de $\frac{\pi}{7}$. Nu s-a
 modificat nimic altceva! Norma vectorilor a rămas la fel și deci graficele
 coincid. În următoarea figură, aplicăm $A3 = 2 * A2$, matrice care nu mai este
@@ -274,6 +327,88 @@ ortogonală.
 	\caption{Transformarea $A2$}
 	\label{fig:4}
 \end{figure}
+
+\subsection{Transformări ortogonale. Descompunerea QR.}
+
+\par \textbf{Definiție.} Fie $T: V \rightarrow V$ o transformare liniară.
+
+\begin{equation*}
+	T \text{ - ortogonală} \equiv \langle T(x), T(y) \rangle = \langle x, y \rangle
+\end{equation*}
+
+\par Utilitatea transformărilor ortogonale în cazul sistemelor liniare constă în
+faptul că putem aplica o serie de astfel transformări pentru a introduce 0-uri
+în matricea sistemului. La final, aflarea soluției va consta în rezolvarea unui
+sistem triunghiular. Matricea va avea forma $A = QR$, unde $Q$ este o matrice
+ortogonală și $R$ este o matrice superior triunghiulară.
+
+\begin{equation*}
+	Ax = b \Leftrightarrow QRx = b \Leftrightarrow Rx = Q^*b
+\end{equation*}
+
+\par Cu aceste transformări, ne dorim să aducem vectori de la forma
+$\begin{bmatrix} x \\ y \end{bmatrix}$ la forma $\begin{bmatrix} x' \\ 0 \end{bmatrix}$.
+
+\subsubsection{Reflexii. Transformarea Householder.}
+
+\par Căutăm o transformare $P$ astfel încât $P v = ||v|| e$, unde $e$ este un
+vector din baza canonică.
+
+\par Pentru reflexie, ne alegem un vector $d$ care ne va da
+\textit{direcția de reflexie}, $||d||_2 = 1$
+
+\begin{center}
+	\begin{tikzpicture}[vect/.style={->,>={Straight Barb[angle=60:2pt 3]}}]
+		\tkzInit[xmin=0,xmax=3,ymin=0,ymax=2]% dimensions of the bounding box
+		\tkzDrawX[noticks,label=,draw=none]% coordinate system
+		\tkzDrawY[noticks,label=,draw=none]
+
+		\tkzDefPoint(0,0){O}
+		\tkzDefPoint[label=$\mathbf{v}$](1.5,2){A}
+		\tkzDefPoint[label=$\mathbf{P v}$](2.5,0){B}
+
+		\tkzDefMidPoint(A,B) \tkzGetPoint{M}
+		\tkzGetPointCoord(M){Mx,My}
+		\coordinate (Bisector) at ($(O)!1.5!(M)$);
+
+		\draw[dotted] (O) -- (Bisector);
+		\draw[dotted] (A) -- (B);
+		\draw[vect] (A) -- (M) node[above right] {$\mathbf{v'}$};
+
+		\pic[draw, angle eccentricity=1.2, angle radius=1cm, "$\theta$"] {angle=B--O--A};
+		\tkzDrawSegments[vect](O,A O,B)
+	\end{tikzpicture}
+\end{center}
+
+\begin{align*}
+	v' & = proj_d (-v) = \frac{\langle v, d \rangle}{\langle d, d \rangle} d \\
+	v' & = - v^* d d = - d d^* v \implies
+\end{align*}
+\begin{align*}
+	P v & = v - 2 v' = v - 2 d d^* v \\
+	P   & = I - 2 d d^*
+\end{align*}
+
+\par Iar în cazul în care $d$ nu are norma 1, ajungem la forma generală a
+reflectorului Householder, prin normalizare:
+
+\begin{equation*}
+	P = I - 2 \frac{d d^T}{d^T d}
+\end{equation*}
+
+\par \textbf{Cum găsim $d$ pentru a introduce 0-uri?}
+
+\par Ne dorim să găsim o matrice $P$ astfel încât $P v = \pm ||v|| e_1$. Mai
+mult, $v + d = \pm P v$. Astfel, considerăm $d = v \pm ||v|| e_1$.
+
+\par \textbf{Exemplu.} Fie matricea $A = \begin{bmatrix} 1 & 3 \\ 10^{-8} & 4 \end{bmatrix}$.
+Ne dorim să o aducem la o formă superior triunghiulară, deci am avea nevoie de
+un 0 în colțul din stânga jos. Alegem $d = \begin{bmatrix} 1 \\ 10^{-8} \end{bmatrix} - ||\begin{bmatrix} 1 \\ 10^{-8} \end{bmatrix}|| e_1
+	\approxeq \begin{bmatrix} 0 \\ 10^{-8} \end{bmatrix} $. Astfel,
+
+\begin{equation*}
+	P = I - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 4/5 & 3/5 \\ 3/5 & -4/5 \end{bmatrix}
+\end{equation*}
 
 \section{Probleme}
 
