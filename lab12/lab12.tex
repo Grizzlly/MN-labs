@@ -1,0 +1,308 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#12}
+\newcommand{\MNLabTitle}{Integrare numerică. Metoda Romberg. Cuadraturi Gaussiene.}
+\newcommand{\MNLabTitleHeader}{Integrare numerică}
+\newcommand{\MNAuthor}{Andrei STAN, Mădălina Hristache, Radu Constantinescu}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
+\begin{itemize}
+	\item
+	      utilizeze metode gaussiene \c{s}i metoda Romberg pentru a calcula aproximativ valoarea integralei unei func\c{t}ii continue;
+	\item
+	      s\u{a} implementeze \^{i}n Octave metodele studiate.
+\end{itemize}
+
+
+\section{No\c{t}iuni preliminare}
+
+Ne propunem s\u{a} calcul\u{a}m \^{i}n mod aproximativ valorile $ I\left[f\right] = \int_a^b f\left(x\right) dx $ și $ D\left[f\right] = f^{\left(p\right)} (x_0) $, \^{i}n condi\c{t}iile:
+
+\begin{itemize}
+
+	\item func\c{t}ia $ f $ este continu\u{a} pe $ [a, b] $;
+	\item primitiva $ F $ nu este cunoscut\u{a};
+	\item func\c{t}ia $ f $ este cunoscut\u{a} numai prin valorile $ f\left(x_i\right) $ pe care le ia \^{i}ntr-un num\u{a}r restr\^{a}ns de puncte $ x_i, \ i = 0 : N $.
+
+\end{itemize}
+
+Definim o metod\u{a} aproximativ\u{a} de integrare astfel:
+$$ I_N\left[f\right] = \sum_{i = 0}^N A_{iN} \cdot f\left(x_{iN}\right) $$
+
+Metoda aproximativ\u{a} de aproximare este convergent\u{a} dac\u{a} $ \lim_{N \rightarrow \infty} \left| I\left[f\right] - I_N \left[f\right] \right| = 0 $.
+
+\subsection{Cuadraturi Gaussiene}
+
+Metodele de tip Newton-Cotes au gradul de valabilitate $N$ (sunt exacte pentru polinoame p\^{a}n\u{a} la gradul $N$ inclusiv). Dacă \^{i}n formula aproximativ\u{a} de integrare:
+$$ \displaystyle \int_a^b f\left(x\right) w\left(x\right) dx  \approx \sum_{i = 0}^N A_{iN} f\left(x_{iN}\right) $$
+
+\noindent se aleg nodurile $ x_{iN} $ ca r\u{a}d\u{a}cini ale unui polinom ortogonal, definit în mod unic în raport cu $a$, $b$ \c{s}i funcţia pondere w(x),
+gradul de valabilitate al formulei devine $ 2N + 1 $.
+
+Coeficien\c{t}ii $ A_{iN} $ se vor determina impun\^{a}nd ca formula s\u{a} aib\u{a} grad de valabilitate $N$ (s\u{a} fie exact\u{a} pentru func\c{t}iile $ 1, x, \cdots, x^N $).
+Acest fapt conduce la rezolvarea unui sistem de ecua\c{t}ii liniare.
+
+Pentru polinoamele ortogonale uzuale, se ob\c{t}in urm\u{a}toarele formule de integrare:
+
+\begin{itemize}
+	\item Ceb\^{a}\c{s}ev ordin 1
+
+	      $$ \displaystyle \int_{-1}^1 \frac{f\left(x\right)}{\sqrt{1 - x^2}} dx = \frac{\pi}{N} \sum_{i = 0}^{N-1} f\left(cos \frac{\left(2i + 1\right) \pi}{2N}\right) $$
+
+	\item Legendre
+
+	      $$ \displaystyle \int_a^b f\left(x\right) dx  = \sum_{i = 0}^N A_{iN} f\left(x_{iN}\right), \  A_{iN} = \frac{2\left(1 - x_{iN}^2\right)}{N^2 L_{N - 1}^2\left(x_{iN}\right)} $$
+
+	\item Laguerre
+
+	      $$ \displaystyle \int_0^\infty e^{-x} f\left(x\right) dx  = \sum_{i = 0}^N A_{iN} f\left(x_{iN}\right), \  A_{iN} = \frac{x_{iN}}{\left(N + 1\right)^2 G_{N + 1}^2\left(x_{iN}\right)} $$
+
+	\item Hermite
+
+	      $$ \displaystyle \int_0^\infty e^{-x^2} f\left(x\right) dx  = \sum_{i = 0}^N A_{iN} f\left(x_{iN}\right), \  A_{iN} = \frac{2^{N + 1}N!\sqrt{\pi}}{H_{N + 1}^2\left(x_{iN}\right)} $$
+
+\end{itemize}
+
+\subsection{Metoda Romberg}
+
+Se formeaz\u{a} matricea:
+$$ I=\begin{bmatrix}
+		I_{11} &        &                 \\
+		I_{21} & I_{22} &                 \\
+		I_{31} & I_{32} & I_{33}          \\
+		\vdots & \vdots & \ddots &        \\
+		I_{N1} & I_{N2} & \cdots & I_{NN} \\
+	\end{bmatrix} $$
+
+\noindent \^{i}n care prima coloan\u{a} $ I_{11}, I_{21}, \cdots, I_{N1} $ reprezint\u{a} estim\u{a}rile integralelor calculate cu formula compus\u{a} a trapezelor, consider\^{a}nd
+$ 2^0, 2^1, \cdots, 2^{N - 1} $ intervale. $ I_{N1} $ poate fi ob\c{t}inut prin recuren\c{t}\u{a} din $ I_{N - 1, 1} $ cu formula:
+
+$$ I_{N, 1} = \frac{1}{2} \left[ I_{N - 1, 1} + \frac{b - a}{2^{N - 1}} \sum_{i = 1, \Delta i = 2}^{2^N - 1} f\left(a + \frac{b - a}{2^N}i \right) \right] $$
+
+Elementele din coloana $j$ se calculeaz\u{a} cu rela\c{t}ia de recuren\c{t}\u{a}:
+
+$$ I_{k, j} = \frac{4^{j - 1}I_{k + 1, j - 1} - I_{k, j - 1}}{4^{j - 1} - 1} $$
+
+Fiecare coloan\u{a} converge c\u{a}tre $I$, cu at\^{a}t mai rapid cu c\^{a}t este situat\u{a} mai la dreapta. Pentru o coloan\u{a} $j$, calculul iterativ este oprit \^{i}n momentul \^{i}n care $ \left| I_{k, j} - I_{k - 1, j} \right| < \varepsilon \cdot \left| I_{k, j} \right| $.
+
+\section{Probleme rezolvate}
+
+\subsection{Problema 1}
+Implementa\c{t}i \^{i}n OCTAVE metoda Romberg \c{s}i aproxima\c{t}i cu ajutorul ei integrala $\int\limits_{3}^{5}xlog(x)dx.$
+
+\textit{Solu\c{t}ie}:
+\octavescript{./src/romberg.m}{Metoda de integrare Romberg.}
+\octavescript{./src/lab12Pr1.m}{lab12Pr1.m.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:} & \textbf{Date de ieşire:} \\
+		$f\_xlogx, a=3, b=5, N=4$
+		                          &
+		$rez =11.177 $
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+
+unde  $f\_xlogx=@(x)$  $x.*log(x).$
+
+%\end{Problem}
+
+\subsection{Problema 2}
+
+Calcula\c{t}i aproximativ integrala $\int\limits_0^1\frac{x^4}{\sqrt{x\left(1-x\right)}}$.
+
+\textit{Solu\c{t}ie}:
+
+Ca prim pas, facem schimbarea de variabil\u{a} $t=2x-1\Rightarrow x=\frac{t+1}{2}.$
+
+$x=0\Rightarrow t=-1$
+
+$x=1 \Rightarrow t=1$
+
+Atunci integrala devine:
+$ \int\limits_{-1}^1\frac{\left(\frac{t+1}{2}\right)^4}{2\sqrt{\left(\frac{t+1}{2}\right)\left(1-\frac{t+1}{2}\right)}}dt=\int\limits_{-1}^1\frac{\left(\frac{t+1}{2}\right)^4}{\sqrt{(1+t)(1-t)}}dt=\int\limits_{-1}^1\frac{\left(\frac{t+1}{2}\right)^4}{\sqrt{1-t^2}}dt. $
+
+Identific\u{a}m $ f(t)=\left(\frac{t+1}{2}\right)^4, \quad w(t)=\sqrt{1-t^2}, \quad a=-1, \quad b=1. $
+
+Din formula de integrare Ceb\^{a}\c{s}ev, avem:
+$ \ \displaystyle \int_{-1}^1 \frac{f\left(t\right)}{\sqrt{1 - t^2}} dt = \frac{\pi}{N} \sum_{i = 0}^{N-1} f\left(cos(x_i)\right), \quad x_i= \frac{\left(2i + 1\right) \pi}{2N}. $
+
+Deoarece $f$ este un polinom de grad 4, vrem ca formula utilizat\u{a} pentru aproximare s\u{a} aib\u{a} grad de valabilitate $\geq 4$, folosind c\^{a}t mai pu\c{t}ine puncte. Alegem $N=3$, iar gradul de valabilitate va fi 5. \\
+
+$ x_0=cos \left(\frac{\pi}{6}\right)=\frac{\sqrt{3}}{2}, \quad x_1=cos \left(\frac{\pi}{2}\right)=0, \quad x_2=cos \left(\frac{5\pi}{6}\right)=-\frac{\sqrt{3}}{2}. $ \\
+
+\^{I}n final, formula de integrare devine:
+
+$ \int\limits_0^1\frac{x^4}{\sqrt{x(1-x)}}dx=\frac{\pi}{3}\left[\left(\frac{\frac{\sqrt{3}}{2}+1}{2}\right)^4+\left(\frac{1}{2}\right)^4+\left(\frac{-\frac{\sqrt{3}}{2}+1}{2}\right)^4\right]. $
+%\end{Problem}
+
+
+\subsection{Problema 3}
+Se consideră integrala $ \displaystyle I = \int_{-1}^1 f\left(x\right) dx$. Determinați formula de integrare $ I \approx a_1 f\left(x_1\right) + a_2 f\left(x_2\right) + a_3 f\left(x_3\right)$.
+Preciza\c{t}i gradul de valabilitate al formulei. \\
+
+\textit{Solu\c{t}ie}:
+
+\^{I}n formula de integrare gaussian\u{a}:
+
+$ \displaystyle \int_a^b f\left(x\right) w\left(x\right) dx  \approx \sum_{i = 0}^N A_{i} f\left(x_{i}\right), $
+
+\noindent nodurile $x_{i}$ sunt determinate din condi\c{t}ia de ortogonalitate a polinomului
+$ \pi(x)=\prod_{i=0}^{N}(x-x_i) $
+\noindent cu un plinom oarecare de grad mai mic dec\^{a}t cel al lui $\pi$, \^{i}n particular $x^k$. Avem astfel:
+
+$ \int_{a}^{b} \pi(x)\cdot w(x) \cdot x^k dx=0,\quad k=0:n-1. $
+
+\^{I}n cazul nostru,
+
+$ \pi(x)=(x-x_1)\cdot(x-x_2)\cdot(x-x_3)=x^3+ax^2+bx + c, \quad w(x)=1 $
+
+$  \int_{-1}^{1}\left(x^3+ax^2+bx+c\right)x^kdx=0,\quad k=0:2, $
+care conduce la sistemul de ecua\c{t}ii liniare:
+
+$
+	\left\{
+	\begin{array}{ccccccc}
+		\frac{2}{3}a    + 2c  = 0           \\ \\
+		\frac{2}{3}b   = -\frac{2}{5}       \\ \\
+		\frac{2}{5}a +   \frac{2}{3}c  =  0 \\ \\
+	\end{array} \right.
+$, cu solu\c{t}ia $a=c=0,  b = -\frac{3}{5}.$
+
+$\pi(x)=x^3-\frac{3}{5}x$, cu r\u{a}d\u{a}cinile $x_1=-\sqrt{\frac{3}{5}}, \quad x_2=0, \quad x_3=\sqrt{\frac{3}{5}}$.
+
+Pentru determinarea coeficien\c{t}ilor $a_1$, $a_2$, $a_3$ impunem condi\c{t}ia ca formula de integrare s\u{a} fie exact\u{a} pentru func\c{t}iile $1$, $x$, $x^2$. Astfel:
+
+$f(x) = 1: \qquad \int_{-1}^{1}dx=a_1+a_2+a_3=2 $
+
+$f(x) = x: \qquad \int_{-1}^{1}xdx=-\sqrt{\frac{3}{5}}a_1+\sqrt{\frac{3}{5}}a_3=0 $
+
+$f(x) = x^2: \qquad \int_{-1}^{1}x^2dx=\frac{3}{5}a_1+\frac{3}{5}a_3=\frac{2}{3}$
+
+De aici, g\u{a}sim c\u{a} $a_1=a_3=\frac{5}{9},\quad a_2=\frac{8}{9}$.
+
+\^{I}n final, formula de integrare devine:
+
+$ \int_{-1}^1 f\left(x\right) dx=\frac{5}{9}f\left(-\sqrt{\frac{3}{5}}\right)+\frac{8}{9}f(0)+\frac{5}{9}f\left(\sqrt{\frac{3}{5}}\right), $
+iar gradul ei de valabilitate este 5.
+%\end{Problem}
+
+\section{Probleme propuse}
+
+\subsection{Problema 1}
+Se consider\u{a} formula de integrare:
+$$\int\limits_{-1}^1f(x)dx\approx a_1f(x_1)+a_2f(x_2)+a_3f(x_3)+b_1f(-1)+b_2f(1).$$
+
+Determina\c{t}i $x_i, a_i,$ $i=1:3$ \c{s}i $b_j,$ $j=1:2$ astfel \^{i}nc\^{a}t formula s\u{a} aib\u{a} grad maxim de valabilitate.
+
+\textit{Indica\c{t}ie}: Nodurile $x_1$, $x_2$, $x_3$ se determin\u{a} din condi\c{t}iile de ortogonalitate
+$$ \int\limits_{-1}^1\pi(x)\rho(x)x^kdx=0, \qquad k=0:2, $$
+\^{i}n care $\pi(x)=\prod\limits_{i=1}^{3}(x-x_i)$, $\rho(x)=(x-1)(x-2)$.
+%\end{Problem}
+
+\subsection{Problema 2}
+Se consider\u{a} formula de integrare:
+$$\int\limits_0^af(x)dx\approx a_1f(x_1)+a_2f(x_2)+b_1f(0)+b_2f(a).$$
+
+Determina\c{t}i $x_i$, $a_i$, $b_i$, $i=1:2$ astfel \^{i}nc\^{a}t formula s\u{a} aib\u{a} grad de valabilitate maxim.
+
+\textit{Indica\c{t}ie}: Nodurile $x_1$ şi $x_2$ se determin\u{a} din condi\c{t}iile de ortogonalitate
+$$ \int\limits_{-1}^1(x-x_1)(x-x_2)x(x-a)x^kdx=0, \qquad k=0:1. $$
+
+Coeficien\c{t}ii se determin\u{a} impun\^{a}nd formulei de integrare un grad de valabilitate corespunz\u{a}tor.
+%\end{Problem}
+
+\subsection{Problema 3}
+Pentru formula de integrare:
+$$\int\limits_a^bf(x)w(x)dx\approx\sum\limits_{i=0}^{N}a_if(x_i),$$
+\noindent  să se arate că dacă integrarea se face prin cuadratură Gaussiană, atunci $a_i=\int\limits_a^bw(x)l^2_i(x)dx$, \^{i}n care $l_i$ reprezint\u{a} multiplicatorii din formula de interpolare Lagrange.
+%\end{Problem}
+
+\subsection{Problema 4}
+Formula de integrare Gauss-Radau are forma:
+$$\int\limits_{-1}^1\frac{f(x)}{\sqrt{1-x^2}}\approx\sum\limits_{i=0}^{N}a_if(x_i),$$
+este exact\u{a} pentru polinoame de grad $\leq N$ \c{s}i utilizeaz\u{a} ca abscise $x_i$ zerourile polinomului $T_{N+1}(x)-T_N(x)$.
+
+a) Dezvolta\c{t}i o formul\u{a} de integrare cu $N=3$.
+
+b) Scrie\c{t}i o func\c{t}ie OCTAVE care implementeaz\u{a} metoda de integrare pentru $N$ oarecare.
+%\end{Problem}
+
+\end{document}
