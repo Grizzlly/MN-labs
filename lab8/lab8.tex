@@ -1,0 +1,529 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#8}
+\newcommand{\MNLabTitle}{Metoda QR cu deplasare explicită pentru matrice simetrice.}
+\newcommand{\MNLabTitleHeader}{Metoda QR}
+\newcommand{\MNAuthor}{Andrei STAN, Adelina Vidovici}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
+
+\begin{itemize}
+	\item Construiască o matrice de rotație;
+	\item Utilizeze metoda QR cu deplasare explicită pentru a determina valorile proprii ale unei matrice simetrice tridiagonale;
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+%       TEORIE
+%----------------------------------------------------------------------------------------
+
+\section{Noțiuni teoretice}
+
+Din cauza creșterii rapide a erorii obținute, metodele puterii nu se folosesc la calcularea tuturor valorilor proprii ale unei matrice.
+
+O alternativă este algoritmul QR care determină simultan toate valorile proprii ale unei matrice \mbox{simetrice} tridiagonale. Pentru a putea determina valorile proprii ale oricărei matrice simetrice, vom folosi în prealabil metoda Householder, metodă care transformă o matrice simetrică într-una simetrică tridiagonală.
+
+Matricea $A$, de dimensiune $n\times n$, în forma simetrică tridiagonală este:
+\begin{center}
+	$A$ = $\begin{bmatrix}
+			a_{1}  & b_{2}  & 0       & \cdots  & 0      \\
+			b_{2}  & a_{2}  & b_{3}   & \ddots  & \vdots \\
+			0      & \ddots & \ddots  & \ddots  & 0      \\
+			\vdots & \ddots & b_{n-1} & a_{n-1} & b_{n}  \\
+			0      & \cdots & 0       & b_{n}   & a_{n}  \\
+		\end{bmatrix}$
+\end{center}
+
+Dacă $b_{2} = 0$, respectiv $b_{n} = 0$, atunci matricea $A$ va avea o valoare proprie egală cu $a_{1}$, respectiv cu $a_{n}$. Ceea ce face metoda QR în cazul în care $b_{2}$ și $b_{n}$ sunt diferite de $0$ este să scadă progresiv valorea lui $b_{2}$, respectiv a lui $b_{n}$, până devin aproximativ egale cu $0$.
+
+Când $b_{j} = 0$ pentru o valoare a lui $j$ care respectă condiția $2 < j < n$, problema poate fi redusă la \mbox{rezolvarea} a două probleme de dimensiune mai mică: o problemă de dimensiune $j-1$ (a) și o problemă de dimensiune $n-j+1$ (b).
+
+\begin{equation*}
+	\begin{array}{cccc}
+		(a)                                             &
+		\left [\begin{array}{ccccc}
+				       a_{1}  & b_{2}  & 0      & \cdots  & 0       \\
+				       b_{2}  & a_{2}  & b_{3}  & \ddots  & \vdots  \\
+				       0      & \ddots & \ddots & \ddots  & 0       \\
+				       \vdots & \ddots & \ddots & \ddots  & b_{j-1} \\
+				       0      & \cdots & 0      & b_{j-1} & a_{j-1} \\
+			       \end{array} \right] \hspace{0.2\textwidth} &
+		(b)                                             &
+		\left [\begin{array}{ccccc}
+				       a_{j}   & b_{j+1} & 0       & \cdots & 0      \\
+				       b_{j+1} & a_{j+1} & b_{j+2} & \ddots & \vdots \\
+				       0       & \ddots  & \ddots  & \ddots & 0      \\
+				       \vdots  & \ddots  & \ddots  & \ddots & b_{n}  \\
+				       0       & \cdots  & 0       & b_{n}  & a_{n}  \\
+			       \end{array} \right]
+	\end{array}
+\end{equation*}
+
+
+Dacă niciuna din valorile $b_{j}$ nu este egală cu 0, atunci metoda QR presupune formarea unei secvențe $A = A^{(1)}, A^{(2)}, A^{(3)}$... după cum urmează:
+
+\begin{itemize}
+	\item
+	      $A^{(1)} = A$ este factorizată ca fiind $A^{(1)} = Q^{(1)}R^{(1)}$, unde $Q^{(1)}$ este o matrice ortogonală, iar $R^{(1)}$ este o matrice superior triunghiulară.
+	\item
+	      $A^{(2)} = R^{(1)}Q^{(1)}$...
+\end{itemize}
+
+În general, $A^{(i)}$ este factorizat ca fiind $A^{(i)} = Q^{(i)}R^{(i)}$, unde $Q^{(i)}$ este o matrice ortogonală, iar $R^{(i)}$ este o matrice superior triunghiulară. Apoi, $A^{(i+1)} = R^{(i)}Q^{(i)}$. Deoarece $Q^{(i)}$ este ortogonală, $R^{(i)} = {Q^{(i)}}^{t}A^{(i)}$ şi
+$A^{(i+1)} = R^{(i)}Q^{(i)} = ({Q^{(i)}}^{t}A^{(i)})Q^{(i)} = {Q^{(i)}}^{t}A^{(i)}Q^{(i)}.$
+
+Acest operații asigură faptul că $A^{(i+1)}$ este o matrice simetrică ce are aceleași valori proprii ca $A^{(i)}$ și, având în vedere că inițial $A^{(1)} = A$, înseamnă că $A^{(i+1)}$ are aceleași valori proprii ca matricea A. Tridiagonalitatea matricei $A^{(i+1)}$ este asigurată de modul în care definim $R^{(i)}$ și $Q^{(i)}$.
+
+\subsection{Matrice de rotație}
+
+Pentru a putea descrie construirea matricelor $Q^{(i)}$ și $R^{(i)}$, este necesară definirea noțiunii de \textit{matrice de rotație}. O \textit{matrice de rotație} $P$ este diferită de matricea identitate în cel mult patru elemente. Aceste patru \mbox{elemente} sunt: $p_{ii} = p_{jj} = cos\Theta$ și $p_{ij} = -p_{ji} = sin\Theta$, pentru o valoare $\Theta$ și $i\neq j$.
+
+
+Orice matrice de rotație $P$ este ortogonală pentru că definiția implică $PP^{t} = I$. Pentru orice matrice de rotație $P$, matricea produs $AP$ este diferită de $A$ doar prin valorile din coloanele \textit{i} și \textit{j}, în timp ce matricea produs $PA$ este diferită de $A$ doar prin valorile din liniile \textit{i} și \textit{j}. Mai mult, pentru orice $i\neq j$, valoarea unghiului $\Theta$ poate fi aleasă astfel încât elementul $(PA)_{ij}$ să se anuleze.
+
+
+\subsection{Construcția matricelor Q și R}
+
+Pentru a obține matricea  superior triunghiulară $R^{(1)}$, sunt necesare mai multe matrice de rotație aplicate asupra matricei $A$.
+$$R^{(1)} = P_{n}P_{n-1}...P_{2}A^{(1)}$$
+
+Pentru început, construim matricea de rotație $P_{2}$ cu:
+$$p_{11} = p_{22} = cos\Theta_{2}, \quad  p_{12} = -p_{21} = sin\Theta_{2}$$
+
+\noindent unde
+$$sin\Theta_{2}=\frac{b_{2}}{\sqrt{{b_{2}}^{2}+{{a_{1}}^{2}}}}, \quad  cos\Theta_{2}=\frac{a_{1}}{\sqrt{{b_{2}}^{2}+{{a_{1}}^{2}}}}$$
+
+Pentru verificare, vom calcula produsul:
+$$(-sin\Theta_{2})a_{1} + (cos\Theta_{2})b_{2} = \frac{-b_{2}a_{1}}{\sqrt{{b_{2}}^{2}+{{a_{1}}^{2}}}} + \frac{a_{1}b_{2}}{\sqrt{{b_{2}}^{2}+{{a_{1}}^{2}}}} = 0$$
+ceea ce înseamnă că elementul din poziția $(2,1)$ din matricea ${A_{2}}^{(1)} = P_{2}A^{(1)}$ este egal cu 0.
+Înmulțirea lui $P_{2}$ cu $A^{(1)}$ modifică liniile $1$ și $2$, însă având în vedere că matricea $A^{(1)}$ este tridiagonală, doar valoarea elementului de indice (1,3) poate deveni diferit de $0$ în matricea ${A_{2}}^{(1)}$.
+
+În general, matricea $P_{k}$ este aleasă astfel încât elementul cu indicele $(k, k-1)$ din ${A_{k}}^{(1)}=P_{k}{A_{k-1}}^{(1)}$ să fie $0$. Ceea ce face ca elementul de indice $(k-1, k+1)$ să devină diferit de $0$.
+
+După construirea tuturor matricelor de rotație $P_{2}, P_{3},...P_{n}$, putem determina matricele $Q$ și $R$:
+$$R^{(1)} = {A_{n}}^{(1)} = P_{n}P_{n-1}...P_{2}A$$
+$$Q^{(1)} = {P_{2}}^{t}{P_{3}}^{t}...{P_{n}}^{t}$$
+
+Ortogonalitatea matricelor de rotație implică:
+$$Q^{(1)}R^{(1)} = ({P_{2}}^{t}{P_{3}}^{t}...{P_{n}^{t}})(P_{n}...P_{3}P_{2})A^{(1)} = A^{(1)}$$
+
+Matricea $Q^{(1)}$ este ortogonală deoarece:
+$${Q^{(1)}}^{t}Q^{(1)} = {({P_{2}}^{t}{P_{3}}^{t}...{P_{n}^{t}})}^{t}({P_{2}}^{t}{P_{3}}^{t}...{P_{n}^{t}}) = (P_{n}...P_{3}P_{2})({P_{2}}^{t}{P_{3}}^{t}...{P_{n}^{t}}) = I$$
+
+
+\subsection{Accelerarea convergenței}
+
+Dacă valorile proprii $\lambda_{1}, \lambda_{2},..., \lambda_{n}$, ale matricei $A$, au module diferite,  rata de convergență a elementului ${b_{j+1}}^{(i+1)}$ către $0$ în matricea $A^{(i+1)}$ depinde de raportul $\left|\frac{\lambda_{i+1}}{\lambda_{i}}\right|$. Convergența lui ${b_{j+1}}^{(i+1)}$ către $0$ determină rata cu care elementul ${a_{j}}^{(i+1)}$ converge către valoarea proprie corespunzătoare $\lambda_{j}$.
+
+Pentru a accelera convergența, vom implementa o tehnică de deplasare explicită: este aleasă o constantă $\sigma$, \mbox{constantă} apropiată de una din valorile proprii ale matricei $A$. În acest caz, factorizarea devine:
+$$A^{(i)} - \sigma I = Q^{(i)}R^{(i)}$$
+iar matricea $A^{(i+1)}$ este definită ca fiind:
+$$A^{(i+1)} = R^{(i)}Q^{(i)} + \sigma I. $$
+
+Cu această modificare, rata convergenței lui ${b_{j+1}}^{(i+1)}$ către $0$ depinde de raportul $\left|\frac{\lambda_{i+1}-\sigma}{\lambda_{i}-\sigma}\right|$. Acest lucru poate aduce o îmbunătățire semnificativă asupra convergenței elementului ${a_{j}}^{(i+1)}$ către valoarea proprie corespunzătoare $\lambda_{j}$, în cazul în care $\sigma$ este mai apropiat de $\lambda_{j+1}$ decât de $\lambda_{j}$.
+
+Vom schimba constanta $\sigma$ la fiecare pas, astfel încât, atunci când $A$ are valorii proprii distincte în modul, ${b_{n}}^{(i+1)}$ să conveargă la $0$ mai rapid decât oricare alt ${b_{j}}^{(i+1)}$, pentru orice $j$ mai mic strict ca $n$.
+Când ${b_{n}}^{(i+1)}$ este aproape $0$, tragem concluzia că $\lambda_{n}$ este aproximativ egal cu ${a_{n}}^{(i+1)}$, după care eliminăm rândul $n$ și coloana $n$ și continuăm cu determinarea valorii proprii $\lambda_{n-1}$. Procesul se încheie în momentul în care am obținut câte o aproximare pentru fiecare valoare proprie a matricei $A$.
+
+Tehnica de deplasare explicită alege la pasul $i$ constanta $\sigma_{i}$ ca fiind egală cu valoarea proprie cea mai apropiată de ${a_{n}}^{(i)}$ a matricei $E^{(i)}$:
+$$E^{(i)} = \begin{bmatrix}
+		{a_{n-1}}^{(i)} & {b_{n}}^{(i)} \\
+		{b_{n}}^{(i)}   & {a_{n}}^{(i)} \\
+	\end{bmatrix}$$
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+\section{Probleme rezolvate}
+
+\subsection{Problema  1}
+
+Să se determine matricea $P$ cu proprietatea că $PA$ are un element egal cu $0$ în poziția $(2,1)$
+(linia 2, coloana 1).
+$$A = \begin{bmatrix}
+		3 & 1 & 0 \\
+		1 & 3 & 1 \\
+		0 & 1 & 3 \\
+	\end{bmatrix}$$
+
+\textit{Soluție:}
+
+Forma lui $P$ este:
+$
+	P=
+	\left [\begin{array}{ccc}
+			cos\Theta  & sin\Theta & 0 \\
+			-sin\Theta & cos\Theta & 0 \\
+			0          & 0         & 1 \\
+		\end{array} \right] $
+
+
+Prin urmare,  $PA$  =
+$\left [\begin{array}{ccc}
+			3cos\Theta + sin\Theta   & cos\Theta + 3sin\Theta  & sin\Theta \\
+			-3cos\Theta + cos \Theta & -sin\Theta + 3cos\Theta & cos\Theta \\
+			0                        & 1                       & 3         \\
+		\end{array} \right]
+$
+
+Unghiul $\Theta$ este ales astfel încât $-3sin\Theta + cos\Theta = 0$, ceea ce înseamnă că $tg\Theta = \frac{1}{3}.$
+
+Rezultă că:
+$cos\Theta = \frac{3\sqrt{10}}{10},  sin\Theta = \frac{\sqrt{10}}{10}$.
+
+$\begin{array}{ccccccc}
+		PA  =
+		\left[\begin{array}{ccc}
+				      \frac{3\sqrt{10}}{10} & \frac{\sqrt{10}}{10}  & 0 \\
+				      -\frac{\sqrt{10}}{10} & \frac{3\sqrt{10}}{10} & 0 \\
+				      0                     & 0                     & 1 \\
+			      \end{array}\right] .
+		\left[\begin{array}{ccc}
+				      3 & 1 & 0 \\
+				      1 & 3 & 1 \\
+				      0 & 1 & 3 \\
+			      \end{array}\right] =
+		\left[\begin{array}{ccc}
+				      \sqrt{10} & \frac{3\sqrt{10}}{5} & \frac{\sqrt{10}}{10}  \\
+				      0         & \frac{4\sqrt{10}}{5} & \frac{3\sqrt{10}}{10} \\
+				      0         & 1                    & 3                     \\
+			      \end{array}\right]
+	\end{array}
+$
+
+\textit{Observație:} După cum putem observa, matricea $PA$ nu este nici simetrică, nici tridiagonală.
+
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 2
+%----------------------------------------------------------------------------------------
+
+\subsection{Problema 2}
+Determinați prima iterație a metodei QR pentru matricea A:
+\begin{center}
+	$A$ = $\begin{bmatrix}
+			3 & 1 & 0 \\
+			1 & 3 & 1 \\
+			0 & 1 & 3 \\
+		\end{bmatrix}$\\
+\end{center}
+
+\textit{Soluție:}
+
+$A^{(1)} = A$ și $P_{2}$ reprezintă matricea de rotație determinată în cadrul problemei $1$.
+
+$
+	{A_{2}}^{(1)} = P_{2}A^{(1)}  =
+	\left[\begin{array}{ccc}
+			\frac{3\sqrt{10}}{10} & \frac{\sqrt{10}}{10}  & 0 \\
+			-\frac{\sqrt{10}}{10} & \frac{3\sqrt{10}}{10} & 0 \\
+			0                     & 0                     & 1 \\
+		\end{array}\right] .
+	\left[\begin{array}{ccc}
+			3 & 1 & 0 \\
+			1 & 3 & 1 \\
+			0 & 1 & 3 \\
+		\end{array}\right] =
+	\left[\begin{array}{ccc}
+			\sqrt{10} & \frac{3\sqrt{10}}{5} & \frac{\sqrt{10}}{10}  \\
+			0         & \frac{4\sqrt{10}}{5} & \frac{3\sqrt{10}}{10} \\
+			0         & 1                    & 3                     \\
+		\end{array}\right]
+$
+
+În continuare, calculăm:
+$sin\Theta_{3}=\frac{1}{\sqrt({1}^{2}+{(\frac{4\sqrt{10}}{5})}^{2}} = 0.36761, \quad
+	cos\Theta_{3}=\frac{\frac{4\sqrt{10}}{5}}{\sqrt({1}^{2}+{(\frac{4\sqrt{10}}{5})}^{2}}=0.92998$
+
+Vom determina $R^{(1)} = {A_{3}}^{(1)} = P_{3}{A_{2}}^{(1)}$ și $Q^{(1)} = {P_{2}}^{t}{P_{3}}^{t}$ astfel:
+
+$
+	R^{(1)}=
+	\left[\begin{array}{ccc}
+			1 & 0        & 0       \\
+			0 & 0.92998  & 0.36761 \\
+			0 & -0.36761 & 0.92998 \\
+		\end{array}\right] .
+	\left[\begin{array}{ccc}
+			\sqrt{10} & \frac{3\sqrt{10}}{5} & \frac{\sqrt{10}}{10}  \\
+			0         & \frac{4\sqrt{10}}{5} & \frac{3\sqrt{10}}{10} \\
+			0         & 1                    & 3                     \\
+		\end{array}\right] =
+	\left[\begin{array}{ccc}
+			\sqrt{10} & \frac{3\sqrt{10}}{5} & \frac{\sqrt{10}}{10} \\
+			0         & 2.7203               & 1.9851               \\
+			0         & 0                    & 2.4412               \\
+		\end{array}\right]
+$
+
+$
+	Q^{(1)}=
+	\left[\begin{array}{ccc}
+			\frac{3\sqrt{10}}{10} & -\frac{\sqrt{10}}{10} & 0 \\
+			\frac{\sqrt{10}}{10}  & \frac{3\sqrt{10}}{10} & 0 \\
+			0                     & 0                     & 1 \\
+		\end{array}\right] .
+	\left[\begin{array}{ccc}
+			1 & 0       & 0        \\
+			0 & 0.92998 & -0.36761 \\
+			0 & 0.36761 & 0.92998  \\
+		\end{array}\right]=
+	\left[\begin{array}{ccc}
+			0.94868 & -0.29409 & 0.11625  \\
+			0.31623 & 0.88226  & -0.34874 \\
+			0       & 0.36761  & 0.92998  \\
+		\end{array}\right]
+$
+
+În consecință, $A^{(2)} = R^{(1)}Q^{(1)}$
+
+$
+	A^{(2)}=
+	\left[\begin{array}{ccc}
+			\sqrt{10} & \frac{3\sqrt{10}}{5} & \frac{\sqrt{10}}{10} \\
+			0         & 2.7203               & 1.9851               \\
+			0         & 0                    & 2.4412               \\
+		\end{array}\right] .
+	\left[\begin{array}{ccc}
+			0.94868 & -0.29409 & 0.11625  \\
+			0.31623 & 0.88226  & -0.34874 \\
+			0       & 0.36761  & 0.92998  \\
+		\end{array}\right]=
+	\left[\begin{array}{ccc}
+			3.6    & 0.8602 & 0      \\
+			0.8602 & 3.1297 & 0.8974 \\
+			0      & 0.8974 & 2.2702 \\
+		\end{array}\right]
+$
+
+Elementele de sub diagonala principală din matricea $A^{(2)}$ sunt mai mici decât cele din matricea $A^{(1)}$ cu \mbox{aproximativ} $14\%$. Pentru a obține valori sub $0.001$, vor fi necesare $13$ iterații folosind algoritmul QR. După $13$ iterații, vom obține:
+
+$\begin{array}{ccc}
+		A^{(13)} = &
+		\left[\begin{array}{ccc}
+				      4.4139  & 0.01941 & 0       \\
+				      0.01941 & 3.0003  & 0.00095 \\
+				      0       & 0.00095 & 1.5858  \\
+			      \end{array}\right]
+	\end{array}$
+
+Ceea ce înseamnă că am determinat aproximația unei valori proprii a matricei $A$, $1.5858$ și că putem determina și celelalte două valori proprii calculând valorile proprii ale matricei reduse:
+
+$\begin{bmatrix}
+		4.4139  & 0.01941 \\
+		0.01941 & 3.0003  \\
+	\end{bmatrix}$
+
+%\end{Problem}
+
+\subsection{Problema  3}
+Aplicați metoda QR cu deplasare explicită pentru matricea A:
+$$A = \begin{bmatrix}
+		3 & 1 & 0 \\
+		1 & 3 & 1 \\
+		0 & 1 & 3 \\
+	\end{bmatrix}$$
+
+\textit{Soluție:}
+
+Pentru a determina factorul de accelerare $\sigma_{1}$, trebuie să determinăm valorile proprii ale matricei
+$\begin{bmatrix}
+		3 & 1 \\
+		1 & 3 \\
+	\end{bmatrix}$
+care sunt $\mu_{1}=4$ și $\mu_{2}=2$. Cum ambele valori sunt la fel de depărtate de valoarea lui ${a_{3}}^{(1)}$, alegem  pe oricare dintre cele două, de exemplu, pe $\mu_{2}=2$. Prin urmare, $\sigma_{1}=2$.
+
+$A^{(1)} - \sigma_{1} I=\begin{bmatrix}
+		1 & 1 & 0 \\
+		1 & 1 & 1 \\
+		0 & 1 & 1 \\
+	\end{bmatrix}$
+
+Continuăm cu determinarea lui ${A_{2}}^{(1)}$ ca în cazul algoritmului fără deplasare:
+
+${A_{2}}^{(1)}=\begin{bmatrix}
+		\sqrt{2} & \sqrt{2} & \frac{\sqrt{2}}{2} \\
+		0        & 0        & \frac{\sqrt{2}}{2} \\
+		0        & 1        & 1                  \\
+	\end{bmatrix}$
+
+Determinăm $R^{(1)}$ = ${A_{3}}^{(1)}=\begin{bmatrix}
+		\sqrt{2} & \sqrt{2} & \frac{\sqrt{2}}{2}  \\
+		0        & 1        & 1                   \\
+		0        & 0        & -\frac{\sqrt{2}}{2} \\
+	\end{bmatrix}$
+și
+
+${A}^{(2)} = R^{(1)}Q^{(1)} = \begin{bmatrix}
+		2                  & \frac{\sqrt{2}}{2}  & 0                   \\
+		\frac{\sqrt{2}}{2} & 1                   & -\frac{\sqrt{2}}{2} \\
+		0                  & -\frac{\sqrt{2}}{2} & 0                   \\
+	\end{bmatrix}$
+
+Am terminat o iterație a algoritmului QR. Nici ${b_{2}}^{(2)}$ = $\frac{\sqrt{2}}{2}$, nici ${b_{3}}^{(2)}$ = $-\frac{\sqrt{2}}{2}$ nu sunt suficient de apropiate de $0$, așa că vom calcula și pasul următor al algoritmului QR. De data aceasta, determinăm valorile proprii ale matricei:
+
+$\begin{bmatrix}
+		1                   & -\frac{\sqrt{2}}{2} \\
+		-\frac{\sqrt{2}}{2} & 0                   \\
+	\end{bmatrix}$
+
+Acestea sunt $\frac{1}{2} \pm \frac{1}{2}\sqrt{3}.$ Determinăm cea mai apropiată valoare proprie de ${a_{3}}^{(2)}=0$. Rezultă $\sigma_{2}$ = $\frac{1}{2} - \frac{1}{2}\sqrt{3}$.
+
+$A^{(3)}$=$\begin{bmatrix}
+		2.6720277  & 0.37597448  & 0            \\
+		0.37597448 & 1.4736080   & 0.030396964  \\
+		0          & 0.030396964 & -0.047559530 \\
+	\end{bmatrix}$
+
+Dacă ${b_{3}}^{(3)}$ = $0.030396964$ este suficient de apropiat de $0$, atunci aproximația valorii proprii $\lambda_{3}$ este $1.5864151$, suma dintre ${a_{3}}^{(3)}$ și $\sigma_{1}$ + $\sigma_{2}$ = $2 + \frac{1-\sqrt{3}}{2}$.
+Eliminând a treia linie și a treia coloană din $A^{(3)}$ obţinem:
+
+$A^{(3)}$=$\begin{bmatrix}
+		2.6720277  & 0.37597448 \\
+		0.37597448 & 1.4736080  \\
+	\end{bmatrix}$
+
+\noindent cu valorile proprii $\mu_{1}$=$2.7802140$ și $\mu_{2}$=$1.3654218$. Prin urmare, $\lambda_{1}$ $\approx$
+$\mu_{1}+\sigma_{1}+\sigma_{2} =4.4141886$ și $\lambda_{2}$ $\approx$ $\mu_{2}+\sigma_{1}+\sigma_{2} = 2.9993964$.
+
+
+Valorile proprii exacte ale matricei $A$ sunt $\lambda_{1}=4.41420$, $\lambda_{2}=3.00000$, and $\lambda_{3}=1.58579$, ceea ce \mbox{demostrează} că algoritmul QR cu deplasare explicită oferă precizie bună și în cazul unui număr mic de iterații.
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+\section{Probleme propuse}
+
+\subsection{Problema 1}
+Implementați în OCTAVE algoritmul QR fără deplasare pentru determinarea valorilor proprii ale unei matrice simetrice tridiagonale.
+Date de intrare: $A$ - matricea simetrică tridiagonală; $n$ - dimensiunea matricei; $tol$ - toleranța acceptată; $maxiter$ - numărul maxim de iterații. Date de ieșire: valorile proprii ale matricei $A$ sau un mesaj de eroare în cazul în care a fost depășit \textit{maxiter}.
+
+\subsection{Problema 2}
+Pornind de la programul anterior, realizați implementarea algoritmului QR cu deplasare explicită pentru a determina valorile proprii ale unei matrice simetrice tridiagonale.
+%\end{Problem}
+
+\subsection{Problema 3}
+Determinați primele două iterații ale algoritmului QR fără deplasare pentru următoarele matrice simetrice tridiagonale:
+
+\begin{equation*}
+	\begin{array}{cccc}
+		(a)                                        &
+		\left [\begin{array}{ccc}
+				       6 & 1 & 0 \\
+				       1 & 4 & 2 \\
+				       0 & 2 & 3 \\
+			       \end{array} \right] \hspace{0.2\textwidth} &
+
+		(b)                                        &
+		\left [\begin{array}{ccc}
+				       2 & 4  & 0  \\
+				       4 & 2  & -3 \\
+				       0 & -3 & -1 \\
+			       \end{array} \right]
+	\end{array}
+\end{equation*}
+
+\begin{equation*}
+	\begin{array}{cccc}
+		(c)                                        &
+		\left [\begin{array}{cccc}
+				       2  & -3 & 0  & 0  \\
+				       -3 & 3  & -2 & 0  \\
+				       0  & -2 & 4  & -1 \\
+				       0  & 0  & -1 & 1  \\
+			       \end{array} \right] \hspace{0.2\textwidth} &
+
+		(d)                                        &
+		\left [\begin{array}{cccc}
+				       2  & -2 & 0  & 0  \\
+				       -2 & 2  & 4  & 0  \\
+				       0  & 4  & 2  & -2 \\
+				       0  & 0  & -2 & 3  \\
+			       \end{array} \right]
+	\end{array}
+\end{equation*}
+%\end{Problem}
+
+%\end{Problem}
+
+
+\subsection{Problema 4}
+Folosind algoritmul QR cu deplasare explicită, determinați valorile proprii ale matricelor de la $Problema$ $3$ cu o toleranță de $10^{-5}$.
+%\end{Problem}
+
+\end{document}
