@@ -1,0 +1,464 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#7}
+\newcommand{\MNLabTitle}{Calculul valorilor proprii şi vectorilor proprii prin metodele puterii. Metoda Householder}
+\newcommand{\MNLabTitleHeader}{Valori și vectori proprii}
+\newcommand{\MNAuthor}{Andrei STAN, Dumitru-Clementin Cercel, Alexandru Țifrea}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
+
+\begin{itemize}
+	\item utilizeze metoda puterii directe şi metoda puterii inverse pentru a determina valorile şi vectorii proprii ale unei matrice;
+	\item aplice metoda Householder pentru a determina valorile şi vectorii proprii ale unei matrice;
+	\item aplice proprietățile valorilor şi vectorilor proprii în rezolvarea unor probleme.
+\end{itemize}
+
+
+%----------------------------------------------------------------------------------------
+%       TEORIE
+%----------------------------------------------------------------------------------------
+
+\section{Noțiuni teoretice}
+
+Pentru început, vom introduce conceptele de valoare şi vector propriu folosind următoarea definiţie: fiind dată o matrice $A\in\mathbb{C}^{n\times n}$, un număr $\lambda \in \mathbb{C}$ se numeşte valoare proprie a matricei A dacă există un vector nenul $x \in \mathbb{C}^{n}$, numit vector propriu asociat valorii proprii $\lambda \in \mathbb{C}$, astfel încât:
+$$Ax = \lambda x.$$
+
+Sistemul liniar omogen $Ax = \lambda x$ admite soluţii nenule dacă şi numai dacă $det(\lambda I_{n} - A) = 0$. Polinomul $p(\lambda)=det(\lambda I_{n} - A)$, de gradul $n$, se numeşte \textit{polinomul caracteristic} al matricei $A$ iar ecuația $p(\lambda)=0$ se numeşte  \textit{ecuaţie caracteristică} a  matricei $A$. Valorile proprii ale unei matrice sunt zerourile polinomului caracteristic $p(\lambda)$.
+
+\textit{Spectrul de valori proprii} al matricei $A$ este dat de mulţimea $\lambda(A) = \left\lbrace \lambda_{1}, \lambda_{2}, ..., \lambda_{n}\right\rbrace $. Mai mult, numărul real $\rho(A) = \smash{\displaystyle\max_{\lambda_{i} \in \lambda(A)}}(|\lambda_{i}|)$ defineşte  \textit{raza spectrală} a matricei $A$.
+
+\textit{Transformarea de asemănare} se defineşte după cum urmează: spunem că matricele $A, B \in \mathbb{C}^{n \times n}$ sunt asemenea dacă există o matrice nesingulară $T \in \mathbb{C}^{n \times n}$ astfel încât
+$$B = TAT^{-1}.$$
+
+În cazul în care matricele $A$ si $B$ sunt asemenea, au loc următoarele proprietăţi:
+\begin{itemize}
+	\item Matricele $A$ şi $B$ au aceleaşi valori proprii adică $\lambda(A)=\lambda(B)$. Prin urmare, transformarea de asemănare păstrează spectrul de valori proprii al matricei $A$.
+	\item Dacă $x \in \mathbb{C}^{n}$ este un vector propriu al matricei $A$, asociat cu valoarea proprie $\lambda$, atunci $y=Ty \in \mathbb{C}^{n}$ este vector propriu al matricei $B$, pentru aceeaşi valoarea proprie $\lambda$.
+\end{itemize}
+
+Pentru orice matrice $A \in \mathbb{C}^{n \times n}$ există o matrice unitară $\overset{~}{Q} \in \mathbb{C}^{n \times n}$ astfel încât matricea $S = Q^{T}AQ \in \mathbb{C}^{n \times n}$ unitar asemenea cu $A$ este superior triunghiulară.
+
+În cazul real, pentru orice matrice $A \in \mathbb{R}^{n \times n}$ există o matrice ortogonală $Q \in \mathbb{C}^{n \times n}$ astfel încât matricea $S = Q^{T}AQ \in \mathbb{R}^{n \times n}$ ortogonal asemenea
+cu $A$ are o structură cvasi-superior triunghiulară:
+
+\begin{center}
+	$S = \begin{bmatrix} S_{11} & S_{12} & ... & S_{1q} \\
+                0      & S_{22} & ... & S_{2q} \\
+                ...    & ...    & ... & ...    \\
+                0      & 0      & ... & S_{qq} \\
+		\end{bmatrix}$
+\end{center}
+
+\noindent  unde blocurile diagonale $S_{ii}, i = 1:q$ sunt matrice $1 \times 1$ sau $2 \times 2$. Matricele de dimensiune $2 \times 2$ au valorile proprii complexe. Matricea S se numeşte \textit{forma Schur reală} a matricei $A$.
+
+În cele ce urmează, vom descrie matematic două proprietăți asociate valorilor proprii ale matricei $A$:
+\begin{itemize}
+	\item
+	      $\sum\limits_{i=1}^n \lambda_{i}=\sum\limits_{i=1}^n A(i,i)=tr(A)$
+	\item
+	      $\prod\limits_{i=1}^n \lambda_{i}=det(A)$
+\end{itemize}
+
+Funcţia OCTAVE care calculează valorile şi vectorii proprii pentru o matrice oarecare $A\in\mathbb{C}^{n\times n}$ este $eig$. Un exemplu de utilizare al acestei funcții este următorul: $[V, L] = eig(A) $, unde matricea diagonală $L$ conţine pe diagonala principală valorile proprii ale matricei $A$ iar coloanele matricei $V$ reprezintă vectorii proprii ai matricei $A$.
+
+\subsection{Determinarea vectorilor şi valorilor proprii}
+
+În continuare, vom studia câteva metode numerice pentru a determina valorile şi vectorii proprii ale unei matrice.
+
+\subsubsection{Metoda puterii directe}
+
+Fie matricea $A \in R^{n\times n}$ pentru care considerăm spectrul de valori proprii
+$\lambda\left( A\right) = \left\lbrace \lambda_{1} , \lambda_{2} , ..., \lambda_{n}\right\rbrace $
+şi mulţimea de vectori proprii $X = \left\lbrace  x_{1} , x_{2} , ..., x_{n} \right\rbrace $, de normă euclidiană unitară, ai matricei A. Mai mult, presupunem că $ \vert\lambda_{1}\vert \geq \vert\lambda_{2}\vert \geq ... \geq \vert\lambda_{n}\vert $.
+Fie $y \in \mathbb{C}^{n}$ un vector de normă euclidiană unitară având o componentă nenulă pe direcţia vectorului propriu $x_{1} \in X$.
+
+Metoda puterii directe presupune definirea şirului vectorial $ \left(y^{\left( k \right)}\right)_{k \in \mathbb{N}}$  şi a şirului numeric $ \left(\lambda^{\left( k \right)}\right)_{k \in \mathbb{N}},$
+după cum urmează:
+
+\hspace{0 mm} $ y^{(0)} = y $
+
+\hspace{0 mm} Pentru $k = 1, 2, ... max$
+
+\hspace{0 mm} \hspace{5 mm} $z \leftarrow A \cdot y^{(k-1)}	$
+
+\hspace{0 mm} \hspace{5 mm} $y^{(k)} \leftarrow \frac{z}{\Vert z\Vert_{2}} $
+
+\hspace{0 mm} \hspace{5 mm} $\lambda^{\left( k \right)} \leftarrow (y^{(k)})^{T}Ay^{(k)}$
+
+Astfel, şirul numeric $ \left(\lambda^{\left( k \right)}\right)_{k \in \mathbb{N}}$ converge către valoarea proprie dominantă, în timp ce şirul vectorial $ \left(y^{\left( k \right)}\right)_{k \in \mathbb{N}}$ converge către vectorul propriu unitar asociat cu valoarea proprie dominantă. Metoda puterii directe converge oricum am alege vectorul $y$ inițial.
+
+\subsubsection{Metoda puterii inverse}
+
+Metoda puterii inverse reprezintă metoda puterii directe aplicată matricei $B = (A - \mu I)^{- 1}$. Matricea $B$ va avea o valoarea proprie dominantă dacă valoare $\mu$ (numită valoare de "deplasare") este o aproximaţie, chiar şi grosieră, a unei valori proprii $\lambda$ a matricei $A$.
+
+Algoritmul metodei puterii inverse este:
+
+\hspace{0 mm} $ y^{(0)} = y $
+
+\hspace{0 mm} Pentru $k = 1, 2, ... max$
+
+\hspace{0 mm} \hspace{5 mm} Se rezolvă sistemul liniar $(A - \mu I) z = y^{(k-1)}$
+
+\hspace{0 mm} \hspace{5 mm} $y^{(k)} \leftarrow \frac{z}{\Vert z \Vert_{2}}$
+
+\hspace{0 mm} \hspace{5 mm} $\lambda^{\left( k \right)} \leftarrow (y^{(k)})^{T}Ay^{(k)}$
+
+\hspace{0 mm} \hspace{5 mm} $\mu = \lambda ^{(k)}$
+
+
+Pentru a creşte viteza de convergenţă a algoritmului, valoarea de deplasare $\mu$ este modificată de la o iteraţie la alta, utilizând aproximaţia curentă $ \mu = \lambda ^{(k)}$ a valorii proprii $\lambda$ a matricei A. Această variantă, este cunoscută sub denumirea de \textit{iterarea câtului Rayleigh}.
+În metoda puterii inverse, şirul $ \left(y^{\left( k \right)}\right)_{k \in \mathbb{N}}$ este convergent către vectorul propriu al matricei $A$, asociat valorii proprii $\lambda$.
+
+
+\subsubsection{Metoda deflației}
+
+Metoda deflației se foloseşte doar în cazul matricelor simetrice, cu elemente reale. Folosind metoda puterii directe se  determină valoarea proprie dominantă şi vectorul propriu corespunzător.
+Pentru a afla celelalte perechi proprii se procedează astfel:
+\begin{itemize}
+	\item Iniţial avem o matrice A cu vectorii proprii
+	      $x_{1}, x_{2}, ..., x_{n}$ şi valorile proprii
+	      $\lambda_{1}, \lambda_{2}, ..., \lambda_{n}$. Pe $\lambda_{1}$ şi $x_{1}$  îi calculăm folosind metoda puterii directe.
+
+	\item Construim matricea $ B = (I_{n} - x_{1}y^{T})A $, cu $y$ ales astfel încât
+	      $ x_{1}y^{T} = 1 $. Această matrice va avea valorile proprii $\left\lbrace 0, \lambda_{2}, \lambda_{3} , ... , \lambda_{n}\right\rbrace$  şi vectorii proprii
+	      $\left\lbrace x_{1}, z_{2}, z_{3}, ... , z_{n}\right\rbrace$, unde $z_{i} = x_{i} - y^{T}x_{i}x_{1}$, $\forall i = 2:n$.
+
+	\item Dacă din matricea $B$ eliminăm prima linie şi prima coloană, matricea obţinută, de rang $n-1$, își păstrează perechile proprii mai puţin prima pereche proprie $(0, x_1)$. Pe matricea redusă, putem aplica acelaşi procedeu, obţinându-se valoarea proprie dominantă $\lambda_{2}$. Procesul continuă până se obţin toate valorile proprii ale matricei iniţiale.
+
+\end{itemize}
+
+\subsubsection{Metoda Householder}
+
+Metoda propune o procedură de construcţie iterativă a unui şir de matrice ortogonal asemenea cu matricea iniţială şi rapid convergent către forma Schur reală. Dacă prin metodele puterii se obțineau aproximări ale valorilor şi vectorilor proprii, prin metoda Householder se urmăreşte obţinerea formei Schur reale, care conţine valorile proprii exacte.
+
+Toate versiunile algoritmului QR sunt organizate în două etape:
+\begin{enumerate}
+	\item etapa directă, de reducere a matricei date la forma superior Hessenberg prin
+	      transformări ortogonale de asemănare;
+	\item etapa iterativă, de construcţie recurentă a unui şir de matrice convergent către forma Schur reală.\\
+\end{enumerate}
+
+
+\begin{itemize}
+	\item {\textbf{Algoritmul QR cu deplasare explicită cu paşi simpli}}
+
+	      Considerăm matricea $H$ ca fiind o matrice superior Hessenberg. Algoritmul este următorul:
+
+	      \hspace{5 mm} $ H_{0} = H $
+
+	      \hspace{5 mm} Pentru $k = 0, 1, 2, ...$
+
+	      \hspace{5 mm} \hspace{5 mm} $H_{k} - \mu _{k} I_{n} = Q_{k} R_{k}$
+
+	      \hspace{5 mm} \hspace{5 mm} $H_{k+1} = Q_{k} R_{k} + \mu _{k} I_{n}$
+	      \\
+
+
+	      Pentru o alegere convenabilă a lui $\mu_{k}$ se poate demonstra că metoda converge rapid către forma Schur reală a matricei $H$. De aceea, la fiecare pas facem atribuirea: $\mu_{k} = h_{nn}^{(k)}$. Astfel, algoritmul va fi următorul:
+
+	      \hspace{5 mm} $ \mu = h_{nn} $
+
+	      \hspace{5 mm} $ H = H - \mu I_{n} $
+
+	      \hspace{5 mm} Pentru $j = 1 : n - 1 $
+
+	      \hspace{5 mm} \hspace{5 mm} Se determină rotaţia plană $P_{j, j+1}$ astfel încât $ (P_{j, j+1}^{T} H)_{j+1, j} == 0$
+
+	      \hspace{5 mm} \hspace{5 mm} $H = P_{j, j+1}^{T} H$
+
+	      \hspace{5 mm} Pentru $j = 1 : n - 1 $
+
+	      \hspace{5 mm} \hspace{5 mm} $H = H P_{j, j+1}$
+
+	      \hspace{5 mm} $H = H + \mu I_{n}$
+	      \\
+
+
+	\item {\textbf{Algoritmul QR cu deplasare explicită cu paşi dubli}}
+
+	      Pentru depăşirea dificultăţilor legate de absenţa convergenţei şirului QR creat de utilizarea
+	      paşilor simpli atunci când matricea are valori proprii complexe, se adoptă aşa numita strategie a
+	      paşilor dubli QR care comprimă într-o singură iteraţie doi paşi simpli QR succesivi. Algoritmul este următorul:
+
+	      \hspace{5 mm} Pentru $k = 1, 2, ... $
+
+	      \hspace{5 mm} \hspace{5 mm} $s = h_{n-1,n-1} + h_{n,n}$
+
+	      \hspace{5 mm} \hspace{5 mm} $p = h_{n-1,n-1} h_{nn} - h_{n,n-1} h_{n-1,n}$
+
+	      \hspace{5 mm} \hspace{5 mm} Se calculează $M = H^{2} - sH + pI_{n}$
+
+	      \hspace{5 mm} \hspace{5 mm} Se factorizează $M = QR$
+
+	      \hspace{5 mm} \hspace{5 mm} $H = Q^{T}HQ$
+
+
+\end{itemize}
+
+\section{Probleme rezolvate}
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+\subsection{Problema 1}
+Să se scrie o funcţie Octave pentru a implementa metoda puterii directe. Funcţia primeşte ca parametrii de intrare: matricea $A$, aproximaţia $y$ a vectorului propriu, numărul maxim de iteraţii $maxIter$, precizia $eps$. Rezultatul funcţiei este perechea proprie dominantă a matricei $A$ şi numărul de iteraţii necesar pentru obţinerea acesteia.
+
+\textit{Soluţie:}
+
+\octavescript{./src/PutereDir.m}{Metoda puterii directe}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\\
+		\textbf{Date de intrare:} \\\\
+		$A = $
+		$\begin{bmatrix}
+				 1  & 5  & 10 & 14 \\
+				 2  & 9  & 4  & 1  \\
+				 10 & 13 & 5  & 3  \\
+				 15 & 4  & 12 & 9  \\
+			 \end{bmatrix}
+		$,
+		$ y = $
+		$\begin{bmatrix}
+				 3 \\
+				 5 \\
+				 1 \\
+				 8 \\
+			 \end{bmatrix}
+		$,
+		$ maxIter = 100$, $eps = 10^{-4}$
+		\\ \\
+		\hline
+		\\
+		\textbf{Date de ieşire:}  \\
+		$lambda = 28.583$,
+		$ y = $
+		$\begin{bmatrix}
+				 0.54239 \\
+				 0.17677 \\
+				 0.41742 \\
+				 0.70734 \\
+			 \end{bmatrix}
+		$,
+		$iter = 12$               \\
+		\hline
+	\end{tabular}
+\end{center}
+
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 2
+%----------------------------------------------------------------------------------------
+\subsection{Problema 2}
+
+Să se scrie o funcţie Octave pentru a implementa metoda puterii inverse. Funcţia primeşte ca parametrii de intrare: matricea $A$, aproximaţiile $y$ şi $lambda$ ale unei perechi proprii, numărul maxim de iteraţii $maxIter$, precizia $eps$. Rezultatul funcţiei este o pereche proprie a matricei $A$ şi numărul de iteraţii pentru care s-a obţinut această pereche proprie.
+
+\textit{Soluţie:}
+\octavescript{./src/PutereInv.m}{Metoda puterii inverse}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\\
+		\textbf{Date de intrare:} \\\\
+		$A = $
+		$\begin{bmatrix}
+				 1  & 5  & 10 & 14 \\
+				 2  & 9  & 4  & 1  \\
+				 10 & 13 & 5  & 3  \\
+				 15 & 4  & 12 & 9  \\
+			 \end{bmatrix}
+		$,
+		$ y = $
+		$\begin{bmatrix}
+				 3 \\
+				 5 \\
+				 1 \\
+				 8 \\
+			 \end{bmatrix}
+		$,
+		$ lambda = 7$, $ maxIter = 100$, $eps = 10^{-4}$
+		\\ \\
+		\hline
+		\\
+		\textbf{Date de ieşire:}  \\
+		$lambda = 8.7508$,
+		$ y = $
+		$\begin{bmatrix}
+				 -0.39945 \\
+				 0.55285  \\
+				 0.32860  \\
+				 -0.65331 \\
+			 \end{bmatrix}
+		$,
+		$iter = 4$                \\
+		\hline
+	\end{tabular}
+\end{center}
+
+%\end{Problem}
+
+\section{Probleme propuse}
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+\subsection{Problema 1}
+Fie matricea tridiagonală:
+
+$$A = \begin{bmatrix} a_{1} & c_{1} & ...     & ...     & ...     \\
+                b_{2} & a_{2} & c_{2}   & ...     & ...     \\
+                ...   & ...   & ...     & ...     & ...     \\
+                ...   & ...   & b_{n-1} & a_{n-1} & c_{n-1} \\
+                ...   & ...   & ...     & b_{n}   & a_{n}   \\
+	\end{bmatrix}$$.
+
+Se construieşte şirul de polinoame:
+
+$p_{0} ( \lambda ) = 1$
+
+$p_{1} ( \lambda ) = \lambda - a_{1} $
+
+$p_{n} ( \lambda ) = ( \lambda - a_{n} ) p_{n-1} ( \lambda ) - b_{n} c_{n-1} p_{n-2} ( \lambda )$
+
+a) Arătaţi că $p_{n} ( \lambda )$ este polinomul caracteristic al matricei $A$.
+
+b) Scrieţi o funcţie OCTAVE care calculează valorile şi vectorii proprii ale matricei $A$.
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 2
+%----------------------------------------------------------------------------------------
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\subsection{Problema 2}
+
+Să se demonstreze pentru o matrice $A \in \mathbb{R}^{n \times n}$ proprietăţile următoare:
+
+a) $\sigma(A^{-1}) = \left\lbrace \frac{1}{\lambda _{1}}, \frac{1}{\lambda _{2}}, ..., \frac{1}{\lambda _{n}}\right\rbrace $;
+
+b) $\sigma(A - \mu I_{n}) = \left\lbrace \lambda_{i} - \mu \right\rbrace , \forall \mu \in \mathbb{R}$;
+
+c) $\sigma(A^{k}) = \left\lbrace \lambda_{i}^{k} \right\rbrace , \forall k \in \mathbb{N}$
+
+d) $\sigma((A - \mu I_{n})^{- 1}) = \left\lbrace \frac{1}{\lambda_{i} - \mu} \right\rbrace , \forall \mu \in \mathbb{R}$.
+
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 3
+%----------------------------------------------------------------------------------------
+
+\subsection{Problema 3}
+Calculaţi valorile şi vectorii proprii ai unui reflector Householder.
+
+Indicaţie: $G^{T} u = e_{1}G$  - este un reflector. Coloanele lui $G$ sunt vectori proprii.
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 4
+%----------------------------------------------------------------------------------------
+
+\subsection{Problema 4}
+Pentru matricea:
+\begin{center}
+	$A = \begin{bmatrix}
+			c & -s \\
+			s & c  \\
+		\end{bmatrix}$
+	$\in \mathbb{R}^{2 \times 2}$, $c^2+s^2=1$
+\end{center}
+
+calculaţi valorile şi vectorii proprii.
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
