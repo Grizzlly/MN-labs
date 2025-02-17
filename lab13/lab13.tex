@@ -1,0 +1,312 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#13}
+\newcommand{\MNLabTitle}{Metode Runge-Kutta pentru rezolvarea ecuaţiilor diferenţiale}
+\newcommand{\MNLabTitleHeader}{Metode Runge-Kutta}
+\newcommand{\MNAuthor}{Andrei STAN, Dumitru-Clementin Cercel, Adelina Vidovici}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
+
+\begin{itemize}
+	\item găsească soluţia unei ecuaţii diferenţiale folosind metode de tip Runge-Kutta;
+	\item găsească soluţia unui sistem de ecuaţii diferenţiale.
+\end{itemize}
+%----------------------------------------------------------------------------------------
+%       TEORIE
+%----------------------------------------------------------------------------------------
+\section{Noţiuni teoretice}
+
+Fiind date:
+\begin{itemize}
+	\item intervalul $I = [ x_0, x_0 + a] \subset R$
+	\item funcţia continuă $f:I\times R \rightarrow R$ care asociază fiecarui punct (x, y) din
+	      domeniul de definiţie un număr real $f(x,y)$
+	\item ecuaţia diferențială $y' = f(x,y)$
+\end{itemize}
+
+\noindent problema diferenţială de ordinul 1 constă în determinarea funcţiei $y:I \rightarrow R$ astfel încât pentru $\forall x\in I$ avem relaţia:
+$$y'(x) = f(x,y(x))$$
+
+Problema diferenţială de ordinul 1 cu condiţii iniţiale (numită şi problema Cauchy) constă în rezolvarea ecuaţiei diferenţiale $y'(x) = f(x,y(x))$ ştiind condiţia iniţială $y(x_0) = y_0$, $y_0 \in R$.
+
+În cele ce urmează, presupunem că funcţia $f$ satisface condiţia Lipschitz, fapt ce asigură existenţa şi unicitatea soluţiei problemei Cauchy:
+\begin{center}
+	$\forall x \in I$, $\forall u, v \in R^n, \exists L>0$ astfel încât $\left|f(x,u)-f(x,v)\right|<L\left|u-v\right|$
+\end{center}
+
+\subsection{Metode de tip Runge-Kutta}
+
+O metodă numerică folosită pentru rezolvarea ecuţiilor diferenţiale este metoda Runge-Kutta. Această metodă este o \textit{metodă cu paşi separaţi}, caracterizată prin faptul că aproximaţia soluţiei la pasul următor ${i+1}$ ţine cont doar de informaţia de la pasul curent $i$, astfel:
+\begin{center}
+	$\left\{
+		\begin{array}{ll}
+			y_{0} = \lambda_{h} \\ \\
+			y_{i+1} = y_i + hf_h(x_{i},y_{i}), \quad  i = 0,1,...
+		\end{array}
+		\right.$
+\end{center}
+
+\noindent şi având condiţiile de consistenţă:
+$$\lim_{h \to 0} \lambda_{h} = \lambda; \quad \lim_{h \to 0} f_{h} = f .
+$$
+
+Funcţia $f_{h}(x,y)$ se determină urmând paşii:
+\begin{itemize}
+	\item considerăm punctele distincte $x_{ij} = x_{i0}+u_jh$ care împart intervalul $I=[x_{i},x_{i+1}]$ în $q$ subintervale, unde $u_{j} \in [0,1]$, $u_0=0$, $u_q=1$;
+	\item se calculează aproximaţiile soluţiei în punctele introduse $x_{ij}$ folosind relaţiile:
+	      \begin{center}
+		      $\left\{
+			      \begin{array}{ll}
+				      y_{i0} = y_i \\ \\
+				      y_{ij} = y_i + h\sum_{l=0}^{j-1}K_{jl}f(x_{il},y_{il}), \quad  j = 1:q
+			      \end{array}
+			      \right.$
+	      \end{center}
+\end{itemize}
+
+Pentru a determina punctele introduse $x_{ij}$ şi constantele $K_{jl}$ se impune condiţia ca în dezvoltarea Taylor a lui $y_{ij}$ după puterile lui $h$, termenii astfel obtinuţi să coincidă cu cât mai mulţi termeni din dezvoltarea Taylor a soluției exacte. O metoda Runge-Kutta este de $ordin$ $p$, dacă în cele două dezvoltări termenii coincid până la $h^p$ inclusiv. Mai mult, numărul subintervalelor $q$ defineşte \textit{rangul} metodei Runge-Kutta.
+
+Metoda Runge-Kutta de ordin 1 şi rang 1 este:
+
+$\left\{
+	\begin{array}{lll}
+		y_{i0} = y_i \\ \\
+		y_{i1} = y_i + hu_{1}f(x_{i0},y_{i0})
+	\end{array}
+	\right.$
+
+Metoda Runge-Kutta de ordin 2 şi rang 2 este:
+
+$\left\{
+	\begin{array}{lll}
+		y_{i0} = y_i                          \\ \\
+		y_{i1} = y_i + hu_{1}f(x_{i0},y_{i0}) \\ \\
+		y_{i2} = y_i + h(1-\frac{1}{2u_1})f(x_{i0},y_{i0}) + \frac{h}{2u_1}f(x_{i1},y_{i1})
+	\end{array}
+	\right.$
+
+Particularizând valoarea lui $u_1 \in [0,1]$ obţinem:
+\begin{itemize}
+	\item metoda tangentei ameliorate, pentru $u_1 = \frac{1}{2}$:
+
+	      $\left\{
+		      \begin{array}{lll}
+			      x_{i1} = x_{i0} + u_1h = x_i + \frac{h}{2} \\ \\
+			      y_{i1} = y_i + \frac{h}{2}f(x_{i},y_{i})   \\ \\
+			      y_{i+1} = y_i + hf(x_{i1},y_{i1})
+		      \end{array}
+		      \right.$ \\
+
+	\item metoda Heun, pentru $u_1=\frac{2}{3}$:
+
+	      $\left\{
+		      \begin{array}{lll}
+			      x_{i1} = x_{i} + \frac{2}{3}h             \\ \\
+			      y_{i1} = y_i + \frac{2}{3}hf(x_{i},y_{i}) \\ \\
+			      y_{i+1} = y_i + \frac{h}{4}f(x_i,y_i)+\frac{3h}{4}f(x_{i1},y_{i1})
+		      \end{array}
+		      \right.$ \\
+
+	\item metoda Euler-Cauchy, pentru $u_1=1$:
+
+	      $\left\{
+		      \begin{array}{lll}
+			      x_{i1} = x_{i} + h             \\ \\
+			      y_{i1} = y_i + hf(x_{i},y_{i}) \\ \\
+			      y_{i+1} = y_i + \frac{h}{2}[f(x_i,y_i),f(x_{i1},y_{i1})]
+		      \end{array}
+		      \right.$
+
+\end{itemize}
+
+În mod uzual, se utilizează o metodă Runge-Kutta de ordin $4$ pentru care avem relaţia: \\
+$$y_{i+1} = y_i + \frac{K_1+2K_2+2K_3+K_4}{6}$$
+\noindent  unde:
+
+$K_1 = hf(x_i,y_i) $
+
+$K_2 = hf(x_i+\frac{h}{2}, y_i+\frac{K_1}{2})$
+
+$K_3 = hf(x_i+\frac{h}{2}, y_i+\frac{K_2}{2})$
+
+$K_4 = hf(x_i+h, y_i+K_3)$
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+
+%----------------------------------------------------------------------------------------
+\section{Probleme rezolvate}
+\subsection{Problema 1}
+
+Să se scrie un program OCTAVE care să rezolve o ecuaţie diferenţială de ordin 1 folosind metoda tangentei ameliorate. Programul primeşte ca date de intrare: $a, b$ - capătul superior, respectiv inferior al intervalului de integrare; $n$ - numărul de puncte;  $y0$ - condiţia iniţială; $f$ - funcţia $f(x,y)$. Rezultatul programului va fi $y$, reprezentând vectorul aproximaţiilor soluţiei ecuaţiei diferenţiale.
+
+\textit{Soluţie:}
+
+\octavescript{./src/tangenta_ameliorata.m}{Metoda tangentei ameliorate.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}                   & \textbf{Date de ieşire:} \\
+		$a = 0, b = 3, n = 10, y0 = 0.5,  @functie$ &
+		$y = $
+		$
+			\begin{bmatrix}
+				0.5       \\
+				0.215691  \\
+				-0.074489 \\
+				-0.421686 \\
+				-0.883347 \\
+				-1.521975 \\
+				-2.390099 \\
+				-3.495294 \\
+				-4.751827 \\
+				-5.952477 \\
+				-6.811686 \\
+			\end{bmatrix}
+		$
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+
+unde am considerat funcţia $f(x,y)$ definită astfel:
+\octavescript{./src/functie.m}{Exemplu de funcţie de integrat.}
+
+%\end{Problem}
+
+\subsection{Problema 2}
+Să se scrie program OCTAVE care să rezolve o ecuaţie diferenţială de ordin 1 folosind metoda Runge-Kutta de ordin 4. Programul primeşte ca date de intrare: $a, b$ - capătul superior, respectiv inferior al intervalului de integrare; $n$ - numărul de puncte;  $y0$ - condiţia iniţială; $f$ - funcţia $f(x,y)$. Rezultatul programului va fi $y$, reprezentând vectorul aproximaţiilor soluţiei ecuaţiei diferenţiale.
+
+\textit{Soluţie:}
+
+\octavescript{./src/Runge_Kutta4.m}{Metoda Runge-Kutta de ordin 4.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}                   & \textbf{Date de ieşire:} \\
+		$a = 0, b = 3, n = 10, y0 = 0.5,  @functie$ &
+		$y = $
+		$
+			\begin{bmatrix}
+				0.5       \\
+				0.213770  \\
+				-0.079085 \\
+				-0.431524 \\
+				-0.902985 \\
+				-1.557599 \\
+				-2.447435 \\
+				-3.575427 \\
+				-4.847639 \\
+				-6.051285 \\
+				-6.905223 \\
+			\end{bmatrix}
+		$
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+\section{Probleme propuse}
+
+\subsection{Problema 1}
+
+Să se scrie un program OCTAVE care să rezolve o ecuaţie diferenţială de ordin 1 folosind metoda Euler-Cauchy. Programul primeşte ca date de intrare: $a, b$ - capătul superior, respectiv inferior al intervalului de integrare; $n$ - numărul de puncte;  $y0$ - condiţia iniţială; $f$ - funcţia $f(x,y)$. Rezultatul programului va fi $y$, reprezentând vectorul aproximaţiilor soluţiei ecuaţiei diferenţiale.
+%\end{Problem}
+
+\subsection{Problema 2}
+Să se scrie un program OCTAVE care să rezolve o ecuaţie diferenţială de ordin 1 folosind metoda Heun. Programul primeşte ca date de intrare: $a, b$ - capătul superior, respectiv inferior al intervalului de integrare; $n$ - numărul de puncte;  $y0$ - condiţia iniţială; $f$ - funcţia $f(x,y)$. Rezultatul programului va fi $y$, reprezentând vectorul aproximaţiilor soluţiei ecuaţiei diferenţiale.
+%\end{Problem}
+
+\subsection{Problema 3}
+
+Să se scrie un program OCTAVE care să rezolve un sistem de 2 ecuaţii diferenţiale de ordin 1 folosind metoda Runge-Kutta de ordin 4.
+Ambele ecuaţii diferenţiale se rezolvă pe intervalul delimitat de parametrii $a$ şi $b$, într-un număr de $n$ puncte; $y10$, $y20$ reprezintă condiţia iniţială a primei ecuaţii diferenţiale, respectiv celei de-a doua; $f1$, $f2$ reprezintă prima funcţie a sistemului, respectiv cea de-a doua funcţie.
+Programul va avea ca rezultat vectorii $y1$ şi $y2$ (vectorul aproximaţiilor soluţiei asociată primei ecuaţii diferenţiale, respectiv celei de-a doua).
+
+
+$function$ $[y1$ $y2] = \texttt{Runge\char`_Kutta4\char`_sistem}(a$, $b$, $n$, $y10$, $y20$, $f1$, $f2)$
+
+%\end{Problem}
+
+\end{document}
