@@ -1,0 +1,405 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{url}
+\usepackage{amsmath}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#5}
+\newcommand{\MNLabTitle}{Metode iterative pentru rezolvarea sistemelor de ecuații liniare: Jacobi, Gauss-Siedel, Suprarelaxare}
+\newcommand{\MNLabTitleHeader}{Metode iterative}
+\newcommand{\MNAuthor}{Andrei STAN, Bogdan Țigănoaia}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+\par \^{I}n urma parcurgerii acestui laborator, studentul va fi capabil s\u{a} rezolve sisteme de ecua\c{t}ii liniare utiliz\^{a}nd metode iterative.
+
+\section{Noțiuni teoretice}
+
+\par Metodele exacte de rezolvare a sistemelor de ecua\c{t}ii liniare, av\^{a}nd complexitate O(${n}^{3}$), au aplicabilitate limitat\u{a} la ordine de sisteme ce nu dep\u{a}\c{s}esc 1000. Pentru sisteme de dimensiuni mai mari se utilizeaz\u{a} metode cu complexitate O(${n}^{2}$) \^{i}ntr-un singur pas de itera\c{t}ie. Acestea utilizeaz\u{a} rela\c{t}ii de recuren\c{t}\u{a}, care prin aplicare repetat\u{a} furnizeaz\u{a} aproxima\c{t}ii, cu precizie controlat\u{a}, a solu\c{t}iei sistemului.
+
+
+Metodele iterative transform\u{a}  sistemul $Ax = b$  \^{i}n $x = Gx + c$. Pornindu-se cu o aproxima\c{t}ie ini\c{t}ial\u{a} ${x}^{(0)}$ a solu\c{t}iei, rela\c{t}ia de recuren\c{t}\u{a}  folosit\u{a} are forma:
+$${x}^{(p+1)} = G{x}^{(p)} + c$$
+unde:
+\begin{itemize}
+	\item ${x}^{(0)}, {x}^{(1)}, ... , {x}^{(p)}, ...$ sunt aproxim\u{a}rile solu\c{t}iei;
+	\item $G$ reprezint\u{a} matricea de itera\c{t}ie;
+	\item $c$ reprezint\u{a} vectorul de itera\c{t}ie.
+\end{itemize}
+
+\par O metod\u{a} este convergent\u{a} dac\u{a} este stabil\u{a} \c{s}i consistent\u{a}. Condi\c{t}ia necesar\u{a} \c{s}i suficient\u{a} de convergen\c{t}\u{a} este:
+$${\rho}(G) < 1$$
+unde ${\rho}(G) = \max(|{\lambda}_{1}|, |{\lambda}_{2}|, ... , |{\lambda}_{n}|)$ reprezint\u{a} raza spectral\u{a} a matricei de itera\c{t}ie $G$ \c{s}i ${\lambda}_{i}, i = 1:n$ reprezint\u{a} valorile proprii ale matricei.
+
+\par Metodele iterative se bazeaz\u{a} pe descompunerea matricei $A$ sub forma $A = N - P$. Atunci sistemul devine:
+
+$(N - P)x = b, $ adică $x = {N}^{-1}Px + {N}^{-1}b.$
+
+Astfel, rezult\u{a} rela\c{t}ia de recuren\c{t}\u{a}:
+$${x}^{(p+1)} = {N}^{-1}P{x}^{(p)} + {N}^{-1}b$$
+de unde putem identifica $G = {N}^{-1}P$ \c{s}i $c = {N}^{-1}b$.
+
+\par Se parti\c{t}ioneaz\u{a} matricea $A$ pun\^{a}nd \^{i}n eviden\c{t}\u{a} o matrice diagonal\u{a} $D$, o matrice strict triunghiular inferioar\u{a} $L$ \c{s}i o matrice strict triunghiular superioar\u{a} $U$:
+$$A = D - L - U.$$
+
+\subsection{Metoda Jacobi}
+\par \^{I}n metoda Jacobi se aleg:
+
+$N = D$
+
+$P = L + U$
+
+${G}_{J} = {D}^{-1}(L + U)$
+
+\par Solu\c{t}ia sistemului este:
+$${x}_{i}^{(p+1)} = \frac{{b}_{i} - \sum_{j = 1, j \neq i}^{n}{a}_{ij}{x}_{j}^{(p)}}{{a}_{ii}}$$
+
+%\par Metoda converge dac\u{a} matricea $A$ este diagonal dominant\u{a}\footnote{\url{http://en.wikipedia.org/wiki/Diagonally\_dominant\_matrix}}  pe linii ($|{a}_{ii}| > \sum_{j \neq i}|{a}_{ij}| )$.
+
+\subsection{Metoda Gauss-Seidel}
+\par La aceast\u{a} metod\u{a} se aleg:
+
+$N = D - L$
+
+$P = U$
+
+${G}_{GS} = {(D - L)}^{-1}U$
+
+Solu\c{t}ia sistemului este:
+$${x}_{i}^{(p+1)} = \frac{{b}_{i} - \sum_{j = 1}^{i-1}{a}_{ij}{x}_{j}^{(p+1)} - \sum_{j = i + 1}^{n}{a}_{ij}{x}_{j}^{(p)}}{{a}_{ii}}$$
+
+%\par Metoda converge dac\u{a} matricea A este simetric\u{a} (${a}_{ij} = {a}_{ji},  i,j = 1:n$) \c{s}i pozitiv definit\u{a} ($\forall z \in R^{n}, {z}^{T}Az >0$).
+
+Observa\c{t}ii:
+\begin{enumerate}
+	\item  Dac\u{a} matricea sistemului este diagonal dominant\u{a} pe linii, metoda Gauss Seidel este convergent\u{a}. Reciproca nu este adevarat\u{a}.
+	\item  O matrice $A$ este diagonal dominant\u{a} pe linii dac\u{a} \c{s}i numai dac\u{a} are urm\u{a}toarea proprietate: pentru fiecare linie i, modulul elementului de pe diagonala principal\u{a}, $A(i,i)$ este strict mai mare dec\^{a}t suma modulelor elementelor de pe aceea\c{s}i linie $i$.
+\end{enumerate}
+
+\subsection{Metoda suprarelax\u{a}rii}
+Pentru g\u{a}sirea unei descompuneri c\^{a}t mai rapid convergente, se introduce parametrul de relaxare $\omega$:
+$$A = N - P = N - \omega N - P + \omega N = (1 - \omega)N - (P - \omega N) = N(\omega) - P(\omega)$$
+
+de unde ob\c{t}inem:
+
+$N(\omega) = (1 - \omega)N$
+
+$P(\omega) = P - \omega N$
+
+$G(\omega) = {N}^{-1}(\omega)P(\omega) = \frac{{N}^{-1}}{1-\omega}(P - \omega N) = \frac{{N}^{-1}P - \omega{I}_{n}}{1-\omega}$
+
+Condi\c{t}ia de stabilitate impune $\omega \in (0,2)$. \^{I}n practic\u{a} se face o alt\u{a} alegere, astfel:
+
+$N(\omega) = \frac{1}{\omega}D - L, \quad P(\omega) = (\frac{1}{\omega} - 1)D + U, \quad {G}_{\omega} = (D-\omega L)^{-1}[(1-\omega)D+\omega U]$
+
+Solu\c{t}ia sistemului se poate scrie sub forma:
+$$x_{i}^{(p+1)}=\omega\frac{{b}_{i} - \sum_{j = 1}^{i-1}{a}_{ij}{x}_{j}^{(p+1)} - \sum_{j = i + 1}^{n}{a}_{ij}{x}_{j}^{(p)}}{{a}_{ii}}+(1-\omega)x_{i}^{(p)}$$
+
+Dac\u{a} se alege $\omega = 1 \Rightarrow$ metoda Gauss-Seidel.
+
+
+\section{Probleme rezolvate}
+
+\subsection{Problema 1}
+
+S\u{a} se rezolve sistemul folosind metoda Gauss-Seidel:
+$$	\left\{
+	\begin{array}{ccccccc}
+		7x_1 & + & 2x_2 & - & 4x_3 & = & 7  \\
+		3x_1 & + & 6x_2 & + & 2x_3 & = & 15 \\
+		2x_1 & - & 5x_2 & + & 8x_3 & = & 28 \\
+	\end{array} \right.
+$$
+
+\textit{Solu\c{t}ie}:
+
+Scriem formulele de recuren\c{t}\u{a}
+
+$$\left\{
+	\begin{array}{ccccccccc}
+		x_1^{(k+1)} & = & -2/7x_2^{(k)} & + & 4/7x_3^{(k)} & + & 7/7  \\
+		x_2^{(k+1)} & = & -3/6x_1^{(k)} & - & 2/6x_3^{(k)} & + & 15/6 \\
+		x_3^{(k+1)} & = & -2/8x_1^{(k)} & + & 5/8x_2^{(k)} & + & 28/8 \\
+	\end{array} \right.
+$$
+
+Dac\u{a} alegem $x_{1}^{(0)} = x_{2}^{(0)}=x_{3}^{(0)}=0$ ob\c{t}inem urm\u{a}toarele rezultate:
+$$  \begin{array}{c||ccc}
+		k & x_1^{(k)} & x_2^{(k)} & x_3^{(k)} \\
+		\hline
+		0 & 0         & 0         & 0         \\
+		1 & 1         & 2         & 4.5       \\
+		2 & 3.00      & -0.5      & 2.43      \\
+		3 & 2.53      & 0.41      & 3.12      \\
+		4 & 2.66      & 0.12      & 2.91      \\
+		5 & 2.62      & 0.21      & 2.97      \\
+	\end{array}
+$$
+
+Solu\c{t}ia exact\u{a} este: $x_{1}=2.63,\ x_{2}=0.19\ x_{3}=2.96$.
+%\end{Problem}
+
+\subsection{Problema 2}
+Folosi\c{t}i metoda Jacobi pentru a aproxima solu\c{t}ia sistemului:
+$$	\left\{
+	\begin{array}{ccccccc}
+		10x_1 & - & 5x_2  & + & x_3   & = & 1 \\
+		x_1   & + & 4x_2  & + & 3 x_3 & = & 4 \\
+		4x_1  & - & 3 x_2 & - & 9x_3  & = & 6 \\
+	\end{array} \right.
+$$
+
+\textit{Solu\c{t}ie}:
+
+Scriem formulele de recuren\c{t}\u{a}
+$$\left\{
+	\begin{array}{ccccccc}
+		x_1^{(k+1)} & = & 5/10x_2^{(k)} & - & 1/10x_3^{(k)} & + & 1/10 \\
+		x_2^{(k+1)} & = & -1/4x_1^{(k)} & - & 3/4x_3^{(k)}  & + & 4/4  \\
+		x_3^{(k+1)} & = & 4/9x_1^{(k)}  & - & 3/9x_2^{(k)}  & - & 6/9  \\
+	\end{array} \right.
+$$
+
+Aleg\^{a}nd $x_{1}^{(0)}=x_{2}^{(0)}=x_3^{(0)}=0\Rightarrow$
+
+
+$$  \begin{array}{c||ccc}
+		k & x_1^{(k)} & x_2^{(k)} & x_3^{(k)} \\
+		\hline
+		0 & 0         & 0         & 0         \\
+		1 & 0.1       & 1.00      & -0.66     \\
+		2 & 0.66      & 1.47      & -1.95     \\
+		3 & 0.93      & 1.55      & -0.86     \\
+		4 & 0.96      & 1.41      & -0.76     \\
+		5 & 0.88      & 1.33      & -0.71     \\
+	\end{array}
+$$
+
+Solu\c{t}ia exact\u{a} este: $x_{1}=0.84,\ x_{2}=1.34,\ x_{3}=-0.73$.
+%\end{Problem}
+
+\subsection{Problema 3}
+Fie sistemul $Ax=b, A \in R^{2\times 2}, x, b \in R^{2},
+	A =
+	\left[ {\begin{array}{cc}
+					2 & 2 \\
+					1 & 3
+				\end{array} } \right]
+$. Matricea $A$ nu este diagonal dominant\u{a} pe linii. \^{I}n aceste condi\c{t}ii este convergent\u{a} metoda Gauss-Seidel?
+
+\textit{Solu\c{t}ie}:
+
+Se determin\u{a} matricea de itera\c{t}ie a sistemului pentru metoda Gauss-Seidel, ${G}_{GS}$.
+
+$A = D - L - U \Rightarrow \quad D = \left[ {\begin{array}{cc}
+					2 & 0 \\
+					0 & 3
+				\end{array} } \right], \quad L =
+	\left[ {\begin{array}{cc}
+					0  & 0 \\
+					-1 & 0
+				\end{array} } \right], \quad U =
+	\left[ {\begin{array}{cc}
+					0 & -2 \\
+					0 & 0
+				\end{array} } \right]$
+
+Atunci:
+
+${G}_{GS} = {(D-L)}^{-1}U =
+	\left[ {\begin{array}{cc}
+					2 & 0 \\
+					1 & 3
+				\end{array} } \right] ^ {-1}
+	\left[ {\begin{array}{cc}
+					0 & -2 \\
+					0 & 0
+				\end{array} } \right]
+	=
+	\left[ {\begin{array}{cc}
+					0 & -1          \\
+					0 & \frac{1}{3}
+				\end{array} } \right]$.
+
+$\det{(\lambda I - G_{GS})} = \left| {\begin{array}{cc}
+		\lambda & 1                     \\
+		0       & \lambda - \frac{1}{3}
+	\end{array} } \right| = 0\Rightarrow \lambda(G_{GS}) = \{0,\frac{1}{3}\}$  \c{s}i $\rho(G_{GS}) = \frac{1}{3} < 1$.
+
+$\Rightarrow$ metoda Gauss-Seidel este convergent\u{a}.
+%\end{Problem}
+
+
+\subsection{Problema 4}
+S\u{a} se implementeze o func\c{t}ie OCTAVE care rezolv\u{a} un sistem de ecua\c{t}ii liniare folosind metoda iterativ\u{a} Gauss-Seidel. Date de intrare: $A$ - matricea sistemului; $b$ - vectorul termenilor liberi; $x0$ - aproxima\c{t}ia ini\c{t}ial\u{a} a solu\c{t}iei; $tol$ - precizia determin\u{a}rii solu\c{t}iei; $maxiter$ - num\u{a}rul maxim de itera\c{t}ii. Date de ie\c{s}ire: $x$ - solu\c{t}ia sistemului; $succes$ - variabilă care indică convergenţa metodei.
+
+\textit{Solu\c{t}ie}:
+
+\octavescript{./src/GaussSeidel.m}{}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}  & \textbf{Date de ieşire:} \\
+		$A = $
+		$\left[ {\begin{array}{cc}
+							         2 & 2 \\
+							         1 & 3
+						         \end{array} } \right],$
+
+		$b = $
+		$\left[ {\begin{array}{cc}
+							         2 \\
+							         1
+						         \end{array} } \right],$
+
+		$x0 =
+			\left[ {\begin{array}{cc}
+							        0 \\
+							        0
+						        \end{array} } \right],$
+
+		$ tol=0.0001, maxiter=100$ &
+		$x = $
+		$\left[ {\begin{array}{cc}
+							         1 \\
+							         0
+						         \end{array} } \right]$
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+%\end{Problem}
+
+\section{Probleme propuse}
+
+%--------------------------------------------------------------------------------------
+%	PROBLEM 1
+%--------------------------------------------------------------------------------------
+\subsection{Problema 1}
+Fie sistemul $Ax=b, A \in R^{2 \times 2}, b \in R^{2}$, cu
+$A =\left[ {\begin{array}{cc}
+					2  & -1 \\
+					-1 & 2
+				\end{array} } \right]$. Determina\c{t}i raza spectral\u{a} a matricei de itera\c{t}ie Jacobi. Stabili\c{t}i convergen\c{t}a metodei Jacobi.
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 2
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\subsection{Problema 2}
+Fie sistemul liniar:
+$$	\left\{
+	\begin{array}{ccccccc}
+		2x & + & y  & + & z  & = & 4 \\
+		x  & + & 2y & + & z  & = & 4 \\
+		x  & + & y  & + & 2z & = & 4 \\
+	\end{array} \right.
+$$
+
+Stabili\c{t}i:
+%\begin{enumerate}
+
+a) dac\u{a} matricea sistemului este diagonal dominant\u{a} pe linii;
+
+b) convergen\c{t}a metodei Jacobi;
+
+c) convergen\c{t}a metodei Gauss-Seidel.
+%\end{enumerate}
+
+\^{I}n caz de convergen\c{t}\u{a}, calcula\c{t}i solu\c{t}ia iterativ\u{a} dup\u{a} trei pa\c{s}i. Alege\c{t}i voi aproxima\c{t}ia ini\c{t}ial\u{a}.
+
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+%       PROBLEM 3
+%----------------------------------------------------------------------------------------
+\subsection{Problema 3}
+Fie o matrice $A \in R^{n\times n}$ tridiagonal\u{a} \footnote{\url{http://mathworld.wolfram.com/TridiagonalMatrix.html}} \c{s}i sistemul de ecua\c{t}ii $Ax=b$, cu $b,\ x \in R^{n}$. Scrie\c{t}i o func\c{t}ie OCTAVE care rezolv\u{a} sistemul de ecua\c{t}ii prin metoda iterativ\u{a} Jacobi.
+
+\octavescript{./src/Jacobi.m}{Algoritmul Jacobi}
+%\end{Problem}
+
+%-----------------------------------------------------------------------------------------
+%       PROBLEM 4
+%-----------------------------------------------------------------------------------------
+\subsection{Problema 4}
+S\u{a} se implementeze o func\c{t}ie OCTAVE care rezolv\u{a} un sistem liniar de ecua\c{t}ii folosind metoda suprarelax\u{a}rii.
+\octavescript{./src/sor.m}{Suprarelaxare}
+
+S\u{a} se testeze func\c{t}ia folosind diferite valori pentru $\omega$.
+%\end{Problem}       
+\end{document}
