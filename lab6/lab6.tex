@@ -1,0 +1,361 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#6}
+\newcommand{\MNLabTitle}{Soluția ecuației neliniare $f(x)=0$. Rădăcinile polinoamelor. Lucrul cu polinoame în Octave. Rezolvarea sistemelor de ecuații neliniare.}
+\newcommand{\MNLabTitleHeader}{Ecuații neliniare}
+\newcommand{\MNAuthor}{Andrei STAN, Sorin Ciolofan}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+\begin{itemize}
+	\item Însuşirea noţiunilor privitoare la determinarea aproximativă a soluţiilor unei ecuaţii neliniare;
+	\item Rezolvarea iterativă a unui sistem de ecuaţii neliniare;
+	\item Comenzi Octave pentru lucrul cu polinoame;
+	\item Rădăcinile polinoamelor.
+\end{itemize}
+
+\section{Noțiuni teoretice}
+
+\subsection{Soluţia ecuaţiei neliniare $f(x) = 0$}
+
+Vom studia două tipuri de metode:
+
+a) Metode bazate pe interval
+
+Se porneşte de la observaţia că o funcţie îşi schimbă semnul în vecinătatea unei rădăcini. Iniţial, se consideră două valori de o parte şi de cealaltă a rădăcinii, apoi se micşorează acest interval care încadrează rădăcina până ce se ajunge la rădăcină, cu o anumită precizie. Metodele de acest tip sunt întotdeauna convergente către soluţie deoarece aplicarea repetată a algoritmului duce la o estimare mai precisă a rădăcinii.
+
+În continuare, două metode bazate pe interval vom detalia: metoda bisecţiei şi metoda secantei.
+
+\textit{Metoda bisecţiei}
+
+Dacă o funcţie îşi schimbă semnul pe un interval, adică $f(a)\cdot f(b)<0$, atunci se evaluează valoarea funcţiei în punctul de mijloc al intervalului, $c = \frac{a + b}{2}$. Locaţia rădăcinii se estimează ca fiind la mijlocul subintervalului în care funcţia îşi schimbă semnul, noul subinterval având la unul dintre capete pe $c$. Procedura se repetă până ce se obţin estimări mai precise ale rădăcinii.
+
+Se poate defini eroarea relativă procentuală folosind relaţia:
+$$\epsilon=\left | \frac{x_{r}^{new}-x_{r}^{old}}{x_{r}^{new}} \right |$$.
+
+Când $\epsilon < prag$, algoritmul iterativ se termină, iar $x_{r}^{new}$ este considerată valoarea calculată a rădăcinii.
+
+Un alt avantaj al acestei metode este faptul că pentru o eroare acceptată $tol$, se poate calcula numărul de iteraţii ce trebuie parcurse pentru a se ajunge la aproximarea dorită a rădăcinii, conform formulei:
+$$n=\log_{2}(\frac{b-a}{tol}).$$
+
+
+\textit{Metoda secantei}
+
+În această metodă, aproximarea rădăcinii,  în intervalul $[a_i, b_i]$, se consideră a fi intersecţia  dreptei  care trece prin punctele ($a_i, f(a_i))$ şi $(b_i,f(b_i))$ cu axa $Ox$, adică:
+$$x_{i+1}=\frac{a_if(b_i)-b_if(a_i)}{f(b_i)-f(a_i)}.$$
+
+Apoi, se consideră subintervalul care are la unul dintre capete pe $x_{i+1}$, în manieră similară cu metoda bisecţiei. Acelaşi criteriu de oprire, eroarea relativă procentuală $\epsilon$, pot fi folosite.
+
+b) Metoda care nu se bazează pe un interval, în care este suficientă cunoaşterea unei valori iniţiale $x_i$ care este folosită mai departe pentru estimarea valorii următoare $x_{i+1}$. Aceste metode, spre deosebire de primele, pot fi convergente sau pot fi divergente. Atunci când ele converg, convergenţa este mult mai rapidă decât în cazul metodelor bazate pe interval. Pentru această categorie, menţionăm metoda tangentei (Newton-Raphson) şi metoda aproximaţiilor succesive (contracţiei).
+
+\textit{Metoda tangentei}
+
+După cum s-a menţionat anterior, se porneşte cu o valoare de început $x_{i}$, apoi se deduce o estimare îmbunătăţită $x_{i+1}$. În cazul metodei tangentei, se duce o tangentă la curba din punctul de coordonate $[x_{i}, f(x_{i})]$. Punctul de intersecţie a tangentei cu $Ox$ se consideră  $x_{i+1}$.
+
+Relaţia de recurenţă este:
+$$x_{i+1}=x_{i}-\frac{f(x_{i})}{f^{'}(x_{i})}$$
+
+Se poate arăta că eroarea la iteraţia curentă este proporţională cu pătratul erorii la iteraţia precedentă, ceea ce, aproximativ, înseamnă că la fiecare iteraţie numărul de zecimale corect calculate din rădăcină se dublează.
+
+\textit{Metoda aproximaţiilor succesive}
+
+În cazul acestei metode, ecuaţia $f(x)=0$ se rescrie ca $x=g(x)$, ceea ce are avantajul de a furniza o formulă prin care se poate calcula o nouă valoare a lui $x$ ca o funcţie $g$ aplicată vechii valori a lui $x$, adică:
+$$x_{i+1}=g(x_{i})$$
+
+Această metodă converge liniar (eroarea la pasul $i$ este proporţională cu eroarea la pasul $i-1$ inmulţită cu un factor subunitar) dacă $\left |g^{'}(x)  \right |<1,  \forall x\in (a,b)$. Altfel, metoda este divergentă.
+
+\subsection{Rădăcinile polinoamelor}
+
+Fie $p$ un polinom de grad $n$, $p(x)= a_{n}x^{n}+a_{n-1}x^{n-1}+a_{n-2}x^{n-2}+...+a_{1}x+a_{0}, \: cu \: a_{n}\neq 0$.
+Conform cu \textit{teorema fundamentală a algebrei}, polinomul $p$ are $n$ rădăcini reale sau complexe (numărând şi multiplicităţile). În cazul în care coeficienţii $a_{i}$ sunt toţi reali,  rădăcinile complexe apar conjugate (de forma $c+id$ şi $c-id$).
+
+Folosind regula semnelor a lui Descartes, putem număra câte rădăcini reale pozitive are polinomul $p$. Fie $v$ numărul variaţiilor de semn ale coeficienţilor $a_{n}, a_{n-1}, a_{n-2},.., a_{1},a_{0}$, ignorând coeficienţii care sunt nuli. Fie $n_{p}$ numărul de rădăcini pozitive. Avem următoarele două relaţii:
+
+1) $n_{p}\leq v;$
+
+2) $v-n_{p}$ este un număr par.
+
+Analog, numărul de rădăcini reale negative ale lui $p(x)$ se obţine folosind numărul de schimbări de semn ale coeficienţilor polinomului  $p(-x)$.
+Pentru determinarea rădăcinilor se pot aplica metodele descrise anterior la punctul $b)$, dacă nu se cunoaşte localizarea rădăcinilor pe intervale.
+
+
+\subsection{Lucrul cu polinoame în Octave}
+
+În Octave, un polinom este reprezentat prin coeficienţii săi (în ordine descrescătoare). Vectorul
+\begin{verbatim}
+> p = [-2, -1, 0, 1, 2]
+\end{verbatim}
+
+\noindent  reprezintă polinomul $-2x^{4}-x^{3}+x+2.$
+
+Funcţia $polyout$ generează o reprezentare a funcţiei de o variabilă dată (de exemplu $x$)
+\begin{verbatim}
+> polyout(p,'x')
+\end{verbatim}
+
+\noindent  are ca rezultat $ -2*x^4 - 1*x^3 + 0*x^2 + 1*x^1 + 2$.
+
+Evaluarea unui polinom:
+\begin{verbatim}
+> y = polyval(p, x)
+\end{verbatim}
+
+\noindent  returnează $p(x)$. Dacă $x$ este vector sau matrice, polinomul este evaluat în fiecare dintre elementele lui $x$.
+
+Înmulţirea a două polinoame:
+\begin{verbatim}
+> r = conv(p, q)
+\end{verbatim}
+
+\noindent  returnează un vector $r$ care conţine coeficienţii produsului dintre $p$ şi $q$.
+
+Împărţire a două polinoame:
+\begin{verbatim}
+> [b, r] = deconv(y, a)
+\end{verbatim}
+
+\noindent returnează coeficienţii polinoamelor $b$ şi $r$ a.î. $y=ab+r$, unde $b$ este câtul şi $r$ este restul împărţirii.
+
+Rădăcinile unui polinom:
+\begin{verbatim}
+> roots(p)
+\end{verbatim}
+
+\noindent returnează un vector ce conţine toate rădăcinile polinomului $p$.
+
+Derivata  unui polinom:
+\begin{verbatim}
+> q = polyder(p)
+\end{verbatim}
+
+\noindent returnează un vector ce conţine coeficienţii derivatei polinomului $p$.
+
+Integrarea  unui polinom:
+\begin{verbatim}
+> q = polyint(p)
+\end{verbatim}
+
+\noindent returnează un vector ce conţine coeficienţii rezultaţi din integrarea polinomului $p$.
+
+Polinomul de interpolare de gradul $n$ care aproximează setul de date $(x,y)$:
+\begin{verbatim}
+> p = polyfit(x, y, n)
+\end{verbatim}
+
+\textit{Exemplu: Adunarea polinoamelor}
+
+Presupunem că dorim să adunăm polinoamele $p(x)=x^{2}-1$ şi $q(x)=x+1$. Următoarea încercare va da eroare:
+\begin{verbatim}
+> p = [1, 0, -1]; 
+> q = [1, 1]; 
+> "p + q error: operator +: nonconformant arguments (op1 is 1x3, op2 is 1x2)
+error:evaluating binary operator `+' near line 22, column 3"
+\end{verbatim}
+
+Operaţia de adunare a doi vectori de dimensiuni diferite în Octave dă eroare. Pentru a evita aceasta, trebuie adăugate zerouri la $q$.
+\begin{verbatim}
+> q = [0, 1, 1]; 
+> p + q 
+ans = 1 1 0 
+> polyout(ans, 'x') 
+1*x^2 + 1*x^1 + 0
+\end{verbatim}
+
+%----------------------------------------------------------------------------------------
+\subsection{Sisteme de ecuații neliniare}
+Un sistem de ecuaţii neliniare are forma:
+
+$$\left\{
+	\begin{array}{lll}
+		f_{1}(x_{1},x_{2},x_{3},...,x_{n-1},x_{n})=0 \\
+		f_{2}(x_{1},x_{2},x_{3},...,x_{n-1},x_{n})=0 \\
+		...                                          \\
+		f_{n}(x_{1},x_{2},x_{3},...,x_{n-1},x_{n})=0 \\
+	\end{array}
+	\right.$$
+
+\noindent  unde $f_{i}$ reprezintă funcţii cunoscute de $n$ variabile $x_{1}, x_{2}, ..., x_{n}$, presupuse continue, împreună cu derivatele lor parţiale până la un ordin convenabil (de obicei, până la ordinul doi). Se va urmări găsirea soluţiilor reale ale sistemului într-un anumit domeniu de interes, domeniu în care se consideră valabile proprietăţile de continuitate impuse funcţiilor $f_{i}$ şi derivatelor lor. Rezolvarea sistemului este un proces iterativ în care se porneşte de la o aproximaţie iniţială pe care algoritmul o va îmbunătăţi până ce se va îndeplini o condiţie de convergenţă. În cazul de faţă, localizarea apriori a soluţiei nu mai este posibilă (nu există o metodă analoagă metodei înjumătăţirii intervalelor).
+
+\textit{Metoda Newton}
+
+Pentru simplificarea notaţiei, considerăm $F=\left(\begin{array}{c}f_{1}\\f_{2}\\f_{3}\\...\\f_{n} \end{array}\right)$ şi $x=(x_{1},x_{2},...,x_{n})$. Sistemul îl putem rescrie ca $F(x)=0$.
+Notăm cu $x^{(k)}$ estimarea la pasul $k$ a soluţiei $x^{*}$, deci $F(x^{*})=0$.
+
+Se poate deduce relaţia:
+$$x^{(k+1)} = x^{(k)} - J^{-1}F(x^{(k)}), k=0,1,2,... $$
+
+\noindent  unde $J$ este matricea \textit{Jacobiană}
+\[J=  \left( \begin{array}{ccc}
+			\frac{\partial F_{1}}{ \partial x_{1}} & ...   & \frac{\partial F_{1}}{ \partial x_{n}} \\
+			{...}                                  & {...} & {...}                                  \\
+			\frac{\partial F_{n}}{ \partial x_{1}} & ...   & \frac{\partial F_{n}}{ \partial x_{n}}
+		\end{array} \right)\]
+
+Dacă matricea $J$ este neinversabilă, atunci pasul este nedefinit. Vom presupune că $J(x^*)$ este inversabilă, iar continuitatea lui $J$ va asigura că $J(x^{(k)})$ este inversabilă pentru orice $x^{(k)}$ suficient de apropiat de $x^*$.
+Secvenţa definită iterativ converge spre solutia $x^*$.
+Condiţia de oprire la iteraţia $k$, $\left \|x^{*}-x^{(k)}  \right \|<tol$, unde $tol$ este o toleranţă dată, se poate arăta că revine la $\left \|x^{(k)}-x^{(k-1)}  \right \|<tol.$
+
+\section{Probleme rezolvate}
+
+\subsection{Problema 1}
+
+Scrieţi o funcţie Octave care primeşte ca parametri $a$, $b$ (capetele intervalului în care se află soluţia reală), $tol$ (toleranţa), respectiv un handler la funcţia care defineşte ecuaţia neliniară de rezolvat şi o rezolvă prin metoda bisecţiei.
+
+\textit{Soluţie:}
+
+\octavescript{./src/bisect.m}{Metoda bisecţiei.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}                  & \textbf{Date de ieşire:} \\
+		$a = 1, b = 2, @ecuatie, tol = 10 ^ {-10}$ & $sol = 1.6038$           \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Handler-ul care defineşte funcţia este:
+
+\octavescript{./src/ecuatie.m}{Handler funcţie.}
+
+%\end{Problem}
+
+\subsection{Problema 2}
+Scrieţi o funcţie Octave care să rezolve o ecuaţie neliniară folosind metoda secantei. Parametrii pe care îi primeşte funcţia sunt: $a$, $b$ (capetele intervalului în care se află soluţia reală), $tol$ (toleranţa), respectiv un handler la funcţia care defineşte ecuaţia de rezolvat.
+
+\textit{Soluţie:}
+
+\octavescript{./src/secanta.m}{Regula secantei.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}                 & \textbf{Date de ieşire:} \\
+		$a = 1, b = 2, @ecuatie, tol = 10 ^ {-5}$ & $sol = 1.6038$           \\
+		\hline
+	\end{tabular}
+\end{center}
+
+%\end{Problem}
+
+\subsection{Problema 3}
+Scrieţi o funcţie Octave care să rezolve o ecuaţie neliniară  prin metoda tangentei. Parametrii pe care îi primeşte funcţia sunt: $x_0$ (aproximaţia iniţială a soluţiei), $tol$ (toleranţa), respectiv un handler la funcţia care defineşte ecuaţia de rezolvat şi un handler la derivata acesteia.
+
+\textit{Soluţie:}
+
+\octavescript{./src/tangenta.m}{Metoda tangentei.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}                    & \textbf{Date de ieşire:} \\
+		$x_0 = 0, @ecuatie, @ecDer, tol = 10 ^ {-5}$ & $sol = 1.6038$           \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Handler-ul care defineşte derivata funcţiei:
+
+\octavescript{./src/ecDer.m}{Handler pentru derivata funcţiei.}
+%\end{Problem}
+
+\subsection{Problema 4}
+Scrieţi o funcţie Octave care să rezolve o ecuaţie neliniară  prin metoda aproximaţiilor succesive. Parametrii pe care îi primeşte funcţia sunt: $x_0$ (aproximaţia iniţială a soluţiei), $tol$ (toleranţa), respectiv un handler la funcţia care defineşte ecuaţia de rezolvat.
+
+\textit{Soluţie:}
+
+\octavescript{./src/aprox_succesive.m}{Metoda aproximaţiilor succesive.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}            & \textbf{Date de ieşire:} \\
+		$x_0 = 0, @ecuatie, tol = 10 ^ {-5}$ & $sol = 1.6038$           \\
+		\hline
+	\end{tabular}
+\end{center}
+%\end{Problem}
+
+\section{Probleme propuse}
+
+\subsection{Problema 1}
+Să se determine tipul (dacă sunt reale pozitive sau negative, complexe) rădăcinilor polinomului $p(x)=3x^{6}+x^{4}-2x^{3}-5$.
+%\end{Problem}
+
+\subsection{Problema 2}
+Să se scrie în Octave un program care rezolvă un sistem de ecuaţii neliniare prin metoda Newton. Ca intrare, se consideră un vector coloană care reprezintă $x^{(0)}$, un pointer (handler) la o funcţie care evaluează $F$ într-un vector generic $x$, un pointer la o funcţie care calculează Jacobiana într-un vector generic $x$, o toleranţă dată $\epsilon$. Metoda se opreşte atunci când  $\left \| x^{(k)}-x^{(k-1)} \right \|< \epsilon$ şi returnează vectorul soluţie $x^{*}$ şi numărul de iteraţii $n$ care au fost necesare pentru producerea soluţiei.
+%\end{Problem}
+
+\end{document}
