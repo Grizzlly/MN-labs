@@ -1,0 +1,309 @@
+\documentclass{exam}
+
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
+	columns=fullflexible,
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
+	%   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
+	%   numbersep=6pt,						% how far the line-numbers are from the code
+	%   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\newcommand{\octavescript}[2]{
+	\lstinputlisting[caption=#2,label=#1]{#1}
+}
+
+\newcommand{\MNLab}{Laborator\ \#14}
+\newcommand{\MNLabTitle}{Metode predictor-corector pentru integrarea ecuaţiilor diferenţiale}
+\newcommand{\MNLabTitleHeader}{Metode predictor-corector}
+\newcommand{\MNAuthor}{Andrei STAN, Dumitru-Clementin Cercel, Florin Pop}
+
+\renewcommand{\contentsname}{Cuprins}
+\renewcommand{\figurename}{Figura}
+
+\setlength{\parskip}{0.5\baselineskip}
+
+\graphicspath{{./img/}}
+
+\title{
+	\textmd{\textbf{\MNLabTitle}}
+	\author{Colaboratori: \MNAuthor}
+}
+
+\pagestyle{headandfoot}
+
+\header{Metode Numerice}
+{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{2025}
+\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+
+\begin{document}
+
+\begin{coverpages}
+
+	\maketitle
+	\tableofcontents
+
+\end{coverpages}
+
+\section{Obiective laborator}
+
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
+\begin{itemize}
+	\item găsească soluţia unei ecuaţii diferenţiale utilizând metoda predictor-corector;
+	\item compare metodele de rezolvare a ecuaţiilor diferenţiale, prezentând avantajele şi dezavantajele acestor metode.
+\end{itemize}
+
+\section{Noţiuni teoretice}
+
+Metodele cu paşi separaţi sunt utilizate datorită simplităţii lor şi a faptului că necesită puţine informaţii iniţiale. Ele au dezavantajul lipsei de precizie.
+
+O altă categorie de metode folosite pentru rezolvarea ecuaţiilor diferenţiale şi a sistemelor de ecuaţii diferenţiale este reprezentată de \textit{metodele cu paşi legaţi }(numite şi \textit{metode multipas}). Metodele cu paşi legaţi folosesc mai multe informaţii iniţiale deci sunt mai precise decât metodele cu paşi separaţi. Există două tipuri de metode cu paşi legaţi: \textit{metode explicite} şi \textit{metode implicite}. În cele ce urmează, folosim notaţia: $y_k=y(x_k)$ şi $f_k=f(x_k, y_k) $.
+
+O metodă explicită, cunoscută sub numele de metoda Adams-Bashforth, are forma:
+$$y_{k+1} = y_{k} + h \sum_{j=0}^{r} {c_{j}} \nabla^{j}f_{k}$$
+
+O metodă implicită, cunoscută sub numele de metoda Adams-Moulton, are forma:
+$$y_{k+1} = y_{k} + h \sum_{j=0}^{r} {d_{j}} \nabla^{j}f_{k+1}$$
+
+Numărul $r$ defineşte ordinul metodei cu paşi legaţi. Dezvoltând diferenţele regresive se obţine o recurenţă liniară, general valabilă pentru metodele cu paşi legaţi, de forma:
+$$y_{k+1} = \sum_{j=0}^{r-1}{ \alpha_{j} y_{k-j} } + h \sum_{j=-1}^{r-1}{ \beta_{j} f_{k-j}}$$
+
+\noindent unde dacă $\beta_{-1}$ = 0 se obţine relaţia pentru metoda Adams-Bashforth, altfel se obţine relaţia pentru metoda Adams-Moulton. Pentru a determina coeficienţii ${\alpha_j}, {\beta_j}$, vom impune condiţia următoare: soluţia exactă $y(x)$ a relaţiei generale pentru metodele cu paşi legaţi să fie adevarată pentru polinoamele $1,x, x^2,...$. Mai mult, se aleg punctele intermediare $x_{k-r+1}, ..., x_{k+1}$ echidistante cu $h = 1$ şi originea în $x_{k-r+1}$.
+
+Prin îmbinarea unei metode explicite cu una implicită se obţin \textit{metode predictor-corector}. Metodele predictor-corector presupun folosirea metodei explicite pentru predicţia unei valori $y_{k+1}$ iar aceasta valoare se corecteză, ulterior, prin metoda implicită.
+
+Astfel, putem aplica metoda Adams-Bashforth de ordin 3 pentru a calcula $y_{k+1}^{(p)}$ ($y_{k+1}$ prezis, de unde provine şi superscriptul $(p)$):
+$$y_{k+1}^{(p)} = y_{k} + \frac{h}{12}(23 f_{k} - 16 f_{k-1} + 5 f_{k-2} )$$
+
+Mai departe, putem corecta valoarea $y_{k+1}^{(p)}$ folosind metoda Adams-Moulton de ordin 2 şi se obţine $y_{k+1}^{(c)}$ ($y_{k+1}$ corectat, de unde provine şi superscriptul $(c)$):
+$$y_{k+1}^{(c)} = y_{k} + \frac{h}{12}[5f(x_{k+1}, y_{k+1}^{(p)}) + 8f_{k} - f_{k-1}]$$
+
+%----------------------------------------------------------------------------------------
+%	PROBLEMA 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\section{Probleme rezolvate}
+
+\subsection{Problema 1}
+
+Determinaţi coeficienţii formulelor explicite şi implicite de tip Adams, de ordin 3.
+
+\textit{Soluţie:}
+
+Metoda Adams-Bashforth de ordin 3 are forma:
+$$y_{k+1}=y_{k}+h(\beta_{0}f_{k}+\beta_{1}f_{k-1}+\beta_{2}f_{k-2})$$
+
+Pentru început, alegem punctele: $x_{k-2}=0,x_{k-1}=1,x_{k}=2,x_{k+1}=3$ cu $h=1$. Dorim ca formula să fie exactă pentru polinoamele $1, x, x^2, x^3$. Prin urmare, obţinem:
+
+$y=1 \Rightarrow f = y^{'} =0 \Rightarrow 1 = 1 $
+
+$y=x \Rightarrow f = y^{'} =1 \Rightarrow 3 = 2 + (\beta_{0}+\beta_{1}+\beta_{2}) \Rightarrow \beta_{0} + \beta_{1} + \beta_{2}= 1$
+
+$y=x^2 \Rightarrow f = y^{'} =2x \Rightarrow 3^2 = 2^2 + (4\beta_{0}+2\beta_{1}) \Rightarrow 4\beta_{0}+2\beta_{1}= 5 $
+
+$y=x^3 \Rightarrow f = y^{'} =3x^2 \Rightarrow 3^3 = 2^3 + (12\beta_{0}+3\beta_{1}) \Rightarrow 12\beta_{0}+3\beta_{1}= 19$
+
+Se formează sistemul:
+\begin{center}
+	$\left\{
+		\begin{array}{ll}
+			\beta_{0} + \beta_{1} + \beta_{2}= 1 \\
+			4\beta_{0}+2\beta_{1}= 5             \\
+			12\beta_{0}+3\beta_{1}= 19
+		\end{array}
+		\right.$
+\end{center}
+
+\noindent cu soluţia $\beta_{0} = \frac{23}{12}, \beta_{1} = \frac{-4}{3},  \beta_{2} = \frac{5}{12}$.
+
+Astfel, obţinem forma finală pentru metoda Adams-Bashforth de ordin 3:
+$$y_{k+1}=y_{k}+\frac{h}{12}(23f_{k}-16f_{k-1}+5f_{k-2})$$
+
+Metoda implicită Adams-Moulton de ordin 3 are forma:
+$$y_{k+1}=y_{k}+h(\beta_{-1}f_{k+1}+\beta_{0}f_{k}+\beta_{1}f_{k-1}+\beta_{2}f_{k-2})$$
+
+Alegem punctele: $x_{k-2}=0,x_{k-1}=1,x_{k}=2,x_{k+1}=3$ cu $h=1$. Dorim ca formula să fie exactă pentru polinoamele $1, x, x^2, x^3, x^4$. Prin urmare, obţinem:
+
+$y=1 \Rightarrow f = y^{'} =0 \Rightarrow 1 = 1$
+
+$y=x \Rightarrow f = y^{'} =1 \Rightarrow 3 = 2 + (\beta_{-1}+\beta_{0}+\beta_{1}+\beta_{2}) \Rightarrow \beta_{-1}+\beta_{0}+\beta_{1}+\beta_{2}= 1 $
+
+$y=x^2 \Rightarrow f = y^{'} =2x \Rightarrow 3^2 = 2^2 + (6\beta_{-1}+4\beta_{0}+2\beta_{1}) \Rightarrow 6\beta_{-1}+4\beta_{0}+2\beta_{1}= 5$
+
+$y=x^3 \Rightarrow f = y^{'} =3x^2 \Rightarrow 3^3 = 2^3 + (27\beta_{-1}+12\beta_{0}+3\beta_{1}) \Rightarrow 27\beta_{-1}+12\beta_{0}+3\beta_{1} = 19$
+
+$y=x^4 \Rightarrow f = y^{'} =4x^3 \Rightarrow 3^4 = 2^4 + (108\beta_{-1}+32\beta_{0}+4\beta_{1}) \Rightarrow 108\beta_{-1}+32\beta_{0}+4\beta_{1}=65$
+
+Se formează sistemul:
+\begin{center}
+	$\left\{
+		\begin{array}{ll}
+			\beta_{-1}+\beta_{0}+\beta_{1}+\beta_{2}= 1 \\
+			6\beta_{-1}+4\beta_{0}+2\beta_{1}=5         \\
+			27\beta_{-1}+12\beta_{0}+3\beta_{1} = 19    \\
+			108\beta_{-1}+32\beta_{0}+4\beta_{1}=65
+		\end{array}
+		\right.$
+\end{center}
+
+\noindent cu soluţia $\beta_{-1} = \frac{9}{24}, \beta_{0} = \frac{19}{24},  \beta_{1} = \frac{-5}{24},  \beta_{2} = \frac{1}{24}$.
+
+Atunci, forma finală pentru metoda Adams-Moulton de ordin 3 este:
+$$y_{k+1}=y_{k}+\frac{h}{24}(9f_{k+1}+19f_{k}-5f_{k-1}-f_{k-2})$$
+
+%\end{Problem}
+
+\subsection{Problema 2}
+
+Pentru rezolvarea problemei diferenţiale cu condiţii iniţiale: $y{'} = f(x, y), y(x_{0}) = y_{0}$, se foloseşte următoarea formulă explicită, respectiv implicită:
+$$y_{k+1}= y_{k-1} + h \sum_{j=0}^{2} {\beta_{j}f_{k-j}}$$
+$$y_{k+1}= y_{k-1} + h \sum_{j=0}^{2} {\beta_{j}f_{k+1-j}}$$
+
+a) Determinaţi coeficienţii $\beta$ astfel încât formulele să aibă gradul de valabilitate maxim.
+
+b) Definiţi o metodă predictor-corector folosind aceste formule.
+
+\textit{Soluţie:}
+
+a) Pentru formula:
+$$y_{k+1}=y_{k-1}+h(\beta_{0}f_{k}+\beta_{1}f_{k-1}+\beta_{2}f_{k-2})$$
+
+\noindent alegem punctele: $x_{k-2}=0,x_{k-1}=1,x_{k}=2,x_{k+1}=3$ cu $h=1$. Dorim ca formula să fie exactă pentru polinoamele $1, x, x^2, x^3$. Avem:
+
+$y=1 \Rightarrow f = y^{'} =0 \Rightarrow 1 = 1 $
+
+$y=x \Rightarrow f = y^{'} =1 \Rightarrow 3 = 1 + (\beta_{0}+\beta_{1}+\beta_{2}) \Rightarrow \beta_{0} + \beta_{1} + \beta_{1}= 2 $
+
+$y=x^2 \Rightarrow f = y^{'} =2x \Rightarrow 3^2 = 1^2 + (4\beta_{0}+2\beta_{1}) \Rightarrow 4\beta_{0}+2\beta_{1}= 8 $
+
+$y=x^3 \Rightarrow f = y^{'} =3x^2 \Rightarrow 3^3 = 1^3 + (12\beta_{0}+3\beta_{1}) \Rightarrow 12\beta_{0}+3\beta_{1}= 26 $
+
+Sistemul obţinut are soluţia $ \beta_{0} = \frac{7}{3}, \beta_{1} = \frac{-2}{3}, \beta_{2} = \frac{1}{3}$. Prin urmare, prima formulă are forma:
+$$y_{k+1}=y_{k-1}+\frac{h}{3}(7f_{k}-2f_{k-1}+f_{k-2})$$
+
+Pentru formula:
+$$y_{k+1}=y_{k-1}+h(\beta_{0}f_{k+1}+\beta_{1}f_{k}+\beta_{2}f_{k-1})$$
+
+\noindent alegem punctele: $x_{k-2}=0,x_{k-1}=1,x_{k}=2,x_{k+1}=3$ cu $h=1$. Dorim ca formula să fie exactă pentru polinoamele $1, x, x^2, x^3$. Avem:
+
+$y=1 \Rightarrow f = y^{'} =0 \Rightarrow 1 = 1 $
+
+$y=x \Rightarrow f = y^{'} =1 \Rightarrow 3 = 1 + (\beta_{0}+\beta_{1}+\beta_{2}) \Rightarrow \beta_{0} + \beta_{1} + \beta_{1}= 2 $
+
+$y=x^2 \Rightarrow f = y^{'} =2x \Rightarrow 3^2 = 1^2 + (6\beta_{0}+4\beta_{1}+2\beta_{2}) \Rightarrow 6\beta_{0}+4\beta_{1}+2\beta_{2}= 8 $
+
+$y=x^3 \Rightarrow f = y^{'} =3x^2 \Rightarrow 3^3 = 1^3 + (27\beta_{0}+12\beta_{1}+3\beta_{2}) \Rightarrow 27\beta_{0}+12\beta_{1}+3\beta_{2}= 26$
+
+Sistemul obţinut are soluţia $ \beta_{0} = \frac{1}{3}, \beta_{1} = \frac{4}{3}, \beta_{2} = \frac{1}{3}$. Prin urmare, a doua formulă are forma:
+$$y_{k+1}=y_{k-1}+\frac{h}{3}(f_{k+1}+4f_{k}+f_{k-1})$$
+
+b) Formula explicită furnizează predicţia:
+$$y_{k+1}^{(p)} = y_{k-1} + \frac{h}{3}(7 f_{k} - 2 f_{k-1} + f_{k-2} )$$
+
+iar formula implicită corectează această valoare, astfel:
+$$y_{k+1}^{(c)} = y_{k-1} + \frac{h}{3}[
+		f(x_{k+1}, y_{k+1}^{(p)}) + 4f_{k} + f_{k-1}]$$
+
+%\end{Problem}
+
+\subsection{Problema 3}
+
+Scrieţi o funcţie OCTAVE care să rezolve o ecuaţie diferenţială de ordin 1 folosind metoda predictor-corector obţinută prin îmbinarea unei metode Adams-Bashforth de ordin 3 cu o metoda Adams-Moulton de ordin 2 (vezi secţiunea \textit{Noţiuni teoretice}). Valorile iniţiale ale soluţiei se vor aproxima folosind metoda Runge-Kutta de ordin 4. Funcţia va avea următorii parametrii de intrare: $a, b$ - capătul superior, respectiv inferior al intervalului de integrare; $n$ - numărul de puncte; $y0$ - condiţia iniţială; $f$ - funcţia de integrat $f(x,y)$. Rezultatul funcţiei va fi $y$, reprezentând vectorul aproximaţiilor soluţiei ecuaţiei diferenţiale.
+
+\textit{Soluţie:}
+
+\octavescript{./src/pred_corector3.m}{Metoda predictor-corector.}
+
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		\textbf{Date de intrare:}                   & \textbf{Date de ieşire:} \\
+		$a = 0, b = 3, n = 10, y0 = 0.5,  @functie$ &
+		$y = $
+		$
+			\begin{bmatrix}
+				0.5       \\
+				0.213770  \\
+				-0.079085 \\
+				-0.431703 \\
+				-0.903119 \\
+				-1.557205 \\
+				-2.445785 \\
+				-3.571678 \\
+				-4.841284 \\
+				-6.043362 \\
+				-6.899990 \\
+			\end{bmatrix}
+		$
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+
+\noindent unde am considerat funcţia $f(x,y)$ definită astfel:
+\octavescript{./src/functie.m}{Exemplu de funcţie de integrat.}
+
+%\end{Problem}
+
+%----------------------------------------------------------------------------------------
+%	PROBLEME PROPUSE
+%----------------------------------------------------------------------------------------
+
+\section{Probleme propuse}
+
+\subsection{Problema 1}
+
+Pentru problema diferenţială cu condiţii iniţiale: $y{'} = f(y, t), y(t_{0}) = y_{0}$, se consideră formula aproximativă de integrare:
+$$y_{k+1} = y_{k} + h (\alpha_{1} y'_{k+1} + \alpha_{0} y'_{k}) + h^{2}(\beta_{1}y''_{k+1} + \beta_{0}y''_{k})$$
+
+Determinaţi $\alpha_{0}, \alpha_{1}, \beta_{0}$ şi $\beta_{1}$ astfel încât formula să aibă gradul de valabilitate cât mai mare.
+
+%\end{Problem}
+
+\subsection{Problema 2}
+Pentru problema diferenţială cu condiţii iniţiale: $y{'} = f(y, t)$, $y(t_{0}) = y_{0}$:
+
+a) Calculaţi coeficienţii formulelor explicite şi implicite de tip Adams, de ordin 2.
+
+b) Definiţi cu cele două formule o metodă predictor-corector şi scrieţi o funcţie în OCTAVE care implementează această metodă.
+
+%\end{Problem}
+
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
