@@ -18,32 +18,32 @@
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
 
 \lstset{ %
-  backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
-  breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
-  breaklines=true,					% sets automatic line breaking
-  captionpos=b,						% sets the caption-position to bottom
+	backgroundcolor=\color{white},		% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\small\ttfamily,		% the size of the fonts that are used for the code
+	breakatwhitespace=false,			% sets if automatic breaks should only happen at whitespace
+	breaklines=true,					% sets automatic line breaking
+	captionpos=b,						% sets the caption-position to bottom
 	columns=fullflexible,
-  commentstyle=\color{mygreen},		% comment style
-  deletekeywords={...},				% if you want to delete keywords from the given language
-  escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
-  extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-  frame=single,						% adds a frame around the code
-  keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  keywordstyle=\color{blue},			% keyword style
-  language=Octave,					% the language of the code
-  morekeywords={*,...},				% if you want to add more keywords to the set
+	commentstyle=\color{mygreen},		% comment style
+	deletekeywords={...},				% if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},			% if you want to add LaTeX within your code
+	extendedchars=true,				% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,						% adds a frame around the code
+	keepspaces=true,					% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},			% keyword style
+	language=Octave,					% the language of the code
+	morekeywords={*,...},				% if you want to add more keywords to the set
 %   numbers=left,						% where to put the line-numbers; possible values are (none, left, right)
 %   numbersep=6pt,						% how far the line-numbers are from the code
 %   numberstyle=\tiny\color{mygray},	% the style that is used for the line-numbers
-  rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
-  showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
-  showstringspaces=false,			% underline spaces within strings only
-  showtabs=false,					% show tabs within strings adding particular underscores
-  stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
-  stringstyle=\color{mymauve},		% string literal style
-  tabsize=2,							% sets default tabsize to 2 spaces
-  title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
+	rulecolor=\color{black},			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,					% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,			% underline spaces within strings only
+	showtabs=false,					% show tabs within strings adding particular underscores
+	stepnumber=1,						% the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},		% string literal style
+	tabsize=2,							% sets default tabsize to 2 spaces
+	title=\lstname						% show the filename of files included with \lstinputlisting; also try caption instead of title
 }
 
 % Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
@@ -52,12 +52,13 @@
 }
 
 \newcommand{\MNLab}{Laborator\ \#3}
-\newcommand{\MNLabTitle}{Ortogonalitate. Transformări ortogonale. Polinoame ortogonale.}
+\newcommand{\MNLabTitle}{Ortogonalitate. Transformări ortogonale.}
 \newcommand{\MNLabTitleHeader}{Ortogonalitate} 
 \newcommand{\MNAuthor}{Andrei STAN, Mihaela-Andreea Vasile, Florin Pop}
 
 \renewcommand{\contentsname}{Cuprins}
 \renewcommand{\figurename}{Figura}
+\renewcommand{\refname}{Referințe}
 
 \setlength{\parskip}{0.5\baselineskip}
 
@@ -296,7 +297,6 @@ unitară/ortogonală are următoarele proprietăți:
 	\item valorile proprii se află pe cercul unitate;
 	\item vectorii proprii sunt ortogonali;
 	\item $det(A) = \pm 1$;
-	\item conservă norma vectorilor: $||Ax|| = ||x||$;
 	\item $||A||_2 = 1$;
 	\item conservă produsul scalar: $(Ax)^*(Ay) = x^*A^*Ay = x^*y$;
 \end{itemize}
@@ -395,20 +395,134 @@ reflectorului Householder, prin normalizare:
 	P = I - 2 \frac{d d^T}{d^T d}
 \end{equation*}
 
+\par \textbf{Afirmație.} $P$ este ortogonală.
+
+\par \textbf{Demonstrație.} $P^TP = (I - 2 d d^*)^*(I - 2 d d^*) = I - 2 d d^* - 2 d d^* + 4 d d^* d d^* = I - 4 d d^* + 4 d d^* = I$. $\blacksquare$
+
 \par \textbf{Cum găsim $d$ pentru a introduce 0-uri?}
 
-\par Ne dorim să găsim o matrice $P$ astfel încât $P v = \pm ||v|| e_1$. Mai
-mult, $v + d = \pm P v$. Astfel, considerăm $d = v \pm ||v|| e_1$.
+\par Cum $P$ este ortognală, știm că $||Pv||_2 = ||v||_2$. Astfel, ne dorim ca $Pv = \pm ||v||_2 e_1$.
 
-\par \textbf{Exemplu.} Fie matricea $A = \begin{bmatrix} 1 & 3 \\ 10^{-8} & 4 \end{bmatrix}$.
-Ne dorim să o aducem la o formă superior triunghiulară, deci am avea nevoie de
-un 0 în colțul din stânga jos. Alegem $d = \begin{bmatrix} 1 \\ 10^{-8} \end{bmatrix} - ||\begin{bmatrix} 1 \\ 10^{-8} \end{bmatrix}|| e_1
-	\approxeq \begin{bmatrix} 0 \\ 10^{-8} \end{bmatrix} $. Astfel,
+\begin{align*}
+	v + d & = P v                                                                        \\
+	v + d & = \pm ||v||_2 e_1                                                            \\
+	d     & = \pm ||v||_2 e_1 - v, \text{cum semnul lui } d \text{ nu contează, alegem } \\
+	d     & = v \pm ||v||_2 e_1
+\end{align*}
+
+\par \textbf{Plus sau minus?} Răspunsul îl putem găsi efectuând puțină analiză
+numerică, fără a demonstra nimic formal de data asta. Plecăm de la următoarea
+întrebare: Este bine ca $Pv$ și $v$ să fie apropiate?
+
+\par Știind că calculul numeric nu este perfect, putem presupune că nici
+reflexia nu va fi perfectă. Problema este că dacă $\mathbf{v}$ este deja foarte
+aproape de axe, e foarte posibil ca $\mathbf{Pv}$ să fie chiar mai departe de
+aceasta.
+
+\par În schimb, dacă $\mathbf{v}$ și reflexia acestuia sunt depărtate,
+eroare poate fi neglijabilă.
+
+\par Ne dorim ca $||v - \alpha ||v||_2 e_1||_2$ să fie maximă, unde
+$\alpha = \pm 1$. Considerăm doar cazul numerelor reale.
+
+\begin{align*}
+	||v - \alpha ||v||_2||_2 = (v - \alpha ||v||_2 e_1)^T (v - \alpha ||v||_2 e_1) & = (v - \alpha ||v||_2 e_1)^T(v - \alpha ||v||_2 e_1)           \\
+	                                                                               & = v^Tv - 2 \alpha ||v||_2 v^Te_1 + \alpha^2 ||v||_2^2 e_1^Te_1 \\
+	                                                                               & = v^Tv - 2 \alpha ||v||_2 v_1 + ||v||_2^2
+\end{align*}
+
+\par Cum $v^Tv$ și $||v||_2^2$ sunt constante, trebuie să găsim maximul
+termenului $- \alpha ||v||_2 v_1$, mai precis $- \alpha v_1$. Cum $\alpha$ poate fi
+doar 0 sau 1, rezultă imediat că $\alpha = -sign(v_1)$.
+
+\newpage
+\par În figura de mai jos (figura \ref{fig:5}), avem un grafic al
+$||A - QR||_2 / ||A||_2$. Au fost generate 1000 de teste, deci avem 1000 de puncte pe
+grafic. În fiecare test s-a generat o matrice 3x3 aleatorie iar prima sa coloană
+a fost înlocuită cu $\begin{bmatrix} 1 & \delta & 0 \end{bmatrix}^T$, unde
+$\delta$ lua 17 valori între $10^{-16}$ și $1$. Cu albastru avem cazul când
+alegem semnul ca mai sus, iar cu roșu când alegem semnul opus.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{hbad}
+	\caption{Eroarea relativă}
+	\label{fig:5}
+\end{figure}
+
+\par Se poate observa că eroarea relativă, în medie, mai mică atunci când alegem
+semnul bine.
+
+\par \textbf{Anulare catastrofală.} Având o precizie limitată în calculul
+numeric, se pare că diferența a două aproximari a unor numere foarte apropiate
+poate duce la o aproximare foarte rea.
+
+\par \textbf{Demonstrație.} Fie aproximările $\overline{x}$ și $\overline{y}$,
+cu erorile relative $\epsilon_x = \frac{x - \overline{x}}{x}$ și $\epsilon_y = \frac{y - \overline{y}}{y}$.
+
+\begin{align*}
+	\overline{x} & = x(1 + \epsilon_x) \\
+	\overline{y} & = y(1 + \epsilon_y)
+\end{align*}
+
+\par Atunci,
+
+\begin{align*}
+	\overline{x} - \overline{y} & = x(1 + \epsilon_x) - y(1 + \epsilon_y) = x - y + x \epsilon_x - y \epsilon_y                           \\
+	                            & = x - y + (x - y) \epsilon_{xy}, \text{unde } \epsilon_{xy} = \frac{x \epsilon_x - y \epsilon_y}{x - y} \\
+	                            & = (x - y)(1 + \epsilon_{xy})
+\end{align*}
+
+\par Numitorul lui $\epsilon_{xy}$ este foarte mic daca $x \approx y$, deci
+eroarea devine foarte mare. $\blacksquare$
+
+\par În concluzie, obținem următoarea formulă pentru $d$: $d = v + sign(v_1) ||v||_2 e_1$.
+
+\par Pentru a oferi un exemplu practic a descompunerii QR cu Householder, mai
+e utilă următoarea informație: putem "umple" vectorul $d$ cu 0-uri în locurile
+unde ne dorim ca vectorii să nu fie afectați. De exmeplu, dacă avem 3 dimensiuni
+și vrem să punem 0 \textbf{doar} pe poziția 3, atunci $d = \begin{bmatrix} 0 \\ v2 - sign(v_2) ||v'||_2 \\ v3 \end{bmatrix}$
+sau $d = \begin{bmatrix} v1 - sign(v_1) ||v'||_2 \\ 0 \\ v3 \end{bmatrix}$, unde $v' = \begin{bmatrix} v2 \\ v3 \end{bmatrix}$,
+respectiv $v' = \begin{bmatrix} v1 \\ v3 \end{bmatrix}$
+
+\par \textbf{Exemplu.} Fie matricea $A_1 = \begin{bmatrix} 2 & 4 & 5 \\ 1 & -1 & 1 \\ 2 & 1 & -1 \end{bmatrix}$.
+Ne dorim să găsim matricea $Q$ și $R$ astfel încât $A = QR$ și $Q$ să fie ortogonală.
+
+\par La prima iterație ne dorim să punem 0-uri pe pozițiile (2, 1) și (3, 1).
 
 \begin{equation*}
-	P = I - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 4/5 & 3/5 \\ 3/5 & -4/5 \end{bmatrix}
+	v = \begin{bmatrix} 2 \\ 1 \\ 2 \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 2 -sign(2) * 3 \\ 1 \\ 2 \end{bmatrix} = \begin{bmatrix} -1 \\ 1 \\ 2 \end{bmatrix}, \quad ||d||_2^2 = 6
 \end{equation*}
 
+\begin{align*}
+	H_1           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{3} \begin{bmatrix} -1 \\ 1 \\ 2 \end{bmatrix} \begin{bmatrix} -1 & 1 & 2 \end{bmatrix}                                        \\
+	H_1           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{3} \begin{bmatrix} 1 & -1 & -2 \\ -1 & 1 & 2 \\ -2 & 2 & 4 \end{bmatrix} = \frac{1}{3} \begin{bmatrix} 2 & 1 & 2 \\ 1 & 2 & -2 \\ 2 & -2 & -1 \end{bmatrix} \\
+	A_2 = H_1 A_1 & = \frac{1}{3} \begin{bmatrix} 2 & 1 & 2 \\ 1 & 2 & -2 \\ 2 & -2 & -1 \end{bmatrix} \begin{bmatrix} 2 & 4 & 5 \\ 1 & -1 & 1 \\ 2 & 1 & -1 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix}
+\end{align*}
+
+\par La a doua iterație ne dorim să punem 0 pe poziția (2, 3).
+
+\begin{equation*}
+	v = \begin{bmatrix} 0 \\ 3 \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 0 \\ -sign(0) * 3 \\ 3 \end{bmatrix} = \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix}, \quad ||d||_2^2 = 18
+\end{equation*}
+
+\begin{align*}
+	H_2           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix} \begin{bmatrix} 0 & -3 & 3 \end{bmatrix}                         \\
+	H_2           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 9 & -9 \\ 0 & -9 & 9 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -1 & 0 \end{bmatrix} \\
+	A_3 = H_2 A_2 & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -1 & 0 \end{bmatrix} \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & -3 & -3 \\ 0 & 0 & -3 \end{bmatrix}
+\end{align*}
+
+\par $A_3$ este matricea $R$, iar $Q = H_1^T H_2^T = H_1 H_2$ este matricea ortogonală.
+
+\subsubsection{Rotații Givens}
+
 \section{Probleme}
+
+\begin{thebibliography}{1}
+
+	\bibitem{MichaelPinze}
+	Michael L. Overton, Pinze Yu. On the choice of sign defining Householder transformations. Numerical Algebra, Control and Optimization, 2025, 15(2): 502-505. doi: 10.3934/naco.2023025
+
+\end{thebibliography}
 
 \end{document}
