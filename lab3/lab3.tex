@@ -192,7 +192,7 @@ liniară. În \ref{fig:1} avem o reprezentare a vectorilor unitari.
 	\label{fig:2}
 \end{figure}
 
-\subsection{Produs scalar. Proiecții.}
+\subsection{Produs scalar}
 
 \par Produsul scalar al unui spațiu vectorial $V$ peste $F$ este o funcție
 $\langle \cdot, \cdot \rangle: V \times V \rightarrow F$ care satisface
@@ -516,7 +516,159 @@ Ne dorim să găsim matricea $Q$ și $R$ astfel încât $A = QR$ și $Q$ să fie
 
 \subsubsection{Rotații Givens}
 
+\par Pentru demonstrarea acestor rotiri ne putem referi foarte simplu la numerele
+complexe. Fără a demonstra, putem identifica orice număr complex de forma $a + bi$
+ca fiind un vector din $\mathbb{R}^2$, $\begin{bmatrix} a \\ b \end{bmatrix}$.
+Înmulțirea acestui număr cu un alt număr complex $c + di$ este echivalentă cu
+înmulțirea vectorului cu matricea $\begin{bmatrix} c & -d \\ d & c \end{bmatrix}$.
+
+\par Știind că $ (\cos \alpha + i \sin \alpha)(\cos \beta + i \sin \beta) = \cos(\alpha + \beta) + i \sin(\alpha + \beta)$,
+și că orice număr complex poate fi scris sub forma $r(\cos \beta + i \sin \beta)$,
+putem deduce că înmulțirea cu matricea $\begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix}$
+rotește vectorii cu un unghi $\theta$, în sens trigonometric. Această matrice
+este una ortognală.
+
+\begin{equation*}
+	\begin{bmatrix} \cos \theta & \sin \theta \\ -\sin \theta & \cos \theta \end{bmatrix} \begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix} = I
+\end{equation*}
+
+Cum $-\sin \theta = \sin(-\theta)$, putem vedea prima matrice din ecuația de mai
+sus ca o rotație cu $-\theta$.
+
+\par Prin aceste rotații, ne dorim același lucru ca și la Householder, să aducem
+vectori de la forma $\begin{bmatrix} x \\ y \end{bmatrix}$ la forma
+$\begin{bmatrix} x' \\ 0 \end{bmatrix}$. Fiind o transformare ortogonală, norma
+vectorilor se păstrează și am avea că $x' = \sqrt{x^2 + y^2}$. Pentru a calcula
+matricea, nu avem nevoie de unghi, ci doar de $\cos$ și $\sin$.
+
+\begin{equation*}
+	\begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix}
+	= \begin{bmatrix} x \cos \theta - y \sin \theta \\ y \cos \theta + x \sin \theta \end{bmatrix}
+	= \begin{bmatrix} \sqrt{x^2 + y^2} \\ 0 \end{bmatrix}
+\end{equation*}
+
+\par Rezolvând acest sistem găsim că $\cos \theta = \frac{x}{\sqrt{x^2 + y^2}}$ și
+$\sin \theta = - \frac{y}{\sqrt{x^2 + y^2}}$.
+
+\par Pentru matrici mai mari, de dorim să găsim o matrice $G$ astfel încât
+
+\begin{equation*}
+	G \begin{bmatrix} a \\ \vdots \\ x \\ \vdots \\ y \\ \vdots \\ z \end{bmatrix} = \begin{bmatrix} a \\ \vdots \\ x' \\ \vdots \\ 0 \\ \vdots \\ z \end{bmatrix}
+\end{equation*}
+
+\par $G$ seamănă foarte mult cu matricea identitate și se numește matricea Givens.
+
+\begin{equation*}
+	G =
+	\begin{bmatrix}   1      & \cdots & 0      & \cdots & 0      & \cdots & 0      \\
+                  \vdots & \ddots & \vdots &        & \vdots &        & \vdots \\
+                  0      & \cdots & c      & \cdots & -s     & \cdots & 0      \\
+                  \vdots &        & \vdots & \ddots & \vdots &        & \vdots \\
+                  0      & \cdots & s      & \cdots & c      & \cdots & 0      \\
+                  \vdots &        & \vdots &        & \vdots & \ddots & \vdots \\
+                  0      & \cdots & 0      & \cdots & 0      & \cdots & 1
+	\end{bmatrix}
+\end{equation*}
+
+\par Cu alte cuvinte, matricea $G$ este plină de 0 mai puțin următoarele
+elemente: $G(i, i) = G(j, j) = c$, $G(i, j) = s$ și $G(j, i) = -s$, unde $i$
+și $j$ sunt pozițiile pe care se găsește $y$, respectiv $x$. Asta înseamnă că $i$
+va indica mereu poziția elementului în vector pe care vrem să îl facem 0.
+O regulă bună la descompunerea QR este ca $(i, j)$ să fie fix poziția
+elementului din matrice pe care vrem sa îl facem 0.
+
+\par \textbf{Exemplu.} Fie $A_1 = \begin{bmatrix}
+		0 & 1 & 2 \\
+		3 & 2 & 0 \\
+		4 & 1 & 5
+	\end{bmatrix}$. Ne dorim să găsim matricea $Q$ și $R$ astfel încât $A = QR$ și $Q$ să fie ortogonală.
+
+\par Facem 0 pe poziția $(3, 1)$.
+
+\begin{equation*}
+	(i, j) = (3, 1), \quad x = 0, \quad y = 4, \quad r = \sqrt{0^2 + 4^2} = 4, \quad c = \frac{x}{r} = 0, \quad s = -\frac{y}{r} = -1
+\end{equation*}
+
+\begin{align*}
+	G_1           & = \begin{bmatrix}
+		                  0  & 0 & 1 \\
+		                  0  & 1 & 0 \\
+		                  -1 & 0 & 0
+	                  \end{bmatrix} \\
+	A_2 = G_1 A_1 & = \begin{bmatrix}
+		                  4 & 1  & 5  \\
+		                  3 & 2  & 0  \\
+		                  0 & -1 & -2
+	                  \end{bmatrix}
+\end{align*}
+
+\par Facem 0 pe poziția $(2, 1)$.
+
+\begin{equation*}
+	(i, j) = (2, 1), \quad x = 4, \quad y = 3, \quad r = \sqrt{4^2 + 3^2} = 5, \quad c = \frac{x}{r} = \frac{4}{5}, \quad s = -\frac{y}{r} = -\frac{3}{5}
+\end{equation*}
+
+\begin{align*}
+	G_2           & = \begin{bmatrix}
+		                  \frac{4}{5}  & 0 & \frac{3}{5} \\
+		                  0            & 1 & 0           \\
+		                  -\frac{3}{5} & 0 & \frac{4}{5}
+	                  \end{bmatrix} \\
+	A_3 = G_2 A_2 & = \begin{bmatrix}
+		                  5 & 2  & 4  \\
+		                  0 & 1  & 0  \\
+		                  0 & -1 & -2
+	                  \end{bmatrix}
+\end{align*}
+
+\par Facem 0 pe poziția $(3, 2)$.
+
+\begin{equation*}
+	(i, j) = (3, 2), \quad x = 1, \quad y = -1, \quad r = \sqrt{1^2 + (-1)^2} = \sqrt{2}, \quad c = \frac{x}{r} = \frac{\sqrt{2}}{2}, \quad s = -\frac{y}{r} = \frac{\sqrt{2}}{2}
+\end{equation*}
+
+\begin{align*}
+	G_3           & = \begin{bmatrix}
+		                  1 & 0                  & 0                   \\
+		                  0 & \frac{\sqrt{2}}{2} & -\frac{\sqrt{2}}{2} \\
+		                  0 & \frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2}
+	                  \end{bmatrix} \\
+	A_4 = G_3 A_3 & = \begin{bmatrix}
+		                  5 & 2        & 4         \\
+		                  0 & \sqrt{2} & 0         \\
+		                  0 & 0        & -\sqrt{2}
+	                  \end{bmatrix}
+\end{align*}
+
+\par Am adus matricea la forma superior triunghiulară. Așadar, $R$ = $A_4$ și $Q = G_1^T G_2^T G_3^T$.
+
+\par Se observă că față de Householder, am folosit mai multe matrici pentru a
+obține descompunerea. În medie, numărul de reflexii pe care trebuie să le facem
+este egal cu numărul de coloane, iar numărul de rotații este cu un ordin de
+mărime mai mare, mai ales dacă matricea inițială nu este pătratică.
+
+\par Avantajul rotațiilor Givens este că față de reflexii, este ca sunt mult mai
+paralelizabile. O rotație $G(i, j)$ afectează doar liniile $i$ și $j$ ale
+matricei, deci am putea calcula mai multe rotații în paralel. Ca și regulă,
+Householder se folosește pentru matrici dense, iar Givens pentru matrici
+rare.
+
 \section{Probleme}
+
+\begin{questions}
+	\boxedpoints
+	\pointsinmargin
+
+	\question Script MATLAB pentru descompunerea QR a unei matrice folosind reflexii Householder.
+	\question Script MATLAB pentru descompunerea QR a unei matrice folosind rotații Givens.
+	\question Demonstrați că matricea Householder este simetrică.
+	\question Să se determine descompunerea QR pentru matricea
+	$A$ = $\begin{bmatrix}
+			3  & 1 & -2 \\
+			1  & 3 & 1  \\
+			-2 & 1 & 3  \\
+		\end{bmatrix}$ folosind transformarea Givens.
+\end{questions}
 
 \begin{thebibliography}{1}
 
