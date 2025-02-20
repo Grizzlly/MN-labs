@@ -279,7 +279,7 @@ vectori sunt \textit{ortonormați}.
 dacă vectorii acesteia sunt ortogonali, respectiv ortonormați.
 
 \par O matrice $A \in \mathbb{C}^{n \times n}$ se numește \textit{unitară} dacă
-$A^*A = AA^H = I_n$, unde $A^*$ este conjugata transpusă a lui $A$. Dacă $A$
+$A^*A = AA^* = I_n$, unde $A^*$ este conjugata transpusă a lui $A$. Dacă $A$
 este reală, atunci matricea se numește \textit{ortogonală} și putem scrie
 $A^TA = AA^T = I_n$. Ele sunt foarte utilizate în diverse aplicații, precum
 descompunerea QR sau descompunerea valorilor singulare.
@@ -291,9 +291,8 @@ unitară/ortogonală are următoarele proprietăți:
 	\item coloanele (rândurile) sale formează o bază ortonormată a spațiului
 	      vectorial $\mathbb{C}^n$ sau $\mathbb{R}^n$;
 	\item norma vectorilor coloană (rând) este 1;
-	\item $A^{-1} = A^*$ sau $A^{-1} = A^*$;
+	\item $A^{-1} = A^*$;
 	\item este normală, adică $A^*A = AA^*$;
-	\item este diagonalizabilă;
 	\item valorile proprii se află pe cercul unitate;
 	\item vectorii proprii sunt ortogonali;
 	\item $det(A) = \pm 1$;
@@ -304,7 +303,7 @@ unitară/ortogonală are următoarele proprietăți:
 \par Astfel, matricile ortogonale se pot interpreta geometric ca fiind rotații,
 reflecții, permutări, identități sau combinații ale acestora.
 
-\par Ce se întâmplă dacă aplicăm o matrice ortogonală asupra vectorilor unitari? \\
+\par Ce se întâmplă dacă aplicăm o matrice ortogonală asupra vectorilor unitate? \\
 Fie $A2 = \begin{bmatrix} \cos(\frac{\pi}{7}) & -sin(\frac{\pi}{7}) \\ sin(\frac{\pi}{7}) & cos(\frac{\pi}{7}) \end{bmatrix}$.
 
 \begin{figure}[ht]

@@ -1,45 +1,26 @@
-function [A b] = GPP(A, b)
-	[n n] = size(A);
-	
-	for p = 1 : n -1
-		pivot = -inf;
-		linie_pivot = -1;
-		
-		%calculez maximul intre elementele A(p : n, p)
-		for i = p : n
-			if pivot < abs(A(i, p));
-				pivot = abs(A(i, p));
-				linie_pivot = i;
-			endif
-		endfor
+A = [1 3 1 9; 1 1 -1 1; 3 11 8 35];
 
-		%permutarea liniilor linie_pivot si p
-		if p ~= linie_pivot
-			for j = p : n 
-				t = A(p, j);
-				A(p, j) = A(linie_pivot, j);
-				A(linie_pivot, j) = t;
-			endfor
+[m, n] = size(A);
+maxP = min(m, n);
 
-			%permutarea elementelor b(linie_pivot) si b(p)
-			t = b(linie_pivot);
-			b(linie_pivot) = b(p);
-			b(p) = t;
-		endif
-		
-		%eliminare gaussiana
-		for i = p + 1 : n
-			if A(p, p) == 0
-				continue;
-			endif
+for p = 1 : maxP
+	[~, idx] = max(A(p : m, p), [], "ComparisonMethod", "abs");
+	idx = idx + p - 1;  % ne trebuie index-ul din toata coloana,
+                    	% nu doar de la p : m
 
-			tp = A(i, p)/A(p, p);
-			A(i, p) = 0;
-			for j = p + 1 : n 
-				A(i, j) = A(i, j)-tp*A(p, j);
-			endfor
-					
-			b(i) = b(i)-tp*b(p);
-		endfor
-	endfor
-endfunction
+	P = eye(m);
+	P(p, p) = 0;
+	P(idx, idx) = 0;
+	P(p, idx) = 1;
+	P(idx, p) = 1;
+
+	A = P * A;
+
+	T = eye(m);
+	mu = A(p + 1 : m, p) / A(p, p);
+	T(p + 1 : m, p) = -mu;
+
+	A = T * A;
+end
+
+disp(A);

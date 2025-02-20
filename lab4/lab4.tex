@@ -54,6 +54,7 @@
 
 \renewcommand{\contentsname}{Cuprins}
 \renewcommand{\figurename}{Figura}
+\renewcommand{\refname}{Referințe}
 
 \setlength{\parskip}{0.5\baselineskip}
 
@@ -91,193 +92,360 @@
 
 \section{Noțiuni teoretice}
 
-Acest laborator are ca scop familiarizarea cu metodele numerice directe de transformare a unei matrice nesingulare la forma superior triunghiular\u{a} sau inferior triunghiular\u{a}. Aceaste metode poart\u{a} numele de \textit{elimin\u{a}ri Gaussiene}. Cea mai simpl\u{a} metod\u{a} de eliminare este \textit{eliminarea gaussian\u{a} cu pivotare par\c{t}ial\u{a}}. Pentru aceast\u{a} metod\u{a} vom prezenta algoritmul GPP. Cea mai bun\u{a} metod\u{a} este \textit{eliminarea gaussian\u{a} cu pivotare total\u{a} sau complet\u{a}}, numit GPT \^{i}n cadrul acestui laborator. O tehnic\u{a} de scalare care mic\c{s}oreaz\u{a} eroarea \c{s}i elimin\u{a} anularea flotant\u{a} este \textit{pivotarea par\c{t}ial\u{a} cu pivot scalat pe coloan\u{a}} (algoritmul GPPS).
+\par Eliminarea Gaussiană sau \textit{reducerea coloanelor} este un algoritm
+fundamental în algebra liniară. Acesta poate fi folosit pentru rezolvarea
+sistemelor liniare, găsirea rang-ului unei matrice, inversarea unei matrice,
+sau calcularea determinantului.
 
-Eliminarea gaussian\u{a} este echivalent\u{a} cu metoda factoriz\u{a}rii LU care trebuie s\u{a} fie utilizat\u{a} \^{i}mpreun\u{a} cu o strategie de pivotare adecvat\u{a} (factorizarea LUP). O strategie de pivotare este necesar\u{a} \^in general deoarece este posibil ca eliminarea gaussian\u{a} s\u{a} nu poat\u{a} transforma o matrice dat\u{a} la o form\u{a} triunghiular\u{a}. Pentru o matrice simetric\u{a} \c{s}i pozitiv definit\u{a} cea mai bun\u{a} metod\u{a} de aducere la forma triunghiular\u{a} este folosirea factoriz\u{a}rii Cholesky.
+\par Algoritmul se bazează pe efectuarea unor operații elementarea pentru a
+permuta, scala și combina liniile unei matrici. Gândindu-ne la un sistem de
+ecuații liniare, acesta nu se schimbă dacă facem aceste operații. Dacă mai
+adăugăm și permutarea coloanelor, atunci soluția sistemului se schimbă doar prin
+aceste permutări, ușor de inversat. Obiecivul este să aducem matricea la
+\textit{forma eșalon} sau \textit{forma eșalon redusă}.
 
-Algoritmul Thomas este o form\u{a} simplificat\u{a} a elimin\u{a}rii gaussiene pentru o matrice tridiagonal\u{a}. Acest algoritm este folosit pentru rezolvarea sistemelor de ecua\c{t}ii liniare tridiagonale (des \^{i}nt\^{a}lnite \^{i}n metodele de interpolare cu func\c{t}ii spline). Complexitatea algoritmului Thomas este $O(n)$ \^{i}n timp ce elimin\u{a}rile gaussiene au complexitatea $O(n^3)$.
+\par Așadar, opeațiile elementare cu liniile sunt:
 
-\subsection{Eliminarea gaussian\u{a} - G}
+\begin{enumerate}
+	\item permutarea liniilor;
+	\item înmulțirea unei linii cu un scalar nenul;
+	\item adunarea unei linii scalate la altă linie.
+\end{enumerate}
 
-\par Eliminarea gaussian\u{a} este o tehnic\u{a} pentru transformarea matricei $A$ la forma superior triunghiular\u{a}. Matricea de transformare $T$ este o matrice inferior triunghiular\u{a} unitar\u{a} ob\c{t}inut\u{a} ca o secven\c{t}\u{a} (produs) de transform\u{a}ri inferior triunghiulare elementare de forma $ T = T_{n-1} T_{n-2} \ldots T_1$, unde matricele $T_p$ sunt inferior triunghiulare, de ordin $n$, de forma:
-$$T_p = I_n - t_p e_p^T,$$
+\subsection{Forma eșalon a unei matrice}
 
-\noindent $e_{p}$ este coloana $p$ din matricea unitate \c{s}i
-$$t_p = \begin{bmatrix}0 & \cdots & 0 & \mu_{p+1p} & \cdots & \mu_{np}\end{bmatrix}.$$
+\par Pentru fiecare linie dintr-o matrice, numim prima valoare diferită de zero
+\textit{coeficient principal} sau \textit{pivot}. Dacă doi pivoți se găsesc pe
+aceeași coloană, putem mereu să facem pe unul dintre ei 0. Ne folosim apoi de
+permutari, pentru a aranja liniile în așa fel încât pivotul unei linii să fie
+la dreapta pivotului liniei anterioare.
 
-Metoda de mai sus se poate realiza dac\u{a} toate submatricele de forma $A^{[p]}=A(1:p,1:p)$ sunt nesingulare. Scalarii $\mu_{ip}$, numi\c{t}i {\em multiplicatori gaussieni}, ce asigur\u{a} satisfacerea condi\c{t}iei de anulare a elementelor din coloana $p$, de sub diagonala principal\u{a}, au expresia:
-$$\mu_{ip}=a_{ip}/a_{pp},\quad i=p+1:n$$
+\par De exemplu, matricea de mai jos este în forma eșalon. Observați cum toate
+liniile pline de 0 sunt jos.
 
-\^{I}n efectuarea opera\c{t}iei $A\leftarrow T_pA$, se vor memora multiplicatorii gaussieni în locul zerourilor create sub diagonala principal\u{a}, primele $p-1$ coloane ale lui $A$ nu sunt afectate, iar coloanele $a_j$, $j = p+1:n$ sunt transformate astfel:
-$$(T_p a_j)_i = ((I_n - t_pe_p^T)a_j)_i = (a_j - t_p a_{pj})_i = a_{ij} - \mu_{ip} a_{pj}, \quad i=p+1:n.$$
+\begin{equation*}
+	\begin{bmatrix}
+		0 & 1 & 2 & 3 \\
+		0 & 0 & 4 & 5 \\
+		0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0
+	\end{bmatrix}
+\end{equation*}
 
-Algoritmul G de eliminare gaussian\u{a} este:
+\par În plus, putem spune despre o matrice că este în
+\textit{forma eșalon redusă} dacă toți pivoții sunt 1 (lucru care se poate
+obține prin scalare) și toate celelalte elemente de pe coloana unui pivot sunt 0
+(lucru care se poate obține prin adunarea unei linii scalate la altă linie).
 
-\begin{algorithm}[H]
-	\caption{Eliminare gaussian\u{a}}
-	\label{g}
-	\begin{algorithmic}[h]
-		\Procedure{G}{$A$}
-		\For{$p=1:n-1$}
-		\For{$i=p+1:n$}
-		\State $\mu_{ip} = a_{ip}/a_{pp}$;
-		\State $a_{ip} = 0$;
-		\For{$j=p+1:n$}
-		\State $a_{ij} = a_{ij} - \mu_{ip} a_{pj}$;
-		\EndFor
-		\EndFor
-		\EndFor
-		\State return $A$;
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
+\subsection{Matrici elementare}
 
-\par Num\u{a}rul de opera\c{t}ii pentru algoritmul G este $O(n^3)$ (aproximativ $\frac{2n^3}{3}$ opera\c{t}ii), iar memoria folosit\u{a}, conform cu schema descris\u{a} este $O(n^2)$. Nesingularitatea submatricelor nu este o condi\c{t}ie necesar\u{a} pentru existen\c{t}a \c{s}i unicitatea solu\c{t}iei unui sistem de forma $Ax=b$, unde $A$ este adus\u{a} prin transformare la forma superior triunghiular\u{a}. Pentru a elimina aceast\u{a} condi\c{t}ie se introduc strategiile de pivotare:
+\par O matrice elementară este o matrice care se obține din matricea identitate
+prin efectuarea unei operații elementare cu liniile.
 
+\par \textbf{Matricea de permutare.} Interschimbă liniile $i$ și $j$.
+
+\begin{equation*}
+	\begin{split}
+		P_{ij} = \begin{bmatrix}
+			         1 &        &   &        &   &        &   \\
+			           & \ddots &   &        &   &        &   \\
+			           &        & 0 &        & 1 &        &   \\
+			           &        &   & \ddots &   &        &   \\
+			           &        & 1 &        & 0 &        &   \\
+			           &        &   &        &   & \ddots &   \\
+			           &        &   &        &   &        & 1
+		         \end{bmatrix}
+	\end{split}
+	\quad
+	\begin{split}
+		 & \text{Construire:}      \\
+		 & P = eye(n)              \\
+		 & P (i, i) = P (j, j) = 0 \\
+		 & P (i, j) = P (j, i) = 1
+	\end{split}
+\end{equation*}
+
+\par Proprietăți:
 \begin{itemize}
-	\item Eliminarea gaussian\u{a} cu pivotare par\c{t}ial\u{a} - GPP;
-	\item Eliminarea gaussian\u{a} cu pivotare par\c{t}ial\u{a} cu pivot scalat - GPPS;
-	\item Eliminarea gaussian\u{a} cu pivotare total\u{a} - GPT.
+	\item $P = P^{-1} = P^T \implies P$ ortogonală
+	\item $\det P = -1 \implies \det (PA) = -\det A$
 \end{itemize}
 
-\par Singularitatea submatricelor $A^{[p]}$ este echivalent\u{a} cu anularea elementului $a_{pp}$, numit pivot, la pasul $p$ al algoritmului G. Consecin\c{t}a acestei anul\u{a}ri conduce la imposibilitatea calculului multiplicatorilor gaussieni.
+\par \textbf{Matricea de scalare.} Înmulțește linia $i$ cu un scalar $\alpha$.
 
-\par Este necesar\u{a} aducerea pe pozi\c{t}ia pivotului (linia $p$ \c{s}i coloana $p$) a unui element nenul, preferabil de modul c\^at mai mare, prin permutare de linii \c{s}i/sau coloane.
+\begin{equation*}
+	\begin{split}
+		S_{i}(\alpha) = \begin{bmatrix}
+			                1 &        &        &        &   \\
+			                  & \ddots &        &        &   \\
+			                  &        & \alpha &        &   \\
+			                  &        &        & \ddots &   \\
+			                  &        &        &        & 1
+		                \end{bmatrix}
+	\end{split}
+	\quad
+	\begin{split}
+		 & \text{Construire:} \\
+		 & S = eye(n)         \\
+		 & S (i, i) = \alpha
+	\end{split}
+\end{equation*}
 
-\par O matrice de permutare este o matrice care are un singur element nenul egal cu 1 pe orice linie \c{s}i pe orice coloan\u{a} a sa. Ea se ob\c{t}ine din matricea unitate prin interschimbarea (o dat\u{a} sau de mai multe ori) a dou\u{a} linii \c{s}i/sau a dou\u{a} coloane. Iat\u{a} un exemplu (interschimbarea liniilor 1 \c{s}i 2, apoi a coloanelor 2 \c{s}i 3):
+\par Proprietăți:
+\begin{itemize}
+	\item $D_i(m)^{-1} = D_i (\frac{1}{m})$
+	\item $\det S = \alpha \implies \det (SA) = \alpha \det A$
+\end{itemize}
 
-\[
-	P = \begin{bmatrix}
-		0 & 0 & 1 \\
-		1 & 0 & 0 \\
-		0 & 1 & 0 \\
+\par \textbf{Matricea de adunare.} Adună linia $i$ la linia $j$ înmulțită cu un
+scalar $\alpha$.
+
+\begin{equation*}
+	\begin{split}
+		E_{ij}(\alpha) = \begin{bmatrix}
+			                 1 &        &        &        &   &        &   \\
+			                   & \ddots &        &        &   &        &   \\
+			                   &        & 1      &        &   &        &   \\
+			                   &        &        & \ddots &   &        &   \\
+			                   &        & \alpha &        & 1 &        &   \\
+			                   &        &        &        &   & \ddots &   \\
+			                   &        &        &        &   &        & 1
+		                 \end{bmatrix}
+	\end{split}
+	\quad
+	\begin{split}
+		 & \text{Construire:} \\
+		 & E = eye(n)         \\
+		 & E (i, j) = \alpha
+	\end{split}
+\end{equation*}
+
+\par Proprietăți:
+
+\begin{itemize}
+	\item $E_{ij}(\alpha)^{-1} = E_{ij}(-\alpha)$
+	\item $\det E = 1 \implies \det (EA) = \det A$
+\end{itemize}
+
+\subsubsection{Descompunerea LU}
+
+\par Prin aplicare unor astfel de matrice și ajungând la forma eșalon, am ajuns
+practic la o matrice superior triunghiulară.
+
+\begin{align*}
+	T_nT_{n-1}\ldots T_1 A & = U                                             \\
+	A                      & = T_1^{-1}T_2^{-1}\ldots T_n^{-1}U              \\
+	A                      & = LU, \quad L = T_1^{-1}T_2^{-1}\ldots T_n^{-1}
+\end{align*}
+
+\subsubsection{Calcularea determinantului}
+
+\par După cum am spus la primul laborator, determinantul se calculează prin
+formula lui Leibniz în $O(n!)$ operații. Eliminarea Gaussiană are complexitate
+$O(n^3)$.
+
+\par Pentru o matrice triunghiulară $U$ avem că $\det U = \prod_{i=1}^{n} u_{ii}$.
+
+\begin{equation*}
+	\det A = \frac{\det U}{\prod_{i = 1}^{n} \det T_i}
+\end{equation*}
+
+\subsection{Eliminarea gaussiană - G}
+
+\par \textbf{Exemplu.}
+
+\begin{equation*}
+	\begin{bmatrix}
+		1 & 3  & 1  & 9  \\
+		1 & 1  & -1 & 1  \\
+		3 & 11 & 8  & 35
+	\end{bmatrix} \to
+	\begin{bmatrix}
+		1 & 3  & 1  & 9  \\
+		0 & -2 & -2 & -8 \\
+		0 & 2  & 5  & 8
+	\end{bmatrix} \to
+	\begin{bmatrix}
+		1 & 3  & 1  & 9  \\
+		0 & -2 & -2 & -8 \\
+		0 & 0  & 3  & 0
 	\end{bmatrix}
-\]
+\end{equation*}
 
-Interschimbarea a dou\u{a} linii ale unei matrice este echivalent\u{a} cu multiplicarea acelei matrice cu o matrice de permutare la st\^{a}nga. Interschimbarea a dou\u{a} coloane este echivalent\u{a} cu multiplicarea matricei cu o matrice de permutare la dreapta.
+\par Agoritmul în MATLAB poate fi gândit astfel:
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 1
-%----------------------------------------------------------------------------------------
-\subsection{Eliminarea gaussian\u{a} cu pivotare parţială - GPP}
+\begin{enumerate}
+	\item Folosesc un $p$ ca să ma plimb pe coloane, până când $p$ este egal
+	      cu numărul de linii sau de coloane.
+	\item Pivotul meu va fi $a_{pp}$.
+	\item Iau restul de elemente de pe coloană folosind un index $i$ și calculez
+	      $\mu_{ip} = \frac{a_{ip}}{a_{pp}}$. Acești coeficienți îi pun în
+	      matricea $S$, $S(i, p) = -\mu_{ip}$.
+	\item Calculez produsul $SA$ și continui cu următoarea coloană.
+\end{enumerate}
 
-\par Pivotarea par\c{t}ial\u{a} are loc numai prin permutarea liniilor. La pasul $p$ al algoritmului G se aduce \^{\i}n pozi\c{t}ia $(p,p)$ a pivotului cel mai mare element \^{\i}n modul dintre elementele subdiagonale din coloana $p$, fie acesta $a_{i_p p}\ne 0$, prin permutarea liniilor $p$ \c{s}i $i_p$. Acest lucru este echivalent cu multiplicarea matricei $A$ la st\^{a}nga cu matricea de permutare $P_{i_p p}\stackrel{\rm not}{=}P_p$, astfel \^{\i}nc\^at pasul $p$ calculeaz\u{a} $A \leftarrow T_p P_p A$, \^{\i}ntregul algoritm fiind:
-$$
-	A \leftarrow U = T_{n-1} P_{n-1} T_{n-2} P_{n-2} \ldots T_1 P_1 A
-$$
+\newpage
+\octavescript{./src/G.m}{}
 
-Algoritmul GPP de eliminare gaussian\u{a} cu pivotare par\c{t}ial\u{a} este:
+\par De notat că nu este nevoie să aduce matricea la forma eșalon redusă pentru
+a rezolva un sistem, trebuie doar să fie triunghiulară. În codul de mai sus, $A$
+este matricea extinsă a sistemului. Ba mai mult, am putea afecta stabilitatea
+numerică din cauza efectuării mai multor operații.
 
-\begin{algorithm} [H]
-	\caption{Eliminarea gaussian\u{a} cu pivotare par\c{t}ial\u{a}}
-	\label{gpp}
-	\begin{algorithmic}[1]
-		\Procedure{GPP}{$A$}
-		\For{$p=1:n-1$}
-		\State Determin\u{a} primul $i_p$ ($p \leq i_p \leq n$) a.î. $|a_{i_p p}|=\max_{i=p:n}{\{|a_{ip}|\}}$; $v(p) = i_p;$
-		\State $v(p) = i_p;$
-		\For{$j=p:n$}
-		\State $a_{pj} \leftrightarrow a_{i_p j}$;
-		\EndFor
-		\For{$i=p+1:n$}
-		\State $\mu_{ip} = a_{ip}/a_{pp}$;
-		\State $a_{ip} = 0$;
-		\For{$j=p+1:n$}
-		\State $a_{ij} = a_{ij} - \mu_{ip} a_{pj}$;
-		\EndFor
-		\EndFor
-		\EndFor
-		\State return $A,v$;
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
+\par Alt lucru de observat este că dacă pivotul selectat este 0, atunci
+programul "crapă" (womp-womp). Pentru a rezolva acest lucru introducem
+conceptul de \textit{pivotare}.
 
-Pa\c{s}ii 8-14 reprezint\u{a} algoritmul G pentru matricea permutat\u{a}. Vectorul $v$ memoreaz\u{a} permut\u{a}rile de linii.
+\subsection{Pivotare}
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 2
-%----------------------------------------------------------------------------------------
-\subsection{Eliminarea gaussian\u{a} cu pivotare parţială cu pivot scalat - GPPS}
+\par Pivotarea constă în folosirea permutărilor și a scalării pentru a alege
+cel mai bun pivot. Este clar că eliminearea Gauss poate fi aplicată pe orice
+matrice, deci în continuare discuția se va baza pe analiză numerică.
 
-\par Aceast\u{a} tehnic\u{a} este similar\u{a} cu precedenta, doar c\u{a} definim la \^{i}nceput un factor de scalare pentru fiecare linie $i$, factor de forma:
-$$s_i = \max_{j=p:n}{\{|a_{ij}|\}} \quad sau \quad s_i = \sum_{j=p}^n{|a_{ij}|}$$
+\subsubsection{De ce este pivotarea importantă?}
 
-\par Dac\u{a} exist\u{a} un $i$ astfel \^{i}nc\^{a}t $s_i = 0$ atunci matricea este singular\u{a}. Pa\c{s}ii urm\u{a}tori vor stabili interschimb\u{a}rile care se vor face. La pasul $p$ se va g\u{a}si  \^{i}ntregul $i_p$ astfel \^{i}nc\^{a}t:
-$$\frac{|a_{i_p p}|}{s_{i_p}} = \max_{i=p:n}{\frac{|a_{i p}|}{s_i}}$$
+\par Fie un calculator care folosește aritmetică în virgulă mobilă, cu 3
+zecimale, cu trunchiere. Fie următorul sistem:
 
-\par Scalarea ne garanteaz\u{a} c\u{a} cel mai mare element din fiecare coloana are \^{i}nainte de compara\c{t}iile necesare pentru scimbare m\u{a}rimea relativ\u{a} 1. Scalarea se realizeaz\u{a} doar \^{i}n compara\c{t}ii, nu efectiv \^{i}n matrice, astfel c\u{a} imp\u{a}r\c{t}irea cu factorul de scalare nu produce nici o eroare
-de rotunjire.
+\begin{equation*}
+	\begin{bmatrix}
+		0.913 & 0.659 \\
+		0.780 & 0.563
+	\end{bmatrix}
+	\begin{bmatrix}
+		x_1 \\
+		x_2
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		0.254 \\
+		0.217
+	\end{bmatrix}
+\end{equation*}
 
-Algoritmul GPPS de eliminare gaussian\u{a} cu pivotare par\c{t}ial\u{a} cu pivot scalat este:
+\begin{equation*}
+	\mu = \frac{0.780}{0.913} = 0.854 \quad \text{(trunchiere)}
+\end{equation*}
 
-\begin{algorithm}[H]
-	\caption{Eliminarea gaussian\u{a} cu pivotare par\c{t}ial\u{a} cu pivot scalat}
-	\label{gpps}
-	\begin{algorithmic}[1]
-		\Procedure{GPPS}{$A$}
-		\For{$p=1:n-1$}
-		\State Determin\u{a} $i_p$ a.î. $\frac{|a_{i_p p}|}{s_{i_p}} = \max_{i=p:n}{\frac{|a_{i p}|}{s_i}}$; $v(p) = i_p;$
-		\For{$j=1:n$}
-		\State $a_{pj} \leftrightarrow a_{i_p j}$;
-		\EndFor
-		\For{$i=p+1:n$}
-		\State $\mu_{ip} = a_{ip}/a_{pp}$;
-		\State $a_{ip} = 0$;
-		\For{$j=p+1:n$}
-		\State $a_{ij} = a_{ij} - \mu_{ip} a_{pj}$;
-		\EndFor
-		\EndFor
-		\EndFor
-		\State return $A, v$;
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-Pa\c{s}ii 7-13 reprezint\u{a} algoritmul G pentru matricea permutat\u{a}. Vectorul $v$ memoreaz\u{a} permut\u{a}rile de linii. Complexitatea algoritmului GPP este aceea\c{s}i cu a lui G.
+\par Sistemul devine:
 
+\begin{equation*}
+	\begin{bmatrix}
+		0.913 & 0.659 \\
+		0     & 0.001
+	\end{bmatrix}
+	\begin{bmatrix}
+		x_1 \\
+		x_2
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		0.254 \\
+		0.001
+	\end{bmatrix}
+\end{equation*}
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 3
-%----------------------------------------------------------------------------------------
-\subsection{Eliminarea gaussian\u{a} cu pivotare total\u{a} - GPT}
+\par Soluțiile sunt $x_2 = 1$ și $x_1 = \frac{0.254 - 0.659}{0.913} = -0.417$.
 
-\par Stabilitate numeric\u{a} mai bun\u{a} se ob\c{t}ine dac\u{a} pivotul de la
-pasul $p$ se alege drept cel mai mare element \^{\i}n modul dintre
-elementele $a_{ij}$, cu $i=p:n$, $j=p:n$, fie el $a_{i_p j_p}$, \c{s}i este adus \^{\i}n pozi\c{t}ia $(p,p)$ a pivotului prin permutarea liniilor $p$ \c{s}i $i_p$ \c{s}i a coloanelor $p$ \c{s}i $j_p$. Acest lucru este echivalent cu multiplicarea matricei $A$ la st\^{a}nga cu matricea de permutare $P^{st}_{i_p p}\stackrel{\rm not}{=}P^{st}_p$ \c{s}i cu multiplicarea matricei $A$ la dreapta cu matricea de permutare $P^{dr}_{j_p p}\stackrel{\rm not}{=}P^{dr}_p$. La pasul $p$ se calculeaz\u{a} $A \leftarrow T_p P^{st}_p A P^{dr}_p$, \^{\i}ntregul algoritm fiind:
-$$A \leftarrow U = T_{n-1} P^{st}_{n-1} T_{n-2} P^{st}_{n-2} \ldots T_1 P^{st}_1 A P^{dr}_1 P^{dr}_2 \ldots P^{dr}_{n-1}.$$
+\par Comparăm soluția găsită, $x_* = \begin{bmatrix} -0.417 \\ 1 \end{bmatrix}$,
+cu soluția reală, $x = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$:
 
-Algoritmul GPPS de eliminare gaussian\u{a} cu pivotare  total\u{a}  este:
+\begin{align*}
+	||x - x_*||               & = ||\begin{bmatrix} -0.557 \\ 0 \end{bmatrix}|| = 0.557 \\
+	||x||                     & = ||\begin{bmatrix} -1 \\ 1 \end{bmatrix}|| = \sqrt{2}  \\
+	\frac{||x - x_*||}{||x||} & = \frac{0.557}{\sqrt{2}} = 0.39
+\end{align*}
 
-\begin{algorithm} [H]
-	\caption{Eliminarea gaussian\u{a} cu pivotare total\u{a}}
-	\label{gpt}
-	\begin{algorithmic}[1]
-		\Procedure{GPT}{$A$}
-		\For{$p=1:n-1$}
-		\State Determin\u{a} $i_p$ \c{s}i $j_p$ ($p \leq i_p, j_p \leq n$) a.i $|a_{i_p j_p}|=\max_{i=p:n, j=p:n}{\{|a_{ij}|\}}$; $v_{st}(p) = i_p$; $v_{dr}(p) = j_p$;
-		\For{$j=p:n$}
-		\State $a_{pj} \leftrightarrow a_{i_p j}$;
-		\EndFor
-		\For{$i=1:n$}
-		\State $a_{ip} \leftrightarrow a_{i j_p}$;
-		\EndFor
-		\For{$i=p+1:n$}
-		\State $\mu_{ip} = a_{ip}/a_{pp}$;
-		\State $a_{ip} = 0$;
-		\For{$j=p+1:n$}
-		\State $a_{ij} = a_{ij} - \mu_{ip} a_{pj}$;
-		\EndFor
-		\EndFor
-		\EndFor
-		\State return $A, v_{st}, v_{dr}$;
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
+\par Eroarea relativă este de aproape 40\%. Foarte mare! Dacă calculăm reziduul,
+am vedea că el este totuși mic, dar pe noi ne interesează soluția. Prezentăm
+următoarele strategii:
 
-\par Pa\c{s}ii 10-16 reprezint\u{a} algoritmul G pentru matricea permutat\u{a}. Vectorul $v_{st}$ memoreaz\u{a} permut\u{a}rile de linii iar $v_{dr}$ memoreaz\u{a} permut\u{a}rile de coloane. Complexitatea algoritmului GPP este aceea\c{s}i cu a lui G.
+\begin{itemize}
+	\item Pivotare parțială - GPP;
+	\item Pivotare parțială cu pivot scalat - GPPS;
+	\item Pivotare totală - GPT.
+\end{itemize}
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 4
-%----------------------------------------------------------------------------------------
+\subsubsection{Pivotare parţială - GPP}
+
+\par Pivotarea parțială are loc numai prin permutarea liniilor. La pasul $p$ al
+algoritmului se aduce în locul pivotului cel mai mare element din coloană de sub
+acesta.
+
+\par Algoritmul în MATLAB se gândește exact la fel, numai că înaintea calculării
+coeficienților $\mu_{ip}$ se face permutarea liniilor.
+
+\octavescript{./src/GPP.m}{}
+
+\par Este de observat că această metodă de pivotare încă nu rezolvă eroarea din
+sistemul de mai sus, nu se efectuează nicio permutare. Totuși, în general, este
+suficientă pentru a face erorile rezonabile. Dacă pivotul ajunge să fie 0,
+atunci matricea este singulară.
+
+\subsection{Pivotare parţială cu pivot scalat - GPPS}
+
+\par Această tehnică este similară cu precedenta, doar că definim la început un
+factor de scalare pentru fiecare linie $i$, factor de forma:
+
+\begin{equation*}
+	s_i = \max_{j=p:n}{\{|a_{ij}|\}}
+\end{equation*}
+
+\par Dacă $s_i = 0$ atunci matricea este singulară.
+
+\par Prin această metodă interschimbăm liniile în funcție de elementul cel mai
+mare relativ la celelelte elemente de pe linie. Practic, la fiecare pas $p$,
+vom căuta întregul $i_p$ astfel încât:
+
+\begin{equation*}
+	\frac{|a_{i_p p}|}{s_{i_p}} = \max_{i=p:n}{\frac{|a_{i p}|}{s_i}}
+\end{equation*}
+
+\par De exemplu, considerând sistemul
+$\begin{bmatrix}
+		1 & 10000  \\
+		1 & 0.0001
+	\end{bmatrix}
+	\begin{bmatrix}
+		x \\
+		y
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		10000 \\
+		1
+	\end{bmatrix}
+$, folosind GPP nu ar trebui sa interschimbăm liniile, dar avem exact aceeași
+problemă cu stabilitatea numerică. În consecință, interschimbăm liniile pentru
+că 1 este foarte mic relativ la 10000.
+
+\par Algorimtul în MATLAB este similar cu cel de la GPP, dar introducem
+calculul factorului de scalare.
+
+\octavescript{./src/GPPS.m}{}
+
+\subsection{Pivotare totală - GPT}
+
+\par Cea mai bună stabilitate numerică se obține atunci când pivotul este cel
+mai mare element în modul, din toata submatricea rămasă. Această tehnică se
+numește pivotare totală. Totuși, în practică nu se folosește deoarece trebuie
+ca la fiecare iterație să parcurgi toată submatricea. Practic, costurile
+sunt mai mari decât beneficiile.
+
+\par Pentru că acum trebuie să permutăm și coloanele, trebuie să ținem minte
+aceste permutări. Acest lucru se datorează faptului că se schimbă ordinea
+necunoscutelor. Pentru aceste permutări, ne folosim tot de o matrice $P$ numai
+că o vom aplica la dreapta.
+
+\par Algoritmul în MATLAB este similar cu cel de la GPP, doar că modificăm
+căutarea maximului.
+
+\octavescript{./src/GPT.m}{}
+
+\par Pentru că $A$ este matricea extinsă trebuie să avem grijă cu indicii.
+Ultima comandă de \verb|display| demonstrează restabilirea ordinii inițiale a
+necunoscutelor.
+
 \subsection{Algoritmul Thomas pentru rezolvarea sistemului 3-diagonal}
 
 Sistemul tridiagonal se poate scrie compact sub forma $a_i x_{i-1} + b_i x_i + c_i x_{i+1} = d_i$, $i=1:n$ cu men\c{t}iunea c\u{a} $a_1=0$ \c{s}i $c_n = 0$, iar componentele $x_0$ \c{s}i $x_{n+1}$ nu sunt definite. Forma general\u{a} este:
@@ -362,33 +530,6 @@ $\displaystyle
 
 În final, ob\c{t}inem solu\c{t}ia:
 $\displaystyle \begin{cases} x_1 = -85.625 \\ x_2 = 65.5\end{cases}$\\
-
-%\end{Problem}
-
-
-\subsection{Problema 2}
-Să se scrie un program OCTAVE pentru a implementa algoritmul de eliminarea gaussian\u{a}.
-
-\textit{Soluţie:}
-
-\octavescript{./src/G.m}{}
-%\end{Problem}
-
-\subsection{Problema 3}
-Să se scrie un program OCTAVE pentru a implementa algoritmul de eliminarea gaussian\u{a} cu pivotare par\c{t}ial\u{a}.
-
-\textit{Soluţie:}
-
-\octavescript{./src/GPP.m}{}
-%\end{Problem}
-
-\subsection{Problema 4}
-Să se scrie un program OCTAVE pentru a implementa algoritmul de eliminarea gaussian\u{a} cu pivotare total\u{a}.
-
-\textit{Soluţie:}
-
-\octavescript{./src/GPT.m}{}
-%\end{Problem}
 
 
 \subsection{Problema 5}
@@ -508,8 +649,11 @@ $\displaystyle
 	\end{cases}$
 Rezolva\c{t}i sistemul folosind eliminare GPP, GPPS, GPT.
 
-%\end{Problem}
+\begin{thebibliography}{1}
 
-%----------------------------------------------------------------------------------------
+	\bibitem{AlgLinNegrescu}
+	Alexandru Negrescu. Algebra Liniară. O abordare prietenoasă, 2025, 15(2): 502-505. doi: 10.3934/naco.2023025
+
+\end{thebibliography}
 
 \end{document}
