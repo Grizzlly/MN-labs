@@ -388,7 +388,7 @@ atunci matricea este singulară.
 factor de scalare pentru fiecare linie $i$, factor de forma:
 
 \begin{equation*}
-	s_i = \max_{j=p:n}{\{|a_{ij}|\}}
+	s_i = \max_{j=p:n}{\{|a_{ij}|\}} \quad \text{sau} \quad s_i = \sum_{j=p}^{n}{|a_{ij}|}
 \end{equation*}
 
 \par Dacă $s_i = 0$ atunci matricea este singulară.
@@ -448,8 +448,14 @@ necunoscutelor.
 
 \subsection{Algoritmul Thomas pentru rezolvarea sistemului 3-diagonal}
 
-Sistemul tridiagonal se poate scrie compact sub forma $a_i x_{i-1} + b_i x_i + c_i x_{i+1} = d_i$, $i=1:n$ cu men\c{t}iunea c\u{a} $a_1=0$ \c{s}i $c_n = 0$, iar componentele $x_0$ \c{s}i $x_{n+1}$ nu sunt definite. Forma general\u{a} este:
-$$\begin{bmatrix}
+Un sistem tridiagonal are ecuații de forma:
+\begin{equation*}
+	a_i x_{i - 1} + b_i x_i + c_i x_{i + 1} = d_i, \quad a_0 = 0, \quad c_n = 0
+\end{equation*}
+
+Iar sub forma matriceală:
+\begin{equation*}
+	\begin{bmatrix}
 		{b_1} & {c_1} & {   }  & {   }  & { 0 }     \\
 		{a_2} & {b_2} & {c_2}  & {   }  & {   }     \\
 		{   } & {a_3} & {b_3}  & \ddots & {   }     \\
@@ -471,66 +477,69 @@ $$\begin{bmatrix}
 		\vdots \\
 		{d_n } \\
 	\end{bmatrix}
-$$
+\end{equation*}
 
-\par Algoritmul presupune modificarea coeficien\c{t}ilor sistemului \c{s}i aducerea lor la o form\u{a} prin care sistemul de poate rezolva direct prin substitu\c{t}ie \^{i}napoi.
-$$c\rq{}_i =
-	\begin{cases}
-		\begin{array}{lcl}
-			\cfrac{c_i}{b_i}                      &  & i = 1     \\
-			\cfrac{c_i}{b_i - c\rq{}_{i - 1} a_i} &  & i = 2:n-1 \\
-		\end{array}
-	\end{cases}
-$$
+Un astfel de sistem este un caz special al eliminării Gaussiene și poate fi
+rezolvat în doar $O(n)$ operații. Astfel de matrici apar în special la calculul
+spline-urilor cubice.
 
-$$d\rq{}_i =
-	\begin{cases}
-		\begin{array}{lcl}
-			\cfrac{d_i}{b_i}                                           &  & i = 1   \\
-			\cfrac{d_i - d\rq{}_{i - 1} a_i}{b_i - c\rq{}_{i - 1} a_i} &  & i = 2:n \\
-		\end{array}
-	\end{cases}
-$$
+Fie primele 2 ecuații ale unui sistem tridiagonal:
+\begin{align*}
+	 & b_1 x_1 + c_1 x_2           & = d_1 \\
+	 & a_2 x_1 + b_2 x_2 + c_2 x_3 & = d_2
+\end{align*}
 
-Prin formulele de mai sus s-a executat de fapt un pas al elimin\u{a}rii gaussiene. Solu\c{t}ia sistemului va fi dat\u{a} de formulele:
-$$\begin{cases}
-		x_n = d'_n \\
-		x_i = d'_i - c'_i x_{i + 1} \quad i=n-1:1
-	\end{cases}$$
+Facem primul pas din eliminarea gaussiană, cu $\mu = \frac{a_2}{b_1}$:
+\begin{align*}
+	 & b_1 x_1 + c_1 x_2             & = d_1           \\
+	 & (b_1 - \mu c_1) x_2 + c_2 x_3 & = d_2 - \mu d_1
+\end{align*}
 
-\par Sistemul nu se mai p\u{a}streaz\u{a} \^{i}n memorie prin \^{i}ntrega lui matrice, ci doar prin trei vectori de valori corespunz\u{a}toare celor trei diagonale.
+Necunoscuta $x_1$ a fost eliminată, și am rămas cu o ecuație similară cu prima.
+Acest procedeu s-ar continua până la final, deci putem defini coeficienții
+recursiv (coeficienții primesi ecuații nu se modifică):
+\begin{align*}
+	\mu & = \frac{a_i}{b_{i - 1}} \\
+	b_i & = b_i - \mu c_{i - 1}   \\
+	d_i & = d_i - \mu d_{i - 1}
+\end{align*}
 
-\par Algoritmul Thomas este utilizat deoarece este rapid \c{s}i apare frecvent \^{i}n practic\u{a}: interpol\u{a}ri, ecua\c{t}ii diferenc\c{t}iale, etc. De\c{s}i situa\c{t}ia este rar\u{a}, algoritmul poate fi instabil dac\u{a} $b_i - c\rq{}_{i-1} a_i = 0$ sau numeric zero pentru orice $i$. Aceasta se \^{i}nt\^{a}mpl\u{a} dac\u{a} matricea este singular\u{a}, dar \^{i}n cazuri rare se poate \^{i}ntampla \c{s}i pentru o matrice nesingular\u{a}. Condi\c{t}ia de stabilitate este, $\forall i$:
-$$|b_i| > |a_i| + |c_i|$$
+În final, soluția sistemului o găsim prin substituție înapoi:
+\begin{align*}
+	x_n & = \frac{d_n}{b_n}                 \\
+	x_i & = \frac{d_i - c_i x_{i + 1}}{b_i}
+\end{align*}
 
-\noindent condi\c{t}ie care indic\u{a} diagonal-dominan\c{t}a matricei $A$. Dac\u{a} algoritmul este numeric instabil se pot aplica strategii de pivotare, ca \^{i}n cazul elimin\u{a}rii gaussiene.
+Algoritmul în MATLAB îl construim folosind 4 vectori corespunzători
+coeficienților și termenilor liberi.
 
+\newpage
+\octavescript{./src/Thomas.m}{}
+
+Pentru analiza numerică, este suficient să analizăm ecuația:
+\begin{equation*}
+	b'_i = b_i - \frac{a_i c_{i - 1}}{b_{i - 1}}
+\end{equation*}
+
+După cum am observat în laboratoarele trecute, dacă $|b_{i - 1}|$ este foarte mic,
+erorile se pot amplifica atunci când îl calculăm pe $\mu$. În consecință, ne-am
+dori ca $|b_i| > |c_i|$. Mai mult, ne dorim ca $|b_i| > |a_i|$. O matrice care
+satisface aceste condiții se numește \textit{diagonal dominantă}. Această
+matrice este caracterizată de faptul ca elementele de pe diagonala principală
+sunt mai mari decât suma elementelor de pe linie, mai exact, în cazul nostru:
+\begin{equation*}
+	|b_i| \geq |a_i| + |c_i|
+\end{equation*}
 
 \section{Probleme rezolvate}
 
 \subsection{Problema 1}
 
-Fie sistemul de ecua\c{t}ii:
+Fie sistemul de ecuații:
 $\displaystyle \begin{cases}
 		5.2 \cdot x_1 + 7.1 \cdot x_2 = 19.8 \\
 		2.4 \cdot x_1 + 3.2\cdot x_2 = 4.1
 	\end{cases}$ Rezolva\c{t}i sistemul folosind eliminare gaussian\u{a} cu pivotare par\c{t}ial\u{a}.
-
-\textit{Soluţie:}
-
-Valoarea maxim\u{a} a coeficien\c{t}ilor de pe prima coloan\u{a} este 5.2 (coeficientul de pe prima linie). A\c{s}adar, nu schimb\u{a}m ordinea ecua\c{t}iilor.\\
-
-$\mu_{21} = \frac{2.4}{5.2} = 0.46154$\\
-
-Sistemul ini\c{t}ial este echivalent cu:
-$\displaystyle
-	\begin{cases} 5.2 \cdot x_1 + 7.1 \cdot x_2 = 19.8 \\
-		-0.07692 \cdot x_2 = -5.0385
-	\end{cases}$\\
-
-În final, ob\c{t}inem solu\c{t}ia:
-$\displaystyle \begin{cases} x_1 = -85.625 \\ x_2 = 65.5\end{cases}$\\
-
 
 \subsection{Problema 5}
 Să se scrie un program OCTAVE pentru a implementa algoritmul Thomas de rezolvare a unui sistem 3-diagonal.
@@ -602,52 +611,38 @@ Să se scrie un program OCTAVE pentru a implementa algoritmul Thomas de rezolvar
 	\end{tabular}
 \end{center}
 
-%\end{Problem}
-
 \section{Probleme}
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 1
-%----------------------------------------------------------------------------------------
-\subsection{Problema 1}
-Implementa\c{t}i \^{i}n OCTAVE algoritmul GPPS.
-%\end{Problem}
+\begin{questions}
+	\boxedpoints
+	\pointsinmargin
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 2
-%----------------------------------------------------------------------------------------
-\subsection{Problema 2}
-Modifica\c{t}i algoritmii GPP \c{s}i GPT pentru a lucra cu o matrice superior Hessemberg. Implementa\c{t}i H\_GPP \c{s}i H\_GPT.
-%\end{Problem}
+	%----------------------------------------------------------------------------------------
+	%	PROBLEM 3
+	%----------------------------------------------------------------------------------------
+	\question Construi\c{t}i o variant\u{a} modificat\u{a} pentru algoritmul lui Thomas care s\u{a} lucreze cu matricea:
+	\[
+		A = \begin{bmatrix}
+			{b_1} & { 0 }  & {c_1}      & {   }      & {   }     & {   }     & { 0 }     \\
+			{ 0 } & {b_2}  & { 0 }      & {c_2}      & {   }     & {   }     & {   }     \\
+			{a_3} & { 0 }  & {b_3}      & { 0 }      & {c_3}     & {   }     & {   }     \\
+			{   } & \ddots & \ddots     & \ddots     & \ddots    & \ddots    & {   }     \\
+			{   } & {   }  & { a_{n-2}} & { 0 }      & {b_{n-2}} & { 0 }     & {c_{n-2}} \\
+			{   } & {   }  & {   }      & { a_{n-1}} & { 0 }     & {b_{n-1}} & { 0 }     \\
+			{ 0 } & {   }  & {   }      & {   }      & {a_n}     & { 0 }     & {b_n}     \\
+		\end{bmatrix}
+	\]
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 3
-%----------------------------------------------------------------------------------------
-\subsection{Problema 3}
-Construi\c{t}i o variant\u{a} modificat\u{a} pentru algoritmul lui Thomas care s\u{a} lucreze cu matricea:
-\[
-	A = \begin{bmatrix}
-		{b_1} & { 0 }  & {c_1}      & {   }      & {   }     & {   }     & { 0 }     \\
-		{ 0 } & {b_2}  & { 0 }      & {c_2}      & {   }     & {   }     & {   }     \\
-		{a_3} & { 0 }  & {b_3}      & { 0 }      & {c_3}     & {   }     & {   }     \\
-		{   } & \ddots & \ddots     & \ddots     & \ddots    & \ddots    & {   }     \\
-		{   } & {   }  & { a_{n-2}} & { 0 }      & {b_{n-2}} & { 0 }     & {c_{n-2}} \\
-		{   } & {   }  & {   }      & { a_{n-1}} & { 0 }     & {b_{n-1}} & { 0 }     \\
-		{ 0 } & {   }  & {   }      & {   }      & {a_n}     & { 0 }     & {b_n}     \\
-	\end{bmatrix}
-\]
+	\question Fie sistemul de ecua\c{t}ii:
+	\begin{equation*}
+		\begin{cases}
+			1.5 \cdot x_1 - 2.1 \cdot x_2 = 8.3 \\
+			-7.6 \cdot x_1 + 3.11 \cdot x_2 = 6.7
+		\end{cases}
+	\end{equation*}
+	Rezolvați sistemul folosind eliminare GPP, GPPS, GPT.
 
-Scrie\c{t}i o func\c{t}ie OCTAVE cu semn\u{a}tura \verb|function x = solve(a,b,c,d)| care s\u{a} rezolv\u{a} sistemul de ecua\c{t}ii $Ax = d$.
-%\end{Problem}
-
-
-\subsection{Problema 4}
-Fie sistemul de ecua\c{t}ii:
-$\displaystyle
-	\begin{cases} 1.5 \cdot x_1 - 2.1 \cdot x_2 = 8.3 \\
-		-7.6 \cdot x_1 + 3.11 \cdot x_2 = 6.7
-	\end{cases}$
-Rezolva\c{t}i sistemul folosind eliminare GPP, GPPS, GPT.
+\end{questions}
 
 \begin{thebibliography}{1}
 
