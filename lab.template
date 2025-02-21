@@ -40,7 +40,7 @@
 }
 
 \newcommand{\octavescript}[2]{
-	\lstinputlisting[caption=#2,label=#1]{#1}
+	\lstinputlisting[caption=#2]{#1}
 }
 
 \newcommand{\MNLab}{Laborator\ \#99}
@@ -50,6 +50,7 @@
 
 \renewcommand{\contentsname}{Cuprins}
 \renewcommand{\figurename}{Figura}
+\renewcommand{\refname}{Referințe}
 
 \setlength{\parskip}{0.5\baselineskip}
 
@@ -72,6 +73,7 @@
 \begin{coverpages}
 
 	\maketitle
+	\thispagestyle{empty}
 	\tableofcontents
 
 \end{coverpages}

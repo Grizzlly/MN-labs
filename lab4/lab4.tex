@@ -44,7 +44,7 @@
 
 % Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
 \newcommand{\octavescript}[2]{
-	\lstinputlisting[caption=#2,label=#1]{#1}
+	\lstinputlisting[caption=#2]{#1}
 }
 
 \newcommand{\MNLab}{Laborator\ \#4}
@@ -77,6 +77,7 @@
 \begin{coverpages}
 
 	\maketitle
+	\thispagestyle{empty}
 	\tableofcontents
 
 \end{coverpages}
@@ -456,26 +457,26 @@ Un sistem tridiagonal are ecuații de forma:
 Iar sub forma matriceală:
 \begin{equation*}
 	\begin{bmatrix}
-		{b_1} & {c_1} & {   }  & {   }  & { 0 }     \\
-		{a_2} & {b_2} & {c_2}  & {   }  & {   }     \\
-		{   } & {a_3} & {b_3}  & \ddots & {   }     \\
-		{   } & {   } & \ddots & \ddots & {c_{n-1}} \\
-		{ 0 } & {   } & {   }  & {a_n}  & {b_n}     \\
+		b_1 & c_1 &        &        & 0         \\
+		a_2 & b_2 & c_2    &        &           \\
+		    & a_3 & b_3    & \ddots &           \\
+		    &     & \ddots & \ddots & c_{n - 1} \\
+		0   &     &        & a_n    & b_n       \\
 	\end{bmatrix}
 	\begin{bmatrix}
-		{x_1 } \\
-		{x_2 } \\
-		{x_3 } \\
+		x_1    \\
+		x_2    \\
+		x_3    \\
 		\vdots \\
-		{x_n } \\
+		x_n    \\
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-		{d_1 } \\
-		{d_2 } \\
-		{d_3 } \\
+		d_1    \\
+		d_2    \\
+		d_3    \\
 		\vdots \\
-		{d_n } \\
+		d_n    \\
 	\end{bmatrix}
 \end{equation*}
 
@@ -531,124 +532,43 @@ sunt mai mari decât suma elementelor de pe linie, mai exact, în cazul nostru:
 	|b_i| \geq |a_i| + |c_i|
 \end{equation*}
 
-\section{Probleme rezolvate}
-
-\subsection{Problema 1}
-
-Fie sistemul de ecuații:
-$\displaystyle \begin{cases}
-		5.2 \cdot x_1 + 7.1 \cdot x_2 = 19.8 \\
-		2.4 \cdot x_1 + 3.2\cdot x_2 = 4.1
-	\end{cases}$ Rezolva\c{t}i sistemul folosind eliminare gaussian\u{a} cu pivotare par\c{t}ial\u{a}.
-
-\subsection{Problema 5}
-Să se scrie un program OCTAVE pentru a implementa algoritmul Thomas de rezolvare a unui sistem 3-diagonal.
-
-\textit{Soluţie:}
-
-\octavescript{./src/Thomas.m}{}
-
-
-\begin{center}
-	\begin{tabular}{| l | l |}
-		\hline
-		\\
-		\textbf{Date de intrare:} \\\\
-		$a = $
-		$\begin{bmatrix}
-				 2 \quad
-				 9\quad
-				 2 \quad
-				 3 \quad
-				 6
-			 \end{bmatrix}$,
-
-		$b = $
-		$\begin{bmatrix}
-				 12 \quad
-				 15\quad
-				 2 \quad
-				 9 \quad
-				 1 \quad
-				 0
-			 \end{bmatrix}$,
-
-		$c = $
-		$\begin{bmatrix}
-				 10 \quad
-				 3\quad
-				 9 \quad
-				 1 \quad
-				 4
-			 \end{bmatrix}$,
-
-		$d = $
-		$\begin{bmatrix}
-				 1 \quad
-				 5\quad
-				 9 \quad
-				 11 \quad
-				 13 \quad
-				 7
-			 \end{bmatrix}$
-
-		\\ \\
-		\hline
-		\\
-		\textbf{Date de ieşire:}  \\ \\
-		$ x = $
-		$\begin{bmatrix}
-				 0.160494 \quad
-				 -0.092593 \quad
-				 2.022634  \quad
-				 0.643118  \quad
-				 1.166667 \quad
-				 2.475995
-			 \end{bmatrix}
-		$
-		\\
-		\hline
-	\end{tabular}
-\end{center}
-
 \section{Probleme}
 
 \begin{questions}
 	\boxedpoints
 	\pointsinmargin
 
-	%----------------------------------------------------------------------------------------
-	%	PROBLEM 3
-	%----------------------------------------------------------------------------------------
-	\question Construi\c{t}i o variant\u{a} modificat\u{a} pentru algoritmul lui Thomas care s\u{a} lucreze cu matricea:
-	\[
+	\question Fie sistemul de ecuații:
+	\begin{align*}
+		1.5  x_1 - 2.1  x_2    & = 8.3 \\
+		-7.6   x_1 + 3.11  x_2 & = 6.7
+	\end{align*}
+	Rezolva\c{t}i sistemul folosind eliminare gaussian\u{a} cu pivotare par\c{t}ial\u{a}.
+
+
+	\question Construiți o variantă modificată pentru algoritmul lui Thomas care
+	să lucreze cu matricea:
+	\begin{equation*}
 		A = \begin{bmatrix}
-			{b_1} & { 0 }  & {c_1}      & {   }      & {   }     & {   }     & { 0 }     \\
-			{ 0 } & {b_2}  & { 0 }      & {c_2}      & {   }     & {   }     & {   }     \\
-			{a_3} & { 0 }  & {b_3}      & { 0 }      & {c_3}     & {   }     & {   }     \\
-			{   } & \ddots & \ddots     & \ddots     & \ddots    & \ddots    & {   }     \\
-			{   } & {   }  & { a_{n-2}} & { 0 }      & {b_{n-2}} & { 0 }     & {c_{n-2}} \\
-			{   } & {   }  & {   }      & { a_{n-1}} & { 0 }     & {b_{n-1}} & { 0 }     \\
-			{ 0 } & {   }  & {   }      & {   }      & {a_n}     & { 0 }     & {b_n}     \\
+			b_1 & 0      & c_1       &           &           &           & 0         \\
+			0   & b_2    & 0         & c_2       &           &           &           \\
+			a_3 & 0      & b_3       & 0         & c_3       &           &           \\
+			    & \ddots & \ddots    & \ddots    & \ddots    & \ddots    &           \\
+			    &        & a_{n - 2} & 0         & b_{n - 2} & 0         & c_{n - 2} \\
+			    &        &           & a_{n - 1} & 0         & b_{n - 1} & 0         \\
+			0   &        &           &           & a_n       & 0         & b_n       \\
 		\end{bmatrix}
-	\]
+	\end{equation*}
 
 	\question Fie sistemul de ecua\c{t}ii:
 	\begin{equation*}
 		\begin{cases}
-			1.5 \cdot x_1 - 2.1 \cdot x_2 = 8.3 \\
-			-7.6 \cdot x_1 + 3.11 \cdot x_2 = 6.7
+			1.5  x_1 - 2.1 x_2 = 8.3 \\
+			-7.6 x_1 + 3.11 x_2 = 6.7
 		\end{cases}
 	\end{equation*}
 	Rezolvați sistemul folosind eliminare GPP, GPPS, GPT.
 
 \end{questions}
-
-\begin{thebibliography}{1}
-
-	\bibitem{AlgLinNegrescu}
-	Alexandru Negrescu. Algebra Liniară. O abordare prietenoasă, 2025, 15(2): 502-505. doi: 10.3934/naco.2023025
-
-\end{thebibliography}
 
 \end{document}

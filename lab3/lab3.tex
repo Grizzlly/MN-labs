@@ -48,7 +48,7 @@
 
 % Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
 \newcommand{\octavescript}[2]{
-\lstinputlisting[caption=#2,label=#1]{#1}
+	\lstinputlisting[caption=#2]{#1}
 }
 
 \newcommand{\MNLab}{Laborator\ \#3}
@@ -81,6 +81,7 @@
 \begin{coverpages}
 
 	\maketitle
+	\thispagestyle{empty}
 	\tableofcontents
 
 \end{coverpages}
