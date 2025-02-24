@@ -10,8 +10,11 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{tkz-euclide}
+\usepackage{pgfplots}
 
 \usetikzlibrary{angles,quotes,calc}
+
+\pgfplotsset{compat=1.18}
 
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
@@ -260,10 +263,10 @@ gândim astfel:
 	\end{tikzpicture}
 \end{center}
 
-\par Avem și o interpretare geometrică a produsului scalar: produsul dintre
+Avem și o interpretare geometrică a produsului scalar: produsul dintre
 norma proiecției pe un vector și norma vectorului pe care se proiectează.
 
-\par Definim operatorul de proiecție astfel: $proj_y x = \frac{||x|| \cos (\theta)}{||y||} y = \frac{\langle x, y \rangle}{\langle y, y \rangle} y$.
+Definim operatorul de proiecție astfel: $proj_y x = \frac{||x|| \cos (\theta)}{||y||} y = \frac{\langle x, y \rangle}{\langle y, y \rangle} y$.
 
 \begin{equation*}
 	proj_y x = \frac{||x|| \cos (\theta)}{||y||} y = \frac{||y||||x|| \cos (\theta)}{||y||^2} y = \frac{\langle x, y \rangle}{\langle y, y \rangle} y
@@ -653,6 +656,197 @@ matricei, deci am putea calcula mai multe rotații în paralel. Ca și regulă,
 Householder se folosește pentru matrici dense, iar Givens pentru matrici
 rare.
 
+\subsection{Tehnici pentru sisteme inconsistente. Regresii liniare în sens CMMP.}
+
+Sunt cazuri în care sistemul $\mathbf{Ax} = \mathbf{b}$ nu are soluție, chiar
+din modul în care a fost construit ($A$ nepătratică). Totuși, ne punem
+următoarea problemă:
+
+Găsește $\mathbf{x}$ astfel încât $||\mathbf{Ax} - \mathbf{b}||_2$ să fie minim.
+
+\textbf{Explicație analitică.} Propoziția de mai sus este echivalentă cu găsirea
+minimului lui $||\mathbf{Ax} - \mathbf{b}||_2^2$. În cazul acesta putem face
+referire la produsul scalar:
+\begin{align*}
+	||\mathbf{Ax} - \mathbf{b}||_2^2 & = \langle Ax - b, Ax - b \rangle                                          \\
+	                                 & = \langle Ax, Ax \rangle - 2 \langle Ax, b \rangle + \langle b, b \rangle \\
+	                                 & = x^T A^T A x - 2 x^T A^T b + b^T b
+\end{align*}
+
+Astfel, transformăm problema în una de optimizare, unde ne dorim să
+găsim $\mathbf{x}$ astfel încât funcția
+\begin{equation*}
+	\mathbf{f(x) = x^T A^T A x - 2 x^T A^T b + b^T b}
+\end{equation*}
+să fie minimă.
+
+Gradientul și hessiana funcției sunt:
+\begin{align*}
+	\mathbf{\nabla f(x)} & \mathbf{= 2 A^T A x - 2 A^T b = 2 (A^T A x - A^T b)} \\
+	\mathbf{H(x)}        & = \mathbf{2 A^T A}
+\end{align*}
+
+Hessiana este o matrice semi-pozitiv definită, având toate valorile proprii mai
+mari sau egale cu 0. Deci minimul este ar fi atins când gradientul este 0, adică
+\begin{equation*}
+	\mathbf{A^T A x - A^T b = 0}
+\end{equation*}
+
+Practic, rămâne să rezolvăm sistemul $A^T A x = A^T b$. În cazul regresiei
+liniare, sistemul nu se poate rezolva atunci cand nu avem un set de date cu cel
+puțin 2 puncte (trebuie să trasăm o dreapta iar dreapta este definită de două)
+puncte.
+
+\textbf{Explicație geometrică.} În cazul cel mai simplu, ne putem gândi la
+distanța de la un punct la o dreaptă. Distanța este dată de segmentul
+perpendicular de la punct la dreaptă. În cazul a doi vectori, distanța este
+dată de diferența dintre un vector și proiecția sa pe celălalt vector.
+\begin{center}
+	\begin{tikzpicture}[vect/.style={->,>={Straight Barb[angle=60:2pt 3]}}]
+		\tkzInit[xmin=0,xmax=3,ymin=0,ymax=2]% dimensions of the bounding box
+		\tkzDrawX[noticks,label=,draw=none]% coordinate system
+		\tkzDrawY[noticks,label=,draw=none]
+
+		\tkzDefPoint(0,0){O}
+		\tkzDefPoint[label=$\mathbf{b}$](1.5,2){A}
+		\tkzDefPoint[label=$\mathbf{a}$](2.5,0){B}
+		\tkzDefPoint[label=$\mathbf{p}$](1.5,0){M}
+
+		% draw dotted from a to c
+		\draw[dotted] (A) -- (M);
+		\tkzDrawSegments[vect](O,A O,B O,M)
+	\end{tikzpicture}
+\end{center}
+
+Practic, vectorul $\mathbf{p}$ este vectorul cel mai apropiat de $\mathbf{b}$,
+din span-ul lui $\mathbf{a}$. Fie $||a||_2 = 1$, atunci $\mathbf{p}$ este
+\begin{align*}
+	\mathbf{p} & = \mathbf{\frac{\langle b, a \rangle}{\langle a, a \rangle} a} \\
+	           & = \mathbf{a \langle b, a \rangle}                              \\
+	           & = \mathbf{a a^T b}
+\end{align*}
+
+Definim $P = a a^T$ ca fiind \textit{matricea de proiecție} pe $a$. Dacă $a$ nu
+are norma 1, atunci $P = \frac{a a^T}{a^T a}$.
+
+Cum proiectăm pe un plan? Contstruim matricea $A = \begin{bmatrix} a_1 & a_2 \end{bmatrix}$,
+care reprezintă baza planului. Proiectția pe plan este dată de suma proiecțiilor
+pe baza planului, adică $\mathbf{p} = x_1 \mathbf{a_1} + x_2 \mathbf{a_2} = A \mathbf{x}$.
+Cum $b - p = b - Ax$ este perpendicular pe plan, din construcție, avem
+următoarele relații:
+\begin{align*}
+	\mathbf{a_1^T (b - Ax)} & \mathbf{= 0} \\
+	\mathbf{a_2^T (b - Ax)} & \mathbf{= 0}
+\end{align*}
+
+Ecvhivalent, în forma matriceală, avem $A^T (b - Ax) = 0$. Rezultă că
+$A^T A x = A^T b$. Soluția este dată de $x = (A^T A)^{-1} A^T b$. De aici putem
+obține matricea de proiecție:
+\begin{align*}
+	\mathbf{x = }      & \mathbf{(A^T A)^{-1} A^T b}     \\
+	\mathbf{p = A x =} & = \mathbf{A (A^T A)^{-1} A^T b} \\
+	\mathbf{P = }      & \mathbf{A (A^T A)^{-1} A^T}
+\end{align*}
+
+Orice matrice de proiecție are proprietatea că $P^2 = P$. Mai mult, în acest caz
+avem că $P^T = P$.
+
+\textbf{Exemplu.} Într-un cartier de case încercăm să prezicem prețul unei case
+în funcție de suprafața casei. Avem următoarele date:
+
+\begin{center}
+	\begin{tabular}{|c|c|}
+		\hline
+		Suprafața (m2) & Prețul (1000 RON) \\
+		\hline
+		1400           & 245               \\
+		1600           & 312               \\
+		1700           & 279               \\
+		1875           & 308               \\
+		1100           & 199               \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Punem pe grafic acest set de date:
+\begin{center}
+	\begin{tikzpicture}
+		\begin{axis}[
+				xlabel=Suprafața (m2),
+				ylabel=Prețul (1000 RON),
+				axis lines=middle,
+				axis equal,
+				xmin=1000,
+				xmax=2000,
+				ymin=150,
+				ymax=350,
+				xtick={1000, 1200, 1400, 1600, 1800,  2000},
+				ytick={150, 200, 250, 300, 350},
+			]
+			\addplot[only marks] table {
+					1400 245
+					1600 312
+					1700 279
+					1875 308
+					1100 199
+				};
+		\end{axis}
+	\end{tikzpicture}
+\end{center}
+
+Se obervă o relație liniară între suprafață și preț, dată de $y = a_1 x + a_2$.
+Formulăm această problemă ca un sistem de ecuații liniare:
+\begin{align*}
+	\begin{bmatrix}
+		1400 & 1 \\
+		1600 & 1 \\
+		1700 & 1 \\
+		1875 & 1 \\
+		1100 & 1
+	\end{bmatrix}
+	\begin{bmatrix}
+		a_1 \\
+		a_2
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		245 \\
+		312 \\
+		279 \\
+		308 \\
+		199
+	\end{bmatrix} \\
+\end{align*}
+
+Soluția este dată de rezolvarea sistemului $A^T A x = A^T b$. După rezolvare,
+găsim că $a_1 = 0.1450$ și $a_2 = 46.0575$. Graficul dreptei de regresie este:
+\begin{center}
+	\begin{tikzpicture}
+		\begin{axis}[
+				xlabel=Suprafața (m2),
+				ylabel=Prețul (1000 RON),
+				axis lines=middle,
+				axis equal,
+				xmin=1000,
+				xmax=2000,
+				ymin=150,
+				ymax=350,
+				xtick={1000, 1200, 1400, 1600, 1800,  2000},
+				ytick={150, 200, 250, 300, 350},
+			]
+			\addplot[only marks] table {
+					1400 245
+					1600 312
+					1700 279
+					1875 308
+					1100 199
+				};
+			\addplot[domain=1000:2000, color=red]{0.1450 * x + 46.0575};
+		\end{axis}
+	\end{tikzpicture}
+\end{center}
+
+
 \section{Probleme}
 
 \begin{questions}
@@ -662,12 +856,16 @@ rare.
 	\question Script MATLAB pentru descompunerea QR a unei matrice folosind reflexii Householder.
 	\question Script MATLAB pentru descompunerea QR a unei matrice folosind rotații Givens.
 	\question Demonstrați că matricea Householder este simetrică.
+	\question Aduceți o matrice 3x3 Householder la forma diagonală folosind
+	rotații Givens.
 	\question Să se determine descompunerea QR pentru matricea
 	$A$ = $\begin{bmatrix}
 			3  & 1 & -2 \\
 			1  & 3 & 1  \\
 			-2 & 1 & 3  \\
 		\end{bmatrix}$ folosind transformarea Givens.
+	\question Regresie liniară în sens CMMP pe propriul set de date. Trasați
+	graficele punctelor și a dreptei. Hint: \verb|hold on|
 \end{questions}
 
 \begin{thebibliography}{1}
