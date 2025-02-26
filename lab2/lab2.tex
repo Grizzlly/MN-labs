@@ -64,15 +64,16 @@
 
 \title{
 \textmd{\textbf{\MNLabTitle}}
-\author{Colaboratori: \MNAuthor}
+\author{}
+\date{}
 }
 
 \pagestyle{headandfoot}
 
 \header{Metode Numerice}
-{\MNLabTitleHeader, Pagina \thepage\ din \numpages}
+{\MNLabTitleHeader}
 {2025}
-\footer{Facultatea de Automatică și Calculatoare}{}{Pagina \thepage\ din \numpages}
+\footer{Facultatea de Automatică și Calculatoare, Politehnica București}{}{Pagina \thepage\ din \numpages}
 
 \begin{document}
 
@@ -97,13 +98,13 @@
 
 \subsection{Complexitatea regulii Cramer}
 
-\par La liceu sistemele de ecuaţii se rezolvau folosing
-\textit{regula lui Cramer}. În continuare, demonstrăm de ce această abordare,
+\par La liceu, sistemele de ecuaţii se rezolvau folosind
+\textit{regula lui Cramer}. În continuare, demonstrăm de ce această abordare
 este ineficientă computațional.
 
 \par Fie un sistem de $n$ ecuaţii cu $n$ necunoscute, $Ax = b$, cu $det(A) \neq 0$.
 Folosind regula lui Cramer urmează să calculăm $n$ determinanți pentru fiecare
-necuoscută, înlocuind pe rând coloane din $A$ cu $b$. În total, calculăm
+necunoscută, înlocuind pe rând coloane din $A$ cu $b$. În total, calculăm
 $n + 1$ determinanți.
 
 \par Determinantul unei matrici se poate calcula în două moduri:
@@ -119,28 +120,28 @@ $n + 1$ determinanți.
 \par Cu $A_{ij}$ am notat matricea de dimensiune $(n - 1) \times (n - 1)$
 rezultată din suprimarea (eliminarea) liniei $i$ și a coloanei $j$. Cu alte
 cuvinte, pentru calcularea unui determinant de ordin $n$ trebuie să calculăm
-$n$ determinanți de ordin $n - 1$. În total, pentru calcularea determinantului
-de ordin $n$ am avea:
+$n$ determinanți de ordinul $n - 1$. În total, pentru calcularea determinantului
+de ordin $n$, am avea:
 
 \begin{equation}
 	n \cdot (n - 1) \cdot (n - 2) \cdot ... \cdot 1 = n!
 \end{equation}
 
-\par În cazul unui sistem de $n$ ecuații cu $n$ necunoscute, folosind ecuația 3,
-avem o complexitate de ordinul $O(n!)$. Pe mai departe, vom explora metode mai
+\par În cazul unui sistem de $n$ ecuații cu $n$ necunoscute, conform (3),
+avem o complexitate de ordinul $O(n!)$. Mai departe vom explora metode mai
 eficiente de calcul, de ordinul $O(n^3)$.
 
 \newpage
 \subsection{Factorizarea LU}
 
-\par Factorizarea (sau descomponerea) unei matrici are aplicabilitate foarte
+\par Factorizarea (sau descomponerea) unei matrici are o aplicabilitate importantă
 în analiza numerică. Pentru rezolvarea sistemelor liniare, vom discuta despre
-factorizarea LU și QR.
+factorizările LU și QR.
 
 \par Factorizarea LU presupune descompunerea unei matrici pătratice $A$ într-un
 produs de două matrici, $L$ și $U$, unde $L$ este o matrice inferior
 triunghiulară, iar $U$ este o matrice superior triunghiulară. Astfel, putem
-scrie $A = LU$. Astfel sistemul de ecuații $Ax = b$ se transformă în două
+scrie $A = LU$. Drept urmare, sistemul de ecuații $Ax = b$ se transformă în două
 sisteme:
 
 \begin{gather*}
@@ -149,7 +150,7 @@ sisteme:
 \end{gather*}
 
 \par Aceste sisteme se numesc \textit{triunghiulare} și se pot rezolva în $O(n^2)$.
-Astfel avem 2 pași de făcut:
+Așadar, avem 2 pași de făcut:
 
 \begin{enumerate}
 	\item Descompunerea matricei $A$ în $L$ și $U$;
@@ -179,15 +180,15 @@ Astfel avem 2 pași de făcut:
 	\end{bmatrix}
 \end{equation*}
 
-\par Prin efectuarea deescompunerii direct, ar rezulta un sistem cu $n^2$
+\par Prin efectuarea descompunerii direct, ar rezulta un sistem cu $n^2$
 ecuații și $n^2 + n$ necunoscute. Putem "scăpa" de necunoscutele în plus
 folosind mai multe metode, cele mai cunoscute fiind \textit{Crout},
 \textit{Doolittle} și \textit{Cholesky}.
 
 \textbf{Metoda Crout}
 
-\par Metoda Crout prespune ca toate elementele de pe diagonala matricei $U$ să
-fie egale cu 1. Astfel, pentru o matrice $3 \times 3$, putem scrie sistemul de
+\par Metoda Crout presupune ca toate elementele de pe diagonala matricei $U$ să
+fie egale cu 1. Astfel, pentru o matrice de dimensiune $3 \times 3$, putem scrie sistemul de
 ecuaţii:
 
 \begin{align*}
@@ -199,7 +200,7 @@ ecuaţii:
 \par Algoritmul în MATLAB pentru Crout poate fi gândit astfel:
 
 \begin{enumerate}
-	\item Folosesc un indice $p$ cu care mă plimb pe coloane;
+	\item Folosim un indice $p$ cu care ne "plimbăm" pe coloane;
 	\item Observăm că pentru fiecare coloană avem două seturi de ecuaţii:
 	      \begin{itemize}
 		      \item Din primele $p - 1$ ecuații putem calcula $u_{ip}, \forall j \in \{1, 2, \ldots, p - 1\}$;
@@ -219,13 +220,13 @@ de ecuaţii:
 \begin{align*}
 	u_{11}       & = a_{11} & u_{12}                      & = a_{12} & u_{13}                              & = a_{13} \\
 	l_{21}u_{11} & = a_{21} & l_{21}u_{12} + u_{22}       & = a_{22} & l_{21}u_{13} + u_{23}               & = a_{23} \\
-	l_{31}u_{11} & = a_{31} & l_{31}u_{12} + l_{32}u_{22} & = a_{32} & l_{31}u_{13} + l_{32}u_{23} + u{33} & = a_{33}
+	l_{31}u_{11} & = a_{31} & l_{31}u_{12} + l_{32}u_{22} & = a_{32} & l_{31}u_{13} + l_{32}u_{23} + u_{33} & = a_{33}
 \end{align*}
 
 \par Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
 
 \begin{enumerate}
-	\item Folosesc un indice $p$ cu care mă plimb pe linii;
+	\item Folosim un indice $p$ cu care ne "plimbăm" pe linii;
 	\item Observăm că pentru fiecare linie avem două seturi de ecuaţii:
 	      \begin{itemize}
 		      \item Din primele $p - 1$ ecuații putem calcula $l_{pi}, \forall i \in \{1, 2, \ldots, p - 1\}$;
@@ -283,14 +284,14 @@ $x^* A x > 0$. $\blacksquare$
 \par Algoritmul în MATLAB pentru Cholesky poate fi gândit astfel:
 
 \begin{enumerate}
-	\item Folosesc un indice $p$ cu care mă plimb pe linii și cu $i$ pe coloane;
+	\item Folosim un indice $p$ cu care ne ”plimbăm” pe linii și un alt indice $i$ cu care ne ”plimbăm” pe coloane;
 	\item Observăm că avem 2 tipuri de ecuaţii:
 	      \begin{itemize}
 		      \item $i = p$: Putem calcula $l_{pp} = \sqrt{a_{pp} - \sum_{j = 1}^{i}{l_{pj}^2}}$;
 		      \item $t \neq p$: Putem calcula $l_{pi} = \frac{a_{pi} - \sum_{j = 1}^{i}{l_{pj} l_{ij}}}{l_{ii}}$.
 	      \end{itemize}
 	\item Pentru că matricea $A$ este simetrică, putem ignora partea de deasupra
-	      diagonalei principală a sistemului.
+	      diagonalei principale a sistemului.
 	\item Se observă că cele două sume sunt echivalente atunci când $p = i$.
 \end{enumerate}
 
@@ -298,7 +299,7 @@ $x^* A x > 0$. $\blacksquare$
 
 \subsubsection{Rezolvarea sistemelor triunghiulare}
 
-\par Sisteme triunghiulare pot fi de 2 tipuri, \textit{superioare} sau
+\par Sistemele triunghiulare pot fi de 2 tipuri, \textit{superioare} sau
 \textit{inferioare}, în funcție de tipul matricei. Tratăm prima data cazul
 sistemelor superior triunghiulare.
 
