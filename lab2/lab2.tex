@@ -62,6 +62,8 @@
 
 \setlength{\parskip}{0.5\baselineskip}
 
+\mathtoolsset{centercolon}
+
 \graphicspath{{./img/}}
 
 \title{
@@ -214,12 +216,9 @@ ecuaţii:
 \begin{algorithm}
 	\caption{Metoda Crout}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} Matrix \( A \) of size \( n \times n \)
-		\State \textbf{Output:} Matrices \( L \) and \( U \) such that \( A = L \cdot U \)
-
-		\State \( n \gets \text{rows of } A \)
-		\State \( L \gets \text{zero matrix of size } n \times n \)
-		\State \( U \gets \text{identity matrix of size } n \times n \)
+		\State \( n \gets \text{numărul de linii a matricei } A \)
+		\State \( L \gets \text{matricea 0 de dimensiune } n \times n \)
+		\State \( U \gets \text{matricea identitate de dimensiune } n \times n \)
 
 		\For{$p = 1$ to $n$}
 		\For{$i = 1$ to $p - 1$}
@@ -235,18 +234,16 @@ ecuaţii:
 
 \textbf{Metoda Doolittle}
 
-\par Metoda Doolittle presupune ca toate elementele de pe diagonala matricei $L$
+Metoda Doolittle presupune ca toate elementele de pe diagonala matricei $L$
 să fie egale cu 1. Astfel, pentru o matrice $3 \times 3$, putem scrie sistemul
 de ecuaţii:
-
 \begin{align*}
 	u_{11}       & = a_{11} & u_{12}                      & = a_{12} & u_{13}                               & = a_{13} \\
 	l_{21}u_{11} & = a_{21} & l_{21}u_{12} + u_{22}       & = a_{22} & l_{21}u_{13} + u_{23}                & = a_{23} \\
 	l_{31}u_{11} & = a_{31} & l_{31}u_{12} + l_{32}u_{22} & = a_{32} & l_{31}u_{13} + l_{32}u_{23} + u_{33} & = a_{33}
 \end{align*}
 
-\par Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
-
+Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
 \begin{enumerate}
 	\item Folosim un indice $p$ cu care ne "plimbăm" pe linii;
 	\item Observăm că pentru fiecare linie avem două seturi de ecuaţii:
@@ -262,12 +259,9 @@ de ecuaţii:
 \begin{algorithm}
 	\caption{Metoda Doolittle}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} Matrix \( A \) of size \( n \times n \)
-		\State \textbf{Output:} Matrices \( L \) and \( U \) such that \( A = L \cdot U \)
-
-		\State \( n \gets \text{rows of } A \)
-		\State \( L \gets \text{identity matrix of size } n \times n \)
-		\State \( U \gets \text{zero matrix of size } n \times n \)
+		\State \( n \gets \text{numărul de linii a matricei } A \)
+		\State \( L \gets \text{matricea identitate de dimensiune } n \times n \)
+		\State \( U \gets \text{matricea 0 de dimensiune } n \times n \)
 
 		\For{$p = 1$ to $n$}
 		\For{$i = 1$ to $p - 1$}
@@ -344,11 +338,8 @@ $x^* A x > 0$. $\blacksquare$
 \begin{algorithm}
 	\caption{Metoda Cholesky}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} Symmetric Positive Definite Matrix \( A \) of size \( n \times n \)
-		\State \textbf{Output:} Lower Triangular Matrix \( L \) such that \( A = L \cdot L^T \)
-
-		\State \( n \gets \text{rows of } A \)
-		\State \( L \gets \text{zero matrix of size } n \times n \)
+		\State \( n \gets \text{numărul de linii a matricei } A \)
+		\State \( L \gets \text{matrice 0 de dimensiune } n \times n \)
 
 		\For{$p = 1$ to $n$}
 		\For{$i = 1$ to $p$}
@@ -369,7 +360,6 @@ $x^* A x > 0$. $\blacksquare$
 \par Sistemele triunghiulare pot fi de 2 tipuri, \textit{superioare} sau
 \textit{inferioare}, în funcție de tipul matricei. Tratăm prima data cazul
 sistemelor superior triunghiulare.
-
 \begin{align*}
 	a_{11} x_1 + a_{12} x_2 + \ldots + a_{1n} x_n & = b_1 \\
 	a_{22} x_2 + \ldots + a_{2n} x_n              & = b_2 \\
@@ -379,7 +369,6 @@ sistemelor superior triunghiulare.
 
 \par Pentru a rezolva un sistem superior triunghiular, putem folosi metoda
 \textit{substituției înapoi}:
-
 \begin{equation}
 	x_i = \frac{b_i - \sum_{j = i + 1}^{n}{a_{ij} x_j}}{a_{ii}}, \quad \forall i \in \{n, n - 1, \ldots, 1\}
 \end{equation}
@@ -389,11 +378,8 @@ sistemelor superior triunghiulare.
 \begin{algorithm}
 	\caption{Substituție înapoi pentru sisteme triunghiulare superioare}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} Upper triangular matrix \( A \) of size \( n \times n \), vector \( b \) of size \( n \)
-		\State \textbf{Output:} Solution vector \( x \) such that \( A \cdot x = b \)
-
-		\State \( n \gets \text{rows of } A \)
-		\State \( x \gets \text{zero vector of size } n \)
+		\State \( n \gets \text{numărul de linii a matricei } A \)
+		\State \( x \gets \text{vector plin de 0 de mărime} n \)
 
 		\For{$i = n$ to $1$ \textbf{step} $-1$}
 		\State \( x(i) \gets \frac{b(i) - A(i, (i+1):n) \cdot x((i+1):n)}{A(i, i)} \)
@@ -401,8 +387,7 @@ sistemelor superior triunghiulare.
 	\end{algorithmic}
 \end{algorithm}
 
-\par Sistemele inferior triunghiulare arată similar:
-
+Sistemele inferior triunghiulare arată similar:
 \begin{align*}
 	a_{11} x_1                       & = b_1 \\
 	a_{21} x_1 + a_{22} x_2          & = b_2 \\
@@ -410,9 +395,8 @@ sistemelor superior triunghiulare.
 	a_{n1} x_1 + \ldots + a_{nn} x_n & = b_n
 \end{align*}
 
-\par Pentru a rezolva un sistem inferior triunghiular, putem folosi metoda
+Pentru a rezolva un sistem inferior triunghiular, putem folosi metoda
 \textit{substituției înainte}:
-
 \begin{equation}
 	x_i = \frac{b_i - \sum_{j = 1}^{i - 1}{a_{ij} x_j}}{a_{ii}}, \quad \forall i \in \{1, 2, \ldots, n\}
 \end{equation}
@@ -422,11 +406,8 @@ sistemelor superior triunghiulare.
 \begin{algorithm}
 	\caption{Substituție înainte pentru sisteme triunghiulare inferioare}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} Lower triangular matrix \( A \) of size \( n \times n \), vector \( b \) of size \( n \)
-		\State \textbf{Output:} Solution vector \( x \) such that \( A \cdot x = b \)
-
-		\State \( n \gets \text{rows of } A \)
-		\State \( x \gets \text{zero vector of size } n \)
+		\State \( n \gets \text{numărul de linii a matricei } A \)
+		\State \( x \gets \text{vector plin de 0 de mărime} n \)
 
 		\For{$i = 1$ to $n$}
 		\State \( x(i) \gets \frac{b(i) - A(i, 1:(i-1)) \cdot x(1:(i-1))}{A(i, i)} \)
@@ -435,7 +416,157 @@ sistemelor superior triunghiulare.
 	\end{algorithmic}
 \end{algorithm}
 
-\newpage
+\subsection{Inversarea matricilor prin partiționare}
+
+Partiționarea matricilor este o tehnică folosită pentru a simplifica operațiile
+cu matrice. Dacă partiționăm bine, atunci putem paraleliza operațiile pe blocuri,
+scăzând astfel timpul de execuție.
+
+\subsubsection{Matrice blocuri}
+
+Fie matricea $A = \begin{bmatrix} 1 & 2 & 3 & 4 \\ 5 & 6 & 7 & 8 \\ 9 & 10 & 11 & 12 \\ 13 & 14 & 15 & 16\end{bmatrix}$.
+Aceasta poate fi împărțită, de exemplu, în 4 blocuri de dimensiune $2 \times 2$,
+$A = \begin{bmatrix} A_{11} & A_{12} \\ A_{21} & A_{22} \end{bmatrix}$, unde
+\begin{equation*}
+	\begin{split}
+		A_{11} = \begin{bmatrix} 1 & 2 \\ 5 & 6 \end{bmatrix}
+	\end{split}
+	\quad
+	\begin{split}
+		A_{12} = \begin{bmatrix} 3 & 4 \\ 7 & 8 \end{bmatrix}
+	\end{split}
+	\quad
+	\begin{split}
+		A_{21} = \begin{bmatrix} 9 & 10 \\ 13 & 14 \end{bmatrix}
+	\end{split}
+	\quad
+	\begin{split}
+		A_{22}  = \begin{bmatrix} 11 & 12 \\ 15 & 16 \end{bmatrix}
+	\end{split}
+\end{equation*}
+
+Pentru matrici conforme, operațiile de adunare și înmulțire se pot face pe
+blocuri. De exemplu, pentru adunare:
+\begin{equation*}
+	A + B = \begin{bmatrix} A_{11} & A_{12} \\ A_{21} & A_{22} \end{bmatrix} + \begin{bmatrix} B_{11} & B_{12} \\ B_{21} & B_{22} \end{bmatrix} = \begin{bmatrix} A_{11} + B_{11} & A_{12} + B_{12} \\ A_{21} + B_{21} & A_{22} + B_{22} \end{bmatrix}
+\end{equation*}
+
+Iar pentru înmulțire:
+\begin{equation*}
+	A B = \begin{bmatrix} A_{11} & A_{12} \\ A_{21} & A_{22} \end{bmatrix} \begin{bmatrix} B_{11} & B_{12} \\ B_{21} & B_{22} \end{bmatrix} = \begin{bmatrix} A_{11} B_{11} + A_{12} B_{21} & A_{11} B_{12} + A_{12} B_{22} \\ A_{21} B_{11} + A_{22} B_{21} & A_{21} B_{12} + A_{22} B_{22} \end{bmatrix}
+\end{equation*}
+
+\subsubsection{Complementul lui Schur}
+\textit{Complementul lui Schur} \cite{Schur1917} apare atunci când pe o matrice bloc aplicăm
+eliminarea Gaussiană. Fie matricea $M = \begin{bmatrix} A & B \\ C & D \end{bmatrix}$.
+Pentru a elimina elementele de sub diagonala principală (matricea $C$) astfel:
+\begin{align*}
+	\begin{bmatrix}
+		I         & 0 \\
+		-C A^{-1} & I
+	\end{bmatrix}
+	\begin{bmatrix}
+		A & B \\
+		C & D
+	\end{bmatrix}
+	 & =
+	\begin{bmatrix}
+		A & B              \\
+		0 & D - C A^{-1} B
+	\end{bmatrix} \\
+	\begin{bmatrix}
+		A & B \\
+		C & D
+	\end{bmatrix}
+	\begin{bmatrix}
+		I         & 0 \\
+		-D^{-1} C & I
+	\end{bmatrix}
+	 & =
+	\begin{bmatrix}
+		A - B D^{-1} C & B \\
+		0              & D
+	\end{bmatrix}
+\end{align*}
+
+Astfel, complementul lui Schur este definit:
+\begin{align*}
+	M/A & \vcentcolon = D - C A^{-1} B, \text{ dacă } A \text{ inversabilă} \\
+	M/D & \vcentcolon = A - B D^{-1} C, \text{ dacă } D \text{ inversabilă}
+\end{align*}
+
+\subsubsection{Calcularea inversei}
+Continuăm cu eliminarea Gaussiană pentru a calcula inversa unei matrici.
+\begin{align*}
+	\begin{bmatrix}
+		I & -B (M/A)^{-1} \\
+		0 & I
+	\end{bmatrix}
+	\begin{bmatrix}
+		A & B     \\
+		0 & (M/A)
+	\end{bmatrix}
+	 & =
+	\begin{bmatrix}
+		A & 0     \\
+		0 & (M/A)
+	\end{bmatrix} \\
+	\begin{bmatrix}
+		A^{-1} & 0          \\
+		0      & (M/A)^{-1}
+	\end{bmatrix}
+	\begin{bmatrix}
+		A & 0     \\
+		0 & (M/A)
+	\end{bmatrix}
+	 & =
+	\begin{bmatrix}
+		I & 0 \\
+		0 & I
+	\end{bmatrix}
+\end{align*}
+
+Astfel, inversa va fi (dacă și $M/A$ este inversabilă):
+\begin{align*}
+	M^{-1} & =
+	\begin{bmatrix}
+		A^{-1} & 0          \\
+		0      & (M/A)^{-1}
+	\end{bmatrix}
+	\begin{bmatrix}
+		I & -B (M/A)^{-1} \\
+		0 & I
+	\end{bmatrix}
+	\begin{bmatrix}
+		I         & 0 \\
+		-C A^{-1} & I
+	\end{bmatrix}                            \\
+	       & = \begin{bmatrix}
+		           A^{-1} & 0          \\
+		           0      & (M/A)^{-1}
+	           \end{bmatrix}
+	\begin{bmatrix}
+		I + B (M/A)^{-1} C A^{-1} & -B (M/A)^{-1} \\
+		- C A^{-1}                & I
+	\end{bmatrix} \\
+	       & =
+	\begin{bmatrix}
+		A^{-1} + A^{-1} B (M/A)^{-1} C A^{-1} & -A^{-1} B (M/A)^{-1} \\
+		- (M/A)^{-1} C A^{-1}                 & (M/A)^{-1}
+	\end{bmatrix}
+\end{align*}
+
+Dacă $D$ și $M/D$ este inversbilă atunci putem scrie
+\begin{equation*}
+	M^{-1} = \begin{bmatrix} (M/D)^{-1} & -(M/D)^{-1} B D^{-1} \\ -D^{-1} C (M/D)^{-1} & D^{-1} + D^{-1} C (M/D)^{-1} B D^{-1} \end{bmatrix}
+\end{equation*}
+
+Dacă și $A$ și $D$ sunt inversabile, atunci, egalând cele două matrice pentru
+inversă, putem ajunge la următoarea factorizare:
+\begin{equation*}
+	M^{-1} = \begin{bmatrix} (M/D)^{-1} & 0 \\ 0 & (M/A)^{-1} \end{bmatrix} \begin{bmatrix} I & -B D^{-1} \\ -C A^{-1} & I \end{bmatrix}
+\end{equation*}
+
 \section{Probleme}
 
 \begin{questions}
@@ -444,7 +575,6 @@ sistemelor superior triunghiulare.
 
 	\question Pentru matricea dată mai jos, determinați matricele $L$ și $U$
 	folosind metoda Crout.
-
 	\begin{equation*}
 		\begin{bmatrix}
 			1 & 2  & 3  \\
@@ -456,15 +586,26 @@ sistemelor superior triunghiulare.
 	\question Pentru matricea de la exerciţiul anterior aplicați factorizarea
 	Doolittle.
 
+	\question Pentru matricea $A = \begin{bmatrix} 14 & 8 & 3 \\ 8 & 5 & 2 \\ 3 & 2 & 1 \end{bmatrix}$
+	verificați dacă este pozitiv definită folosind teorema cercurilor Gershgorin.
+	Aplicați factorizarea Cholesky.
+
 	\question Scrieți două funcții în MATLAB care să rezolve un sistem de
 	ecuații superior triunghiular, respectiv inferior triunghiular. Folosiți
 	următoarele prototipuri:
-
 	\begin{verbatim}
 	function x = superior(U, b)
 	function x = inferior(U, b)
 	\end{verbatim}
 
+	\question Scrieți o funcție în MATLAB pentru fiecare din cele 3 descompuneri
+	studiate.
+
+	\question Calculați inversa pentru matricea $A = \begin{bmatrix} 4 & 0 & 0 & 0 \\ 0 & 0 & 2 & 0 \\ 0 & 1 & 2 & 0 \\ 1 & 0 & 0 & 1 \end{bmatrix}$.
+
 \end{questions}
+
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}
