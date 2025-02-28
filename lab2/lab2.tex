@@ -379,7 +379,7 @@ sistemelor superior triunghiulare.
 	\caption{Substituție înapoi pentru sisteme triunghiulare superioare}
 	\begin{algorithmic}[1]
 		\State \( n \gets \text{numărul de linii a matricei } A \)
-		\State \( x \gets \text{vector plin de 0 de mărime} n \)
+		\State \( x \gets \text{vector plin de 0 de dimensiune } n \)
 
 		\For{$i = n$ to $1$ \textbf{step} $-1$}
 		\State \( x(i) \gets \frac{b(i) - A(i, (i+1):n) \cdot x((i+1):n)}{A(i, i)} \)
@@ -407,7 +407,7 @@ Pentru a rezolva un sistem inferior triunghiular, putem folosi metoda
 	\caption{Substituție înainte pentru sisteme triunghiulare inferioare}
 	\begin{algorithmic}[1]
 		\State \( n \gets \text{numărul de linii a matricei } A \)
-		\State \( x \gets \text{vector plin de 0 de mărime} n \)
+		\State \( x \gets \text{vector plin de 0 de dimensiune } n \)
 
 		\For{$i = 1$ to $n$}
 		\State \( x(i) \gets \frac{b(i) - A(i, 1:(i-1)) \cdot x(1:(i-1))}{A(i, i)} \)
