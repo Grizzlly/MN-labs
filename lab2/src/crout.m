@@ -1,9 +1,9 @@
 A = [14 8 3; 8 5 2; 3 2 1];
 
-n = size(A)(1);
+[n, ~] = size(A);
 
-L = zeros(size(A));
-U = eye(size(A));
+L = zeros(n);
+U = eye(n);
 
 for p = 1 : n
 	for i = 1 : p - 1
