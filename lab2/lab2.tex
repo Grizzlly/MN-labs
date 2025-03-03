@@ -141,7 +141,7 @@ eficiente de calcul, de ordinul $O(n^3)$.
 factorizările LU și QR.
 
 \par Factorizarea LU presupune descompunerea unei matrici pătratice $A$ într-un
-produs de două matrici, $L$ și $U$, unde $L$ este o matrice inferior
+produs de două matrice, $L$ și $U$, unde $L$ este o matrice inferior
 triunghiulară, iar $U$ este o matrice superior triunghiulară. Astfel, putem
 scrie $A = LU$. Drept urmare, sistemul de ecuații $Ax = b$ se transformă în două
 sisteme:
@@ -245,11 +245,11 @@ de ecuaţii:
 
 Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
 \begin{enumerate}
-	\item Folosim un indice $p$ cu care ne "plimbăm" pe linii;
-	\item Observăm că pentru fiecare linie avem două seturi de ecuaţii:
+	\item Folosim un indice $p$ cu care ne "plimbăm" pe coloane;
+	\item Observăm că pentru fiecare coloană avem două seturi de ecuaţii:
 	      \begin{itemize}
-		      \item Din primele $p - 1$ ecuații putem calcula $l_{pi}, \forall i \in \{1, 2, \ldots, p - 1\}$;
-		      \item Din restul, putem calcula $u_{pi}, \forall i \in \{p, p + 1, \ldots, n\}$.
+		      \item Din primele $p$ ecuații putem calcula $u_{ip}, \forall i \in \{1, 2, \ldots, p \}$;
+		      \item Din restul, putem calcula $l_{ip}, \forall i \in \{p + 1, p + 2, \ldots, n\}$.
 	      \end{itemize}
 \end{enumerate}
 
@@ -265,11 +265,11 @@ Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
 
 		\For{$p = 1$ to $n$}
 		\For{$i = 1$ to $p - 1$}
-		\State \( L(p, i) \gets \frac{A(p, i) - L(p, 1:i) \cdot U(1:i, i)}{U(i, i)} \)
+		\State \( U(i, p) \gets A(i, p) - L(i, 1:i) \cdot U(1:i, p) \)
 		\EndFor
 
 		\For{$i = p$ to $n$}
-		\State \( U(p, i) \gets A(p, i) - L(p, 1:i) \cdot U(1:i, i) \)
+		\State \( L(i, p) \gets \frac{A(i, p) - L(i, 1:i) \cdot U(1:i, p)}{U(p, p)} \)
 		\EndFor
 		\EndFor
 	\end{algorithmic}
@@ -280,35 +280,39 @@ Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
 \par Descompunerea Cholesky se remarcă prin faptul că matricea $U$ este setată
 ca fiind transpusa (sau hermitica) matricei $L$, adică $A = LL^*$.
 
-\par Fie o matrice $A$ simetrică de dimensiune $n \times n$.
+Fie o matrice $A$ simetrică de dimensiune $n \times n$.
+\begin{gather*}
+	A \ \text{pozitiv-definită} \Leftrightarrow \mathbf{x}^* A \mathbf{x} > 0, \forall \mathbf{x} \in \mathbb{C}^n \backslash \{\mathbf{0}\} \\
+	A \ \text{pozitiv-semidefinită} \Leftrightarrow \mathbf{x}^* A \mathbf{x} \geq 0, \forall \mathbf{x} \in \mathbb{C}^n \backslash \{\mathbf{0}\}
+\end{gather*}
 
-\begin{equation*}
-	A \ pozitiv-definita \Leftrightarrow \mathbf{x}^* A \mathbf{x} > 0, \forall \mathbf{x} \in \mathbb{C}^n \backslash \{\mathbf{0}\}
-\end{equation*}
-
-\par În același mod se poate defini și conceptul de matrice
+În același mod se poate defini și conceptul de matrice
 \textit{negativ-definită}, înlocuind semnul $>$ cu $<$.
 
-\par Descompunerea Cholesky se poate aplica doar pe matrici simetrice,
-pozitiv-definite.
+Descompunerea Cholesky se poate aplica doar pe matrice simetrice,
+pozitiv-semidefinite. Ne interesează totuși cazul sistemelor consistente, adică
+soluția este unică și matricea $A$ este invers
+
+
+abilă. În acest caz, matricea $A$
+este pozitiv-definită.
 
 \textbf{Demonstrație.} Fie $A$ o matrice oarecare.
-
 \begin{equation*}
 	A = LL^* \implies A^* = LL^* \implies A = A^*
 \end{equation*}
 
-\par Demonstrăm acum că $A$ trebuie să fie pozitiv-definită. Fie $Ax = b$:
+Demonstrăm acum că $A$ trebuie să fie semi pozitiv-definită. Fie $\mathbf{x} \in \mathbb{C}^n \backslash \{\mathbf{0}\}$.
+\begin{equation*}
+	x^* A x = x^* LL^* x = (L^* x)^* (L^* x) \geq 0
+\end{equation*}
 
-\begin{align*}
-	Ax          & = b                             \\
-	x^* A x     & = x^* b                         \\
-	x^* L L^* x & = x^* b, \quad y \coloneq L^* x \\
-	y^* y       & = x^* b
-\end{align*}
+Dacă $A$ este inversabilă, atunci și $L^*$ este inversabilă. Egalitatea în cazul
+de mai sus se obține doar atunci când $x = 0$. Astfel, $A$ este pozitiv-definită.
 
-\par Cum $y^* y > 0 \quad \forall y \neq 0$, rezultă că $x^* b > 0$ și deci
-$x^* A x > 0$. $\blacksquare$
+Algoritmul eșuează dacă matricea nu este pozitiv-definită (ajungem să
+împărțim la 0 sau radical dintr-un număr negativ), deci nu este necesar să
+verificăm această condiție în prealabil.
 
 \newpage
 \par Revenind, pentru o matrice $3 \times 3$, putem scrie sistemul de ecuaţii:
@@ -322,11 +326,11 @@ $x^* A x > 0$. $\blacksquare$
 \par Algoritmul în MATLAB pentru Cholesky poate fi gândit astfel:
 
 \begin{enumerate}
-	\item Folosim un indice $p$ cu care ne ”plimbăm” pe linii și un alt indice $i$ cu care ne ”plimbăm” pe coloane;
+	\item Folosim un indice $p$ cu care ne ”plimbăm” pe coloane și un alt indice $i$ cu care ne ”plimbăm” pe linii;
 	\item Observăm că avem 2 tipuri de ecuaţii:
 	      \begin{itemize}
 		      \item $i = p$: Putem calcula $l_{pp} = \sqrt{a_{pp} - \sum_{j = 1}^{i}{l_{pj}^2}}$;
-		      \item $t \neq p$: Putem calcula $l_{pi} = \frac{a_{pi} - \sum_{j = 1}^{i}{l_{pj} l_{ij}}}{l_{ii}}$.
+		      \item $t \neq p$: Putem calcula $l_{ip} = \frac{a_{ip} - \sum_{j = 1}^{p}{l_{pj} l_{ij}}}{l_{pp}}$.
 	      \end{itemize}
 	\item Pentru că matricea $A$ este simetrică, putem ignora partea de deasupra
 	      diagonalei principale a sistemului.
@@ -342,13 +346,13 @@ $x^* A x > 0$. $\blacksquare$
 		\State \( L \gets \text{matrice 0 de dimensiune } n \times n \)
 
 		\For{$p = 1$ to $n$}
-		\For{$i = 1$ to $p$}
-		\State \( s \gets L(p, 1:i) \cdot L(i, 1:i)^T \)
+		\For{$i = p$ to $n$}
+		\State \( s \gets L(p, 1:p) \cdot L(i, 1:p)^T \)
 
 		\If{$i = p$}
 		\State \( L(p, p) \gets \sqrt{A(p, p) - s} \)
 		\Else
-		\State \( L(p, i) \gets \frac{A(p, i) - s}{L(i, i)} \)
+		\State \( L(i, p) \gets \frac{A(i, p) - s}{L(p, p)} \)
 		\EndIf
 		\EndFor
 		\EndFor
@@ -416,9 +420,9 @@ Pentru a rezolva un sistem inferior triunghiular, putem folosi metoda
 	\end{algorithmic}
 \end{algorithm}
 
-\subsection{Inversarea matricilor prin partiționare}
+\subsection{Inversarea matricelor prin partiționare}
 
-Partiționarea matricilor este o tehnică folosită pentru a simplifica operațiile
+Partiționarea matricelor este o tehnică folosită pentru a simplifica operațiile
 cu matrice. Dacă partiționăm bine, atunci putem paraleliza operațiile pe blocuri,
 scăzând astfel timpul de execuție.
 
@@ -445,7 +449,7 @@ $A = \begin{bmatrix} A_{11} & A_{12} \\ A_{21} & A_{22} \end{bmatrix}$, unde
 	\end{split}
 \end{equation*}
 
-Pentru matrici conforme, operațiile de adunare și înmulțire se pot face pe
+Pentru matrice conforme, operațiile de adunare și înmulțire se pot face pe
 blocuri. De exemplu, pentru adunare:
 \begin{equation*}
 	A + B = \begin{bmatrix} A_{11} & A_{12} \\ A_{21} & A_{22} \end{bmatrix} + \begin{bmatrix} B_{11} & B_{12} \\ B_{21} & B_{22} \end{bmatrix} = \begin{bmatrix} A_{11} + B_{11} & A_{12} + B_{12} \\ A_{21} + B_{21} & A_{22} + B_{22} \end{bmatrix}
@@ -459,7 +463,7 @@ Iar pentru înmulțire:
 \subsubsection{Complementul lui Schur}
 \textit{Complementul lui Schur} \cite{Schur1917} apare atunci când pe o matrice bloc aplicăm
 eliminarea Gaussiană. Fie matricea $M = \begin{bmatrix} A & B \\ C & D \end{bmatrix}$.
-Pentru a elimina elementele de sub diagonala principală (matricea $C$) astfel:
+Putem elimina elementele de sub diagonala principală (matricea $C$) astfel:
 \begin{align*}
 	\begin{bmatrix}
 		I         & 0 \\
@@ -586,9 +590,8 @@ inversă, putem ajunge la următoarea factorizare:
 	\question Pentru matricea de la exerciţiul anterior aplicați factorizarea
 	Doolittle.
 
-	\question Pentru matricea $A = \begin{bmatrix} 14 & 8 & 3 \\ 8 & 5 & 2 \\ 3 & 2 & 1 \end{bmatrix}$
-	verificați dacă este pozitiv definită folosind teorema cercurilor Gershgorin.
-	Aplicați factorizarea Cholesky.
+	\question Pentru matricea $A = \begin{bmatrix} 4 & 2 & 1 \\ 2 & 6 & -2 \\ 1 & -2 & 5 \end{bmatrix}$
+	aplicați factorizarea Cholesky.
 
 	\question Scrieți două funcții în MATLAB care să rezolve un sistem de
 	ecuații superior triunghiular, respectiv inferior triunghiular. Folosiți
