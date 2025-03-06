@@ -625,6 +625,29 @@ matricei, deci am putea calcula mai multe rotații în paralel. Ca și regulă,
 Householder se folosește pentru matrici dense, iar Givens pentru matrici
 rare.
 
+\subsection{Polinoame ortogonale}
+
+Polinoamele pot defini și ele un spațiu vectorial. Folosind baza ${1, x, x^2, \dots, x^n}$,
+putem genera orice polinom. Acestui spațiu vectorial îi putem atașa un produs
+scalar. Pe când la vectori produsul scalar era definit ca o sumă a produselor
+coomponentelor, analog în cest caz ar fi integrala. Considerăm polinoame
+definite pe $[-1, 1]$.
+\begin{equation*}
+	\langle f, g \rangle = \int_{-1}^{1} f(x) g(x) dx
+\end{equation*}
+
+Vom aplica Gram-Schmidt pe baza polinoamelor de mai sus, pentru a obține
+\textit{polinoame ortogonale} (în special polinoame Legendre). Notăm baza de
+polinoame cu $e_i = x^i, \forall i = 0, 1, \dots$.
+\begin{equation*}
+	u_i (x) = e_i (x) - \sum_{j = 0}^{i - 1} \frac{\langle e_i, u_j \rangle}{\langle u_j, u_j \rangle} u_j (x)
+\end{equation*}
+
+Pentru normalizare, impunem ca $u(1) = 1$.
+\begin{equation*}
+	u (x) = \frac{u(x)}{u(1)}
+\end{equation*}
+
 \subsection{Tehnici pentru sisteme inconsistente. Regresii liniare în sens CMMP.}
 
 Sunt cazuri în care sistemul $\mathbf{Ax} = \mathbf{b}$ nu are soluție, chiar
@@ -814,7 +837,6 @@ găsim că $a_1 = 0.1450$ și $a_2 = 46.0575$. Graficul dreptei de regresie este
 		\end{axis}
 	\end{tikzpicture}
 \end{center}
-
 
 \section{Probleme}
 
