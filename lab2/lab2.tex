@@ -264,11 +264,11 @@ Algoritmul în MATLAB pentru Doolittle poate fi gândit astfel:
 		\State \( U \gets \text{matricea 0 de dimensiune } n \times n \)
 
 		\For{$p = 1$ to $n$}
-		\For{$i = 1$ to $p - 1$}
+		\For{$i = 1$ to $p$}
 		\State \( U(i, p) \gets A(i, p) - L(i, 1:i) \cdot U(1:i, p) \)
 		\EndFor
 
-		\For{$i = p$ to $n$}
+		\For{$i = p + 1$ to $n$}
 		\State \( L(i, p) \gets \frac{A(i, p) - L(i, 1:i) \cdot U(1:i, p)}{U(p, p)} \)
 		\EndFor
 		\EndFor
