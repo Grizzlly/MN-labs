@@ -57,7 +57,7 @@
 \newcommand{\MNLab}{Laborator\ \#3}
 \newcommand{\MNLabTitle}{Ortogonalitate. Transformări și proiecții ortogonale. Aplicații în metode de regresie.}
 \newcommand{\MNLabTitleHeader}{Ortogonalitate} 
-\newcommand{\MNAuthor}{Andrei STAN, Mihaela-Andreea Vasile, Florin Pop}
+\newcommand{\MNAuthor}{Andrei STAN, Bîrlădeanu Monica-Maria, Mihaela-Andreea Vasile, Florin Pop}
 
 \renewcommand{\contentsname}{Cuprins}
 \renewcommand{\figurename}{Figura}
@@ -624,6 +624,38 @@ paralelizabile. O rotație $G(i, j)$ afectează doar liniile $i$ și $j$ ale
 matricei, deci am putea calcula mai multe rotații în paralel. Ca și regulă,
 Householder se folosește pentru matrici dense, iar Givens pentru matrici
 rare.
+
+\subsection{Algoritmul Gram-Schmidt}
+
+Procesul Gram-Schmidt este un algoritm utilizat pentru a transforma un set de vectori liniar independenți într-o bază ortonormală. Aplicarea procedeului Gram–Schmidt pe vectorii coloană ai unei matrice rang produce descompunerea QR.
+
+\subsubsection{Descrierea Algoritmului}
+
+Fie un set de vectori liniar independenți \{$v_1$, $v_2$, \dots, $v_n$\}. Algoritmul Gram-Schmidt construiește un set ortonormal \{ $q_1$, $q_2$, \dots, $q_n$ \} astfel:
+\begin{itemize}
+    \item \textbf{Inițializare}: Primul vector ortogonalizat este
+    \begin{equation*}
+        u_1 = v_1
+    \end{equation*}
+    și este normalizat pentru a obține
+    \begin{equation*}
+        q_1 = \frac{u_1}{||u_1||}
+    \end{equation*}
+    \item \textbf{Ortogonalizare iterativă}: Pentru fiecare vector $v_k$, se elimină componentele paralele față de vectorii ortonormați anteriori:
+    \begin{equation*}
+        u_k = v_k - \sum_{i = 1}^{k - 1}\frac{\langle v_k, q_i \rangle}{\langle q_i, q_i \rangle}q_i
+    \end{equation*}
+    Apoi $u_k$ este normalizat pentru a obtine $q_k$.
+\end{itemize}
+
+\subsubsection{Instabilitate numerică}
+
+În practică, algoritmul Gram-Schmidt este numeric instabil din cauza erorilor de rotunjire. Problemele principale sunt:
+\begin{itemize}
+    \item \textbf{Pierderea de ortogonalitate}: Scăderile succesive din calculul lui $u_k$ pot introduce erori de precizie, ceea ce duce la vectori care nu mai sunt exact ortogonali.
+    \item \textbf{Erori de anulare}: Diferențele dintre numere apropiate în aritmetica cu virgulă mobilă pot cauza pierderi de semnificație.
+\end{itemize}
+O variantă mai stabilă este \textbf{Gram-Schmidt modificat}, unde proiecțiile sunt eliminate pas cu pas. Totuși, pentru o stabilitate numerică ridicată, metode precum \textbf{reflecțiile Householder} sau \textbf{rotațiile Givens} sunt preferate în practică.
 
 \subsection{Polinoame ortogonale}
 
