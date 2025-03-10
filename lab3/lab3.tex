@@ -141,7 +141,7 @@ Multe norme matriceale mai au proprietatea de a fi \textit{submultiplicative}:
 	      \begin{itemize}
 		      \item \textbf{p = 1.} $||A||_1 \coloneq \max_j \sum_i |a_{ij}|$. Este suma maximă a valorilor absolute
 		            de pe coloane.
-		      \item \textbf{p = 2. Norma/Raza spectrală.} $||A||_2 \coloneq \sqrt{\lambda_{max}(A^*A)}$.
+		      \item \textbf{p = 2. Norma spectrală.} $||A||_2 \coloneq \sqrt{\lambda_{max}(A^*A)}$.
 		            Este rădăcina patrată a celei mai mari valori proprii a matricei $A^*A$.
 		            Este egala cu cea mai mare valoare singulară a matricei $A$. \\
 		            \textbf{Demonstrație.} Fie $B = A^*A$. Atunci $B$ este
@@ -159,12 +159,10 @@ Multe norme matriceale mai au proprietatea de a fi \textit{submultiplicative}:
 	\item \textbf{Norma Frobenius.} $||A||_F \coloneq \sqrt{\sum_{i,j} |a_{ij}|^2} = \sqrt{trace(A^*A)}$.
 \end{itemize}
 
-\textbf{Teorema Gelfand.} Pentru orice normă matriceală avem:
+Pentru orice normă matriceală submultiplicativă avem:
 \begin{equation*}
-	\lim_{k \to \infty} ||A^k||^{1/k} = \rho(A)
+	\rho(A) \leq ||A^k||^{1/k}, \quad \lim_{k \to \infty} ||A^k||^{1/k} = \rho(A)
 \end{equation*}
-
-Mai mult, $\rho(A) \leq ||A||$ pentru orice normă matriceală.
 
 \textbf{Demonstrație.} Fie $\lambda$ valoarea proprie cea mai mare a lui $A$ și $v$ un vector propriu asociat. Atunci:
 \begin{equation*}
@@ -519,8 +517,8 @@ ortogonală.
 
 \subsubsection{Rotații Givens}
 
-Pentru demonstrarea acestor rotiri ne putem referi foarte simplu la numerele
-complexe. Fără a demonstra, putem identifica orice număr complex de forma $a + bi$
+Pentru demonstrarea acestor rotiri putem face referire la numerele
+complexe. Putem identifica orice număr complex de forma $a + bi$
 ca fiind un vector din $\mathbb{R}^2$, $\begin{bmatrix} a \\ b \end{bmatrix}$.
 Înmulțirea acestui număr cu un alt număr complex $c + di$ este echivalentă cu
 înmulțirea vectorului cu matricea $\begin{bmatrix} c & -d \\ d & c \end{bmatrix}$.
@@ -529,7 +527,7 @@ ca fiind un vector din $\mathbb{R}^2$, $\begin{bmatrix} a \\ b \end{bmatrix}$.
 și că orice număr complex poate fi scris sub forma $r(\cos \beta + i \sin \beta)$,
 putem deduce că înmulțirea cu matricea $\begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix}$
 rotește vectorii cu un unghi $\theta$, în sens trigonometric. Această matrice
-este una ortognală.
+este una ortogonală.
 \begin{equation*}
 	\begin{bmatrix} \cos \theta & \sin \theta \\ -\sin \theta & \cos \theta \end{bmatrix} \begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix} = I
 \end{equation*}
