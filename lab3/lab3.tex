@@ -97,7 +97,7 @@
 	\item definească noțiunile de vectori ortogonali și matrice ortogonală;
 	\item aplice metode de transformare ortogonală: Householder și Givens;
 	\item implementeze procesul Gram-Schmidt;
-	\item folosească polinoame ortogonale în aprixmarea funcțiilor.
+	\item folosească polinoame ortogonale în aproximarea funcțiilor.
 \end{itemize}
 
 \section{Noțiuni teoretice}
@@ -395,9 +395,9 @@ reflectorului Householder, prin normalizare:
 
 Cum $P$ este ortognală, știm că $||Pv||_2 = ||v||_2$. Astfel, ne dorim ca $Pv = \pm ||v||_2 e_1$.
 \begin{align*}
-	v + d & = P v                                                                        \\
-	v + d & = \pm ||v||_2 e_1                                                            \\
-	d     & = \pm ||v||_2 e_1 - v, \text{cum semnul lui } d \text{ nu contează, alegem } \\
+	v + d & = P v                                                                            \\
+	v + d & = \pm ||v||_2 e_1                                                                \\
+	d     & = - v \pm ||v||_2 e_1 - v, \text{cum semnul lui } d \text{ nu contează, alegem } \\
 	d     & = v \pm ||v||_2 e_1
 \end{align*}
 
@@ -422,8 +422,8 @@ $\alpha = \pm 1$. Considerăm doar cazul numerelor reale.
 \end{align*}
 
 Cum $v^Tv$ și $||v||_2^2$ sunt constante, trebuie să găsim maximul
-termenului $- \alpha ||v||_2 v_1$, mai precis $- \alpha v_1$. Cum $\alpha$ poate fi
-doar 0 sau 1, rezultă imediat că $\alpha = -sign(v_1)$.
+termenului $- \alpha ||v||_2 v_1$, mai precis $- \alpha v_1$. Cum $\alpha$ poate
+fi doar $\pm 1$, rezultă imediat că $\alpha = -sign(v_1)$.
 
 \newpage
 În figura de mai jos (figura \ref{fig:5}), avem un grafic al
