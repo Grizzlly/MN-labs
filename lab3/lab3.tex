@@ -11,6 +11,8 @@
 \usepackage{mathtools}
 \usepackage{tkz-euclide}
 \usepackage{pgfplots}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \usetikzlibrary{angles,quotes,calc}
 
@@ -55,7 +57,7 @@
 }
 
 \newcommand{\MNLab}{Laborator\ \#3}
-\newcommand{\MNLabTitle}{Ortogonalitate. Transformări și proiecții ortogonale. Aplicații în metode de regresie.}
+\newcommand{\MNLabTitle}{Ortogonalitate. Transformări și proiecții ortogonale. Polinoame ortogonale.}
 \newcommand{\MNLabTitleHeader}{Ortogonalitate} 
 \newcommand{\MNAuthor}{Andrei STAN, Bîrlădeanu Monica-Maria, Mihaela-Andreea Vasile, Florin Pop}
 
@@ -95,7 +97,7 @@
 	\item definească noțiunile de vectori ortogonali și matrice ortogonală;
 	\item aplice metode de transformare ortogonală: Householder și Givens;
 	\item implementeze procesul Gram-Schmidt;
-	\item folosească polinoame ortogonale.
+	\item folosească polinoame ortogonale în aprixmarea funcțiilor.
 \end{itemize}
 
 \section{Noțiuni teoretice}
@@ -428,8 +430,8 @@ doar 0 sau 1, rezultă imediat că $\alpha = -sign(v_1)$.
 $||A - QR||_2 / ||A||_2$. Au fost generate 1000 de teste, deci avem 1000 de puncte pe
 grafic. În fiecare test s-a generat o matrice 3x3 aleatorie iar prima sa coloană
 a fost înlocuită cu $\begin{bmatrix} 1 & \delta & 0 \end{bmatrix}^T$, unde
-$\delta$ lua 17 valori între $10^{-16}$ și $1$. Cu albastru avem cazul când
-alegem semnul ca mai sus, iar cu roșu când alegem semnul opus.
+$\delta$ lua 17 valori între $10^{-16}$ și $1$ \cite{overton2023}. Cu albastru
+avem cazul când alegem semnul ca mai sus, iar cu roșu când alegem semnul opus.
 
 \begin{figure}[ht]
 	\centering
@@ -494,7 +496,26 @@ La a doua iterație ne dorim să punem 0 pe poziția (2, 3).
 	A_3 = H_2 A_2 & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -1 & 0 \end{bmatrix} \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & -3 & -3 \\ 0 & 0 & -3 \end{bmatrix}
 \end{align*}
 
-$A_3$ este matricea $R$, iar $Q = H_1^T H_2^T = H_1 H_2$ este matricea ortogonală.
+$A_3$ este matricea $R$, iar $Q = H_1^T H_2^T = H_1 H_2$ este matricea
+ortogonală.
+
+\begin{algorithm}
+	\caption{Descompunerea QR cu Householder}
+	\begin{algorithmic}[1]
+		\State \( [m, n] \gets \text{dimensiunea matricei } A \)
+		\State \( Q \gets \text{matricea identitate de dimensiune } m \times m \)
+
+		\For{$i = 1$, $\min(m-1, n)$}
+		\State \( v \gets \text{vector plin de 0 de dimensiune } m \)
+		\State \( v(i:m) \gets A(i:m, i) \)
+		\State \( v(i) \gets v(i) - \text{sign}(v(i)) \times \text{norm}(v) \)
+		\State \( v \gets v / \text{norm}(v) \)
+		\State \( H \gets I - 2 \times (v \cdot v^T) \)
+		\State \( Q \gets H \cdot Q \)
+		\State \( A \gets H \cdot A \)
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Rotații Givens}
 
@@ -612,265 +633,357 @@ Facem 0 pe poziția $(3, 2)$.
 	                  \end{bmatrix}
 \end{align*}
 
-Am adus matricea la forma superior triunghiulară. Așadar, $R$ = $A_4$ și $Q = G_1^T G_2^T G_3^T$.
+Am adus matricea la forma superior triunghiulară. Așadar, $R$ = $A_4$ și
+$Q = G_1^T G_2^T G_3^T$.
+
+\begin{algorithm}
+	\caption{Descompunerea QR cu Givens}
+	\begin{algorithmic}[1]
+		\State \( [m, n] \gets \text{dimensiunea matricei } A \)
+		\State \( Q \gets \text{matricea identitate de dimensiune } m \times m \)
+
+		\For{$i = 1$, $n$}
+		\For{$j = m$, $i + 1$}
+		\If{$A(j, i) \neq 0$}
+		\State \( G \gets \text{matricea identitate de dimensiune } m \times m \)
+		\State \( r \gets norm([A(j, i); A(i, i)]) \)
+		\State \( G(j, i) \gets - A(j, i) / r \)
+		\State \( G(i, j) \gets - G(j, i) \)
+		\State \( G(i, i) \gets G(j, j) \gets A(i, i) / r \)
+		\State \( Q \gets G \cdot Q \)
+		\State \( A \gets G \cdot A \)
+		\EndIf
+		\EndFor
+		\EndFor
+
+		\State \( Q \gets Q^T \)
+	\end{algorithmic}
+\end{algorithm}
 
 Se observă că față de Householder, am folosit mai multe matrici pentru a
 obține descompunerea. În medie, numărul de reflexii pe care trebuie să le facem
 este egal cu numărul de coloane, iar numărul de rotații este cu un ordin de
 mărime mai mare, mai ales dacă matricea inițială nu este pătratică.
 
-Avantajul rotațiilor Givens este că față de reflexii, este ca sunt mult mai
+Avantajul rotațiilor Givens este că față de reflexii, sunt mult mai
 paralelizabile. O rotație $G(i, j)$ afectează doar liniile $i$ și $j$ ale
 matricei, deci am putea calcula mai multe rotații în paralel. Ca și regulă,
 Householder se folosește pentru matrici dense, iar Givens pentru matrici
 rare.
 
-\subsection{Algoritmul Gram-Schmidt}
+\subsection{Procesul Gram-Schmidt}
 
-Procesul Gram-Schmidt este un algoritm utilizat pentru a transforma un set de vectori liniar independenți într-o bază ortonormală. Aplicarea procedeului Gram–Schmidt pe vectorii coloană ai unei matrice rang produce descompunerea QR.
+Procesul Gram-Schmidt este un algoritm utilizat pentru a transforma un set de
+vectori liniar independenți într-o bază ortonormată. Aplicarea procedeului
+Gram-Schmidt pe vectorii coloană ai unei matrice produce descompunerea QR.
 
-\subsubsection{Descrierea Algoritmului}
-
-Fie un set de vectori liniar independenți \{$v_1$, $v_2$, \dots, $v_n$\}. Algoritmul Gram-Schmidt construiește un set ortonormal \{ $q_1$, $q_2$, \dots, $q_n$ \} astfel:
+Fie un set de vectori liniar independenți $v_1, v_2, \dots, v_n$.
+Algoritmul Gram-Schmidt construiește un set ortonormat $q_1, q_2, \dots, q_n$
+astfel:
 \begin{itemize}
-    \item \textbf{Inițializare}: Primul vector ortogonalizat este
-    \begin{equation*}
-        u_1 = v_1
-    \end{equation*}
-    și este normalizat pentru a obține
-    \begin{equation*}
-        q_1 = \frac{u_1}{||u_1||}
-    \end{equation*}
-    \item \textbf{Ortogonalizare iterativă}: Pentru fiecare vector $v_k$, se elimină componentele paralele față de vectorii ortonormați anteriori:
-    \begin{equation*}
-        u_k = v_k - \sum_{i = 1}^{k - 1}\frac{\langle v_k, q_i \rangle}{\langle q_i, q_i \rangle}q_i
-    \end{equation*}
-    Apoi $u_k$ este normalizat pentru a obtine $q_k$.
+	\item Primul vector ortogonalizat este $u_1 = v_1$
+	      și este normalizat pentru a obține $q_1 = \frac{u_1}{||u_1||}$.
+	\item Pentru fiecare vector $v_k$, se elimină componentele paralele față de
+	      vectorii ortonormați anteriori:
+	      \begin{equation*}
+		      u_k = v_k - \sum_{i = 1}^{k - 1}\frac{\langle v_k, q_i \rangle}{\langle q_i, q_i \rangle}q_i
+	      \end{equation*}
+	\item Se normalizează $u_k$ pentru a obține $q_k = \frac{u_k}{||u_k||}$.
 \end{itemize}
 
-\subsubsection{Instabilitate numerică}
+\subsubsection{Stabilitatea numerică}
 
-În practică, algoritmul Gram-Schmidt este numeric instabil din cauza erorilor de rotunjire. Problemele principale sunt:
+În practică, algoritmul Gram-Schmidt este numeric instabil din cauza erorilor de
+rotunjire. Scăderile succesive din calculul lui $u_k$ pot introduce erori de
+precizie, ceea ce duce la vectori care nu mai sunt exact ortogonali. O soluție
+este chiar ortogonalizarea erorilor. La fiecare pas, ortogonalizăm pe rând
+vectorii cu cei de dinaintea lor. Pornind de la vectorii $v_1, v_2, \dots, v_n$:
 \begin{itemize}
-    \item \textbf{Pierderea de ortogonalitate}: Scăderile succesive din calculul lui $u_k$ pot introduce erori de precizie, ceea ce duce la vectori care nu mai sunt exact ortogonali.
-    \item \textbf{Erori de anulare}: Diferențele dintre numere apropiate în aritmetica cu virgulă mobilă pot cauza pierderi de semnificație.
+	\item Scădem din toți vectorii $v_i$ componentele paralele pe $v_1$. Obținem
+	      vectorii $v_1, v_2^{(1)}, \dots, v_n^{(1)}$.
+	\item Pentru că toți vectorii sunt ortogonali pe $v_1$, putem continua
+	      să scădem componentele paralele pe $v_2^{(1)}$. Obținem vectorii
+	      $v_1, v_2^{(1)}, v_3^{(2)}, \dots, v_n^{(2)}$.
+	\item Continuăm acest proces pentru toți vectorii.
 \end{itemize}
-O variantă mai stabilă este \textbf{Gram-Schmidt modificat}, unde proiecțiile sunt eliminate pas cu pas. Totuși, pentru o stabilitate numerică ridicată, metode precum \textbf{reflecțiile Householder} sau \textbf{rotațiile Givens} sunt preferate în practică.
+
+\begin{algorithm}
+	\caption{Algoritmul Gram-Schmidt modificat}
+	\begin{algorithmic}[1]
+		\State \( [\_, n] \gets \text{dimensiunea matricei } A \)
+		\State \( R \gets \text{matricea 0 de dimensiune } n \times n \)
+		\State \( Q \gets A \)
+
+		\State \( Q(:, 1) \gets A(:, 1) / \text{norm}(A(:, 1)) \)
+		\State \( R(1, :) \gets Q(:, 1)^T \cdot A \)
+
+		\For{$i = 1$, $n-1$}
+		\For{$j = i+1$, $n$}
+		\State \( Q(:, j) \gets Q(:, j) - (Q(:, j)^T \cdot Q(:, i)) \cdot Q(:, i) \)
+		\EndFor
+		\State \( Q(:, i+1) \gets Q(:, i+1) / \text{norm}(Q(:, i+1)) \)
+		\State \( R(i+1, :) \gets Q(:, i+1)^T \cdot A \)
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
 
 \subsection{Polinoame ortogonale}
 
 Polinoamele pot defini și ele un spațiu vectorial. Folosind baza ${1, x, x^2, \dots, x^n}$,
 putem genera orice polinom. Acestui spațiu vectorial îi putem atașa un produs
 scalar. Pe când la vectori produsul scalar era definit ca o sumă a produselor
-coomponentelor, analog în cest caz ar fi integrala. Considerăm polinoame
-definite pe $[-1, 1]$.
+coomponentelor, analog în cest caz ar fi integrala.
 \begin{equation*}
-	\langle f, g \rangle = \int_{-1}^{1} f(x) g(x) dx
+	\langle f, g \rangle = \int_{a}^{b} f(x) g(x) w(x) dx
 \end{equation*}
 
-Vom aplica Gram-Schmidt pe baza polinoamelor de mai sus, pentru a obține
-\textit{polinoame ortogonale} (în special polinoame Legendre). Notăm baza de
-polinoame cu $e_i = x^i, \forall i = 0, 1, \dots$.
+$w(x)$ este o funcție pozitivă, numită \textit{funcție de pondere}. În funcție
+de polinoamele pe care vrem să le obținem, alegem și funcția de pondere.
+
+Vom aplica Gram-Schmidt pe baza polinoamelor de mai sus, cu $w(x) = 1$ și
+$[a, b] = [-1, 1]$, pentru a obține polinoamele Legendre \cite{orthopol}. Notăm
+baza de polinoame cu $e_i = x^i, \forall i = 0, 1, \dots$.
 \begin{equation*}
-	u_i (x) = e_i (x) - \sum_{j = 0}^{i - 1} \frac{\langle e_i, u_j \rangle}{\langle u_j, u_j \rangle} u_j (x)
+	p_i (x) = e_i (x) - \sum_{j = 0}^{i - 1} \frac{\langle e_i, p_j \rangle}{\langle p_j, p_j \rangle} p_j (x)
 \end{equation*}
 
-Pentru normalizare, impunem ca $u(1) = 1$.
+Pentru normalizare, impunem ca $u (1) = 1$.
 \begin{equation*}
-	u(x) = \frac{u(x)}{u(1)}
+	p(x) = \frac{p(x)}{p(1)}
 \end{equation*}
 
+\newpage
 Pentru aceste calcule ne putem folosi de MATLAB:
+\octavescript{./src/polygo.m}{}
 
-\subsection{Tehnici pentru sisteme inconsistente. Regresii liniare în sens CMMP.}
+Polinoamele rezultate sunt:
+\begin{gather*}
+	p_0 = 1 \\
+	p_1 = x \\
+	p_2 = \frac{3}{2} x^2 - \frac{1}{2} \\
+	p_3 = \frac{5}{2} x^3 - \frac{3}{2} x
+\end{gather*}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.45\textwidth]{legendre}
+	\caption{Polinoame Legendre}
+	\label{fig:6}
+\end{figure}
 
-Sunt cazuri în care sistemul $\mathbf{Ax} = \mathbf{b}$ nu are soluție, chiar
-din modul în care a fost construit ($A$ nepătratică). Totuși, ne punem
-următoarea problemă:
+Alte tipuri de polinoame ortogonale sunt:
+\begin{itemize}
+	\item \textbf{Laguerre}: $w(x) = e^{-x}$, $[a, b] = (0, \infty)$
+	\item \textbf{Hermite}: $w(x) = e^{-x^2}$, $[a, b] = (-\infty, \infty)$
+	\item \textbf{Chebyshev}: $w(x) = \frac{1}{\sqrt{1 - x^2}}$, $[a, b] = (-1, 1)$
+\end{itemize}
 
-Găsește $\mathbf{x}$ astfel încât $||\mathbf{Ax} - \mathbf{b}||_2$ să fie minim.
-
-\textbf{Explicație analitică.} Propoziția de mai sus este echivalentă cu găsirea
-minimului lui $||\mathbf{Ax} - \mathbf{b}||_2^2$. În cazul acesta putem face
-referire la produsul scalar:
-\begin{align*}
-	||\mathbf{Ax} - \mathbf{b}||_2^2 & = \langle Ax - b, Ax - b \rangle                                          \\
-	                                 & = \langle Ax, Ax \rangle - 2 \langle Ax, b \rangle + \langle b, b \rangle \\
-	                                 & = x^T A^T A x - 2 x^T A^T b + b^T b
-\end{align*}
-
-Astfel, transformăm problema în una de optimizare, unde ne dorim să
-găsim $\mathbf{x}$ astfel încât funcția
+Polinoamele ortogonale sunt folosite pentru rezolvarea ecuațiilor diferențiale, în
+analiza numerică, în teoria aproximării, în teoria probabilistică și altele. De
+exemplu, putem folosi operatorul de proiecție definit mai sus pentru a aproxima
+orice funcție! Trebuie doar să o proiectăm pe baza polinoamelor ortogonale:
 \begin{equation*}
-	\mathbf{f(x) = x^T A^T A x - 2 x^T A^T b + b^T b}
+	p(x) = \sum_{i = 0}^{n} p_i (x) \frac{\langle f, p_i \rangle}{\langle p_i, p_i \rangle}
 \end{equation*}
-să fie minimă.
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.45\textwidth]{legendrefit2}
+	\caption{Aproximarea $sin(2x)$ cu primele 4 polinoame Legendre}
+	\label{fig:7}
+\end{figure}
 
-Gradientul și hessiana funcției sunt:
-\begin{align*}
-	\mathbf{\nabla f(x)} & \mathbf{= 2 A^T A x - 2 A^T b = 2 (A^T A x - A^T b)} \\
-	\mathbf{H(x)}        & = \mathbf{2 A^T A}
-\end{align*}
+În acest mod, putem spune că am afectuat aproximarea în sens CMMP. Proiecția ne
+oferă polinomul $p(x)$ care minimizează eroarea $||f - p||_2^2$.
 
-Hessiana este o matrice semi-pozitiv definită, având toate valorile proprii mai
-mari sau egale cu 0. Deci minimul este ar fi atins când gradientul este 0, adică
-\begin{equation*}
-	\mathbf{A^T A x - A^T b = 0}
-\end{equation*}
 
-Practic, rămâne să rezolvăm sistemul $A^T A x = A^T b$. În cazul regresiei
-liniare, sistemul nu se poate rezolva atunci cand nu avem un set de date cu cel
-puțin 2 puncte (trebuie să trasăm o dreapta iar dreapta este definită de două)
-puncte.
+% \subsection{Tehnici pentru sisteme inconsistente. Regresii liniare în sens CMMP.}
 
-\textbf{Explicație geometrică.} În cazul cel mai simplu, ne putem gândi la
-distanța de la un punct la o dreaptă. Distanța este dată de segmentul
-perpendicular de la punct la dreaptă. În cazul a doi vectori, distanța este
-dată de diferența dintre un vector și proiecția sa pe celălalt vector.
-\begin{center}
-	\begin{tikzpicture}[vect/.style={->,>={Straight Barb[angle=60:2pt 3]}}]
-		\tkzInit[xmin=0,xmax=3,ymin=0,ymax=2]% dimensions of the bounding box
-		\tkzDrawX[noticks,label=,draw=none]% coordinate system
-		\tkzDrawY[noticks,label=,draw=none]
+% Sunt cazuri în care sistemul $\mathbf{Ax} = \mathbf{b}$ nu are soluție, chiar
+% din modul în care a fost construit ($A$ nepătratică). Totuși, ne punem
+% următoarea problemă:
 
-		\tkzDefPoint(0,0){O}
-		\tkzDefPoint[label=$\mathbf{b}$](1.5,2){A}
-		\tkzDefPoint[label=$\mathbf{a}$](2.5,0){B}
-		\tkzDefPoint[label=$\mathbf{p}$](1.5,0){M}
+% Găsește $\mathbf{x}$ astfel încât $||\mathbf{Ax} - \mathbf{b}||_2$ să fie minim.
 
-		% draw dotted from a to c
-		\draw[dotted] (A) -- (M);
-		\tkzDrawSegments[vect](O,A O,B O,M)
-	\end{tikzpicture}
-\end{center}
+% \textbf{Explicație analitică.} Propoziția de mai sus este echivalentă cu găsirea
+% minimului lui $||\mathbf{Ax} - \mathbf{b}||_2^2$. În cazul acesta putem face
+% referire la produsul scalar:
+% \begin{align*}
+% 	||\mathbf{Ax} - \mathbf{b}||_2^2 & = \langle Ax - b, Ax - b \rangle                                          \\
+% 	                                 & = \langle Ax, Ax \rangle - 2 \langle Ax, b \rangle + \langle b, b \rangle \\
+% 	                                 & = x^T A^T A x - 2 x^T A^T b + b^T b
+% \end{align*}
 
-Practic, vectorul $\mathbf{p}$ este vectorul cel mai apropiat de $\mathbf{b}$,
-din span-ul lui $\mathbf{a}$. Fie $||a||_2 = 1$, atunci $\mathbf{p}$ este
-\begin{align*}
-	\mathbf{p} & = \mathbf{\frac{\langle b, a \rangle}{\langle a, a \rangle} a} \\
-	           & = \mathbf{a \langle b, a \rangle}                              \\
-	           & = \mathbf{a a^T b}
-\end{align*}
+% Astfel, transformăm problema în una de optimizare, unde ne dorim să
+% găsim $\mathbf{x}$ astfel încât funcția
+% \begin{equation*}
+% 	\mathbf{f(x) = x^T A^T A x - 2 x^T A^T b + b^T b}
+% \end{equation*}
+% să fie minimă.
 
-Definim $P = a a^T$ ca fiind \textit{matricea de proiecție} pe $a$. Dacă $a$ nu
-are norma 1, atunci $P = \frac{a a^T}{a^T a}$.
+% Gradientul și hessiana funcției sunt:
+% \begin{align*}
+% 	\mathbf{\nabla f(x)} & \mathbf{= 2 A^T A x - 2 A^T b = 2 (A^T A x - A^T b)} \\
+% 	\mathbf{H(x)}        & = \mathbf{2 A^T A}
+% \end{align*}
 
-Cum proiectăm pe un plan? Contstruim matricea $A = \begin{bmatrix} a_1 & a_2 \end{bmatrix}$,
-care reprezintă baza planului. Proiectția pe plan este dată de suma proiecțiilor
-pe baza planului, adică $\mathbf{p} = x_1 \mathbf{a_1} + x_2 \mathbf{a_2} = A \mathbf{x}$.
-Cum $b - p = b - Ax$ este perpendicular pe plan, din construcție, avem
-următoarele relații:
-\begin{align*}
-	\mathbf{a_1^T (b - Ax)} & \mathbf{= 0} \\
-	\mathbf{a_2^T (b - Ax)} & \mathbf{= 0}
-\end{align*}
+% Hessiana este o matrice semi-pozitiv definită, având toate valorile proprii mai
+% mari sau egale cu 0. Deci minimul este ar fi atins când gradientul este 0, adică
+% \begin{equation*}
+% 	\mathbf{A^T A x - A^T b = 0}
+% \end{equation*}
 
-Ecvhivalent, în forma matriceală, avem $A^T (b - Ax) = 0$. Rezultă că
-$A^T A x = A^T b$. Soluția este dată de $x = (A^T A)^{-1} A^T b$. De aici putem
-obține matricea de proiecție:
-\begin{align*}
-	\mathbf{x = }      & \mathbf{(A^T A)^{-1} A^T b}     \\
-	\mathbf{p = A x =} & = \mathbf{A (A^T A)^{-1} A^T b} \\
-	\mathbf{P = }      & \mathbf{A (A^T A)^{-1} A^T}
-\end{align*}
+% Practic, rămâne să rezolvăm sistemul $A^T A x = A^T b$. În cazul regresiei
+% liniare, sistemul nu se poate rezolva atunci cand nu avem un set de date cu cel
+% puțin 2 puncte (trebuie să trasăm o dreapta iar dreapta este definită de două)
+% puncte.
 
-Orice matrice de proiecție are proprietatea că $P^2 = P$. Mai mult, în acest caz
-avem că $P^T = P$.
+% \textbf{Explicație geometrică.} În cazul cel mai simplu, ne putem gândi la
+% distanța de la un punct la o dreaptă. Distanța este dată de segmentul
+% perpendicular de la punct la dreaptă. În cazul a doi vectori, distanța este
+% dată de diferența dintre un vector și proiecția sa pe celălalt vector.
+% \begin{center}
+% 	\begin{tikzpicture}[vect/.style={->,>={Straight Barb[angle=60:2pt 3]}}]
+% 		\tkzInit[xmin=0,xmax=3,ymin=0,ymax=2]% dimensions of the bounding box
+% 		\tkzDrawX[noticks,label=,draw=none]% coordinate system
+% 		\tkzDrawY[noticks,label=,draw=none]
 
-\textbf{Exemplu.} Într-un cartier de case încercăm să prezicem prețul unei case
-în funcție de suprafața casei. Avem următoarele date:
+% 		\tkzDefPoint(0,0){O}
+% 		\tkzDefPoint[label=$\mathbf{b}$](1.5,2){A}
+% 		\tkzDefPoint[label=$\mathbf{a}$](2.5,0){B}
+% 		\tkzDefPoint[label=$\mathbf{p}$](1.5,0){M}
 
-\begin{center}
-	\begin{tabular}{|c|c|}
-		\hline
-		Suprafața (m2) & Prețul (1000 RON) \\
-		\hline
-		1400           & 245               \\
-		1600           & 312               \\
-		1700           & 279               \\
-		1875           & 308               \\
-		1100           & 199               \\
-		\hline
-	\end{tabular}
-\end{center}
+% 		% draw dotted from a to c
+% 		\draw[dotted] (A) -- (M);
+% 		\tkzDrawSegments[vect](O,A O,B O,M)
+% 	\end{tikzpicture}
+% \end{center}
 
-Punem pe grafic acest set de date:
-\begin{center}
-	\begin{tikzpicture}
-		\begin{axis}[
-				xlabel=Suprafața (m2),
-				ylabel=Prețul (1000 RON),
-				axis lines=middle,
-				axis equal,
-				xmin=1000,
-				xmax=2000,
-				ymin=150,
-				ymax=350,
-				xtick={1000, 1200, 1400, 1600, 1800,  2000},
-				ytick={150, 200, 250, 300, 350},
-			]
-			\addplot[only marks] table {
-					1400 245
-					1600 312
-					1700 279
-					1875 308
-					1100 199
-				};
-		\end{axis}
-	\end{tikzpicture}
-\end{center}
+% Practic, vectorul $\mathbf{p}$ este vectorul cel mai apropiat de $\mathbf{b}$,
+% din span-ul lui $\mathbf{a}$. Fie $||a||_2 = 1$, atunci $\mathbf{p}$ este
+% \begin{align*}
+% 	\mathbf{p} & = \mathbf{\frac{\langle b, a \rangle}{\langle a, a \rangle} a} \\
+% 	           & = \mathbf{a \langle b, a \rangle}                              \\
+% 	           & = \mathbf{a a^T b}
+% \end{align*}
 
-Se obervă o relație liniară între suprafață și preț, dată de $y = a_1 x + a_2$.
-Formulăm această problemă ca un sistem de ecuații liniare:
-\begin{align*}
-	\begin{bmatrix}
-		1400 & 1 \\
-		1600 & 1 \\
-		1700 & 1 \\
-		1875 & 1 \\
-		1100 & 1
-	\end{bmatrix}
-	\begin{bmatrix}
-		a_1 \\
-		a_2
-	\end{bmatrix}
-	=
-	\begin{bmatrix}
-		245 \\
-		312 \\
-		279 \\
-		308 \\
-		199
-	\end{bmatrix} \\
-\end{align*}
+% Definim $P = a a^T$ ca fiind \textit{matricea de proiecție} pe $a$. Dacă $a$ nu
+% are norma 1, atunci $P = \frac{a a^T}{a^T a}$.
 
-Soluția este dată de rezolvarea sistemului $A^T A x = A^T b$. După rezolvare,
-găsim că $a_1 = 0.1450$ și $a_2 = 46.0575$. Graficul dreptei de regresie este:
-\begin{center}
-	\begin{tikzpicture}
-		\begin{axis}[
-				xlabel=Suprafața (m2),
-				ylabel=Prețul (1000 RON),
-				axis lines=middle,
-				axis equal,
-				xmin=1000,
-				xmax=2000,
-				ymin=150,
-				ymax=350,
-				xtick={1000, 1200, 1400, 1600, 1800,  2000},
-				ytick={150, 200, 250, 300, 350},
-			]
-			\addplot[only marks] table {
-					1400 245
-					1600 312
-					1700 279
-					1875 308
-					1100 199
-				};
-			\addplot[domain=1000:2000, color=red]{0.1450 * x + 46.0575};
-		\end{axis}
-	\end{tikzpicture}
-\end{center}
+% Cum proiectăm pe un plan? Contstruim matricea $A = \begin{bmatrix} a_1 & a_2 \end{bmatrix}$,
+% care reprezintă baza planului. Proiectția pe plan este dată de suma proiecțiilor
+% pe baza planului, adică $\mathbf{p} = x_1 \mathbf{a_1} + x_2 \mathbf{a_2} = A \mathbf{x}$.
+% Cum $b - p = b - Ax$ este perpendicular pe plan, din construcție, avem
+% următoarele relații:
+% \begin{align*}
+% 	\mathbf{a_1^T (b - Ax)} & \mathbf{= 0} \\
+% 	\mathbf{a_2^T (b - Ax)} & \mathbf{= 0}
+% \end{align*}
+
+% Ecvhivalent, în forma matriceală, avem $A^T (b - Ax) = 0$. Rezultă că
+% $A^T A x = A^T b$. Soluția este dată de $x = (A^T A)^{-1} A^T b$. De aici putem
+% obține matricea de proiecție:
+% \begin{align*}
+% 	\mathbf{x = }      & \mathbf{(A^T A)^{-1} A^T b}     \\
+% 	\mathbf{p = A x =} & = \mathbf{A (A^T A)^{-1} A^T b} \\
+% 	\mathbf{P = }      & \mathbf{A (A^T A)^{-1} A^T}
+% \end{align*}
+
+% Orice matrice de proiecție are proprietatea că $P^2 = P$. Mai mult, în acest caz
+% avem că $P^T = P$.
+
+% \textbf{Exemplu.} Într-un cartier de case încercăm să prezicem prețul unei case
+% în funcție de suprafața casei. Avem următoarele date:
+
+% \begin{center}
+% 	\begin{tabular}{|c|c|}
+% 		\hline
+% 		Suprafața (m2) & Prețul (1000 RON) \\
+% 		\hline
+% 		1400           & 245               \\
+% 		1600           & 312               \\
+% 		1700           & 279               \\
+% 		1875           & 308               \\
+% 		1100           & 199               \\
+% 		\hline
+% 	\end{tabular}
+% \end{center}
+
+% Punem pe grafic acest set de date:
+% \begin{center}
+% 	\begin{tikzpicture}
+% 		\begin{axis}[
+% 				xlabel=Suprafața (m2),
+% 				ylabel=Prețul (1000 RON),
+% 				axis lines=middle,
+% 				axis equal,
+% 				xmin=1000,
+% 				xmax=2000,
+% 				ymin=150,
+% 				ymax=350,
+% 				xtick={1000, 1200, 1400, 1600, 1800,  2000},
+% 				ytick={150, 200, 250, 300, 350},
+% 			]
+% 			\addplot[only marks] table {
+% 					1400 245
+% 					1600 312
+% 					1700 279
+% 					1875 308
+% 					1100 199
+% 				};
+% 		\end{axis}
+% 	\end{tikzpicture}
+% \end{center}
+
+% Se obervă o relație liniară între suprafață și preț, dată de $y = a_1 x + a_2$.
+% Formulăm această problemă ca un sistem de ecuații liniare:
+% \begin{align*}
+% 	\begin{bmatrix}
+% 		1400 & 1 \\
+% 		1600 & 1 \\
+% 		1700 & 1 \\
+% 		1875 & 1 \\
+% 		1100 & 1
+% 	\end{bmatrix}
+% 	\begin{bmatrix}
+% 		a_1 \\
+% 		a_2
+% 	\end{bmatrix}
+% 	=
+% 	\begin{bmatrix}
+% 		245 \\
+% 		312 \\
+% 		279 \\
+% 		308 \\
+% 		199
+% 	\end{bmatrix} \\
+% \end{align*}
+
+% Soluția este dată de rezolvarea sistemului $A^T A x = A^T b$. După rezolvare,
+% găsim că $a_1 = 0.1450$ și $a_2 = 46.0575$. Graficul dreptei de regresie este:
+% \begin{center}
+% 	\begin{tikzpicture}
+% 		\begin{axis}[
+% 				xlabel=Suprafața (m2),
+% 				ylabel=Prețul (1000 RON),
+% 				axis lines=middle,
+% 				axis equal,
+% 				xmin=1000,
+% 				xmax=2000,
+% 				ymin=150,
+% 				ymax=350,
+% 				xtick={1000, 1200, 1400, 1600, 1800,  2000},
+% 				ytick={150, 200, 250, 300, 350},
+% 			]
+% 			\addplot[only marks] table {
+% 					1400 245
+% 					1600 312
+% 					1700 279
+% 					1875 308
+% 					1100 199
+% 				};
+% 			\addplot[domain=1000:2000, color=red]{0.1450 * x + 46.0575};
+% 		\end{axis}
+% 	\end{tikzpicture}
+% \end{center}
 
 \section{Probleme}
 
@@ -889,15 +1002,14 @@ găsim că $a_1 = 0.1450$ și $a_2 = 46.0575$. Graficul dreptei de regresie este
 			1  & 3 & 1  \\
 			-2 & 1 & 3  \\
 		\end{bmatrix}$ folosind transformarea Givens.
-	\question Regresie liniară în sens CMMP pe propriul set de date. Trasați
-	graficele punctelor și a dreptei. Hint: \verb|hold on|
+	% \question Regresie liniară în sens CMMP pe propriul set de date. Trasați
+	% graficele punctelor și a dreptei. Hint: \verb|hold on|
+	\question Demonstrați că cea mai bună aproximare în sens CMMP a unei funcții
+	$f(x)$ pe un subspațiu este unică și este dată de proiecția lui $f(x)$ pe
+	subspațiu.
 \end{questions}
 
-\begin{thebibliography}{1}
-
-	\bibitem{MichaelPinze}
-	Michael L. Overton, Pinze Yu. On the choice of sign defining Householder transformations. Numerical Algebra, Control and Optimization, 2025, 15(2): 502-505. doi: 10.3934/naco.2023025
-
-\end{thebibliography}
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}
