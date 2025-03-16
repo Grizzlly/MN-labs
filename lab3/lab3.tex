@@ -337,7 +337,13 @@ ortogonală și $R$ este o matrice superior triunghiulară.
 \end{equation*}
 
 Cu aceste transformări, ne dorim să aducem vectori de la forma
-$\begin{bmatrix} x \\ y \end{bmatrix}$ la forma $\begin{bmatrix} x' \\ 0 \end{bmatrix}$.
+$\begin{bmatrix} x \\ y \end{bmatrix}$ la forma
+$\begin{bmatrix} x' \\ 0 \end{bmatrix}$. Astfel, aplicăm o serie de
+transformări ortogonale pentru a aduce pe $A$ la $R$.
+\begin{gather*}
+	Q_n \ldots Q_2 Q_1 A = R \\
+	A = Q_1^* Q_2^* \ldots Q_n^* R \implies Q = Q_1 Q_2 \ldots Q_n
+\end{gather*}
 
 \subsubsection{Reflexii. Transformarea Householder.}
 
