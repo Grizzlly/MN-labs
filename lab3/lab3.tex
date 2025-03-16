@@ -151,7 +151,7 @@ Multe norme matriceale mai au proprietatea de a fi \textit{submultiplicative}:
 		            \begin{equation*}
 			            ||Av||^2_2 = \langle Av, Av \rangle = \langle v, A^*Av \rangle = \langle  \sum_{i} \alpha_i v_i, \sum_{i} \alpha_i \lambda_i v_i \rangle = \sum_{i} \lambda_i \alpha_i^2
 		            \end{equation*}
-		            Având constrângerea $||v|| = 1$, $\sum_{i} \alpha_i^2 = 1 \implies ||A||_2 = \lambda_{max}(A). \quad \blacksquare$
+		            Având constrângerea $||v|| = 1$, $\sum_{i} \alpha_i^2 = 1 \implies ||A||_2 = \lambda_{max}(B). \quad \blacksquare$
 
 		      \item \textbf{p = $\infty$.} $||A||_{\infty} \coloneq \max_i \sum_j |a_{ij}|$. Este suma maximă a valorilor
 		            absolute de pe rânduri.
@@ -489,9 +489,9 @@ La a doua iterație ne dorim să punem 0 pe poziția (2, 3).
 	v = \begin{bmatrix} 0 \\ 3 \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 0 \\ -sign(0) * 3 \\ 3 \end{bmatrix} = \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix}, \quad ||d||_2^2 = 18
 \end{equation*}
 \begin{align*}
-	H_2           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix} \begin{bmatrix} 0 & -3 & 3 \end{bmatrix}                         \\
-	H_2           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 9 & -9 \\ 0 & -9 & 9 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -1 & 0 \end{bmatrix} \\
-	A_3 = H_2 A_2 & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -1 & 0 \end{bmatrix} \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & -3 & -3 \\ 0 & 0 & -3 \end{bmatrix}
+	H_2           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix} \begin{bmatrix} 0 & -3 & 3 \end{bmatrix}                       \\
+	H_2           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 9 & -9 \\ 0 & -9 & 9 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 1 & 0 \end{bmatrix} \\
+	A_3 = H_2 A_2 & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 1 & 0 \end{bmatrix} \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & 3 & 3 \\ 0 & 0 & 3 \end{bmatrix}
 \end{align*}
 
 $A_3$ este matricea $R$, iar $Q = H_1^T H_2^T = H_1 H_2$ este matricea
