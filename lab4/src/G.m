@@ -12,3 +12,4 @@ for p = 1 : maxP
 end
 
 disp(A);
+disp(A(1 : 3,1 : 3) \ A(:, 4));

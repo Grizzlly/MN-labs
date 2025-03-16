@@ -84,4 +84,7 @@
 
 \section{Probleme}
 
+\bibliographystyle{plain}
+\bibliography{refs}
+
 \end{document}
