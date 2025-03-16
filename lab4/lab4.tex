@@ -387,7 +387,33 @@ acesta.
 Algoritmul în MATLAB se gândește exact la fel, numai că înaintea calculării
 coeficienților $\mu_{ip}$ se face permutarea liniilor.
 
-\octavescript{./src/GPP.m}{}
+\begin{algorithm}
+	\caption{GPP}
+	\begin{algorithmic}[1]
+		\State \( [m, n] \gets \text{dimensiunea matricei } A \)
+		\State \( \text{maxP} \gets \min(m, n) \) \Comment{Determinăm numărul de operații de eliminare}
+        
+		\For{$p = 1$ to $\text{maxP}$}
+		\State \( \text{idx} \gets \max |A(p : m, p)| \) \Comment{Determinăm pivotul maxim}
+		\State \( \text{idx} \gets \text{idx} + p - 1 \) \Comment{Ne trebuie index-ul din toată coloana, nu doar de la p : m}
+        \\
+		\State \( P \gets I_m \)
+		\State \( P(p, p) \gets 0 \) 
+            \State \( P(idx, idx) \gets 0 \)
+            \State \( P(p, idx) \gets 1 \)
+            \State \( P(idx, p) \gets 1 \)
+        \\
+            \State \( A \gets P \cdot A\)
+        \\
+            \State \(T \gets I_m\)
+            \State \( \mu \gets A(p+1:m, p) / A(p, p) \)
+		\State \( T(p+1:m, p) \gets -\mu \) 
+		\State \( A \gets T \cdot A \)
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+%\octavescript{./src/GPP.m}{}
 
 Este de observat că această metodă de pivotare încă nu rezolvă eroarea din
 sistemul de mai sus, nu se efectuează nicio permutare. Totuși, în general, este
@@ -434,7 +460,35 @@ că 1 este foarte mic relativ la 10000.
 Algorimtul în MATLAB este similar cu cel de la GPP, dar introducem
 calculul factorului de scalare.
 
-\octavescript{./src/GPPS.m}{}
+\begin{algorithm}[H]
+	\caption{GPPS}
+	\begin{algorithmic}[1]
+		\State \( [m, n] \gets \text{dimensiunea matricei } A \)
+		\State \( \text{maxP} \gets \min(m, n) \) \Comment{Determinăm numărul de operații de eliminare}
+        
+		\For{$p = 1$ to $\text{maxP}$}
+		\State \( s_{factors} \gets \max |A(p : m, p : n-1)| \) \Comment{Determinăm pivotul maxim pe linii}
+		\State \( \text{fractions} \gets A(p : m, p) \text{./} s_{factors}\)
+        \\
+            \State \( \text{idx} \gets \max |\text{fractions}| \) 
+		\State \( \text{idx} \gets \text{idx} + p - 1 \)
+		\State \( P \gets I_m \)
+		\State \( P(p, p) \gets 0 \) 
+            \State \( P(idx, idx) \gets 0 \)
+            \State \( P(p, idx) \gets 1 \)
+            \State \( P(idx, p) \gets 1 \)
+        \\
+            \State \( A \gets P \cdot A\)
+        \\
+            \State \(T \gets I_m\)
+            \State \( \mu \gets A(p+1:m, p) / A(p, p) \)
+		\State \( T(p+1:m, p) \gets -\mu \) 
+		\State \( A \gets T \cdot A \)
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+%\octavescript{./src/GPPS.m}{}
 
 \subsection{Pivotare totală - GPT}
 
@@ -452,7 +506,48 @@ că o vom aplica la dreapta.
 Algoritmul în MATLAB este similar cu cel de la GPP, doar că modificăm
 căutarea maximului.
 
-\octavescript{./src/GPT.m}{}
+\begin{algorithm}[h!]
+	\caption{GPT}
+	\begin{algorithmic}[1]
+		\State \( [m, n] \gets \text{dimensiunea matricei } A \)
+		\State \( \text{maxP} \gets \min(m, n) \) 
+        \Comment{Determinăm numărul de operații de eliminare}
+            \State \(\text{rightPerms} \gets I_n\)
+            
+		\For{$p = 1$ to $\text{maxP}$}
+            \State \( \text{idx} \gets \max |A(p : m, p : n - 1)| \) \Comment{Determinăm pivotul maxim din întreaga matrice}
+            \State \(\text{A'} \gets A(p : m, p : n - 1)\)
+            \State \([row, col] \gets \text{dimensiunea matricei } A'\)
+            \State \(\text{row} \gets \text{row} + p - 1\)
+            \State \(\text{col} \gets \text{col} + p - 1\)
+	\\
+		\State \( P \gets I_m \)
+		\State \( P(p, p) \gets 0 \) 
+            \State \( P(idx, idx) \gets 0 \)
+            \State \( P(p, idx) \gets 1 \)
+            \State \( P(idx, p) \gets 1 \)
+        \\
+            \State \(\text{rightPerms} \gets \text{rightPerms} * P\)
+            \State \( A \gets P \cdot A\)
+        \\
+            \State \( P \gets I_m \)
+		\State \( P(p, p) \gets 0 \) 
+            \State \( P(idx, idx) \gets 0 \)
+            \State \( P(p, idx) \gets 1 \)
+            \State \( P(idx, p) \gets 1 \)
+        \\
+            \State \( A \gets P \cdot A\)
+        \\
+            \State \(T \gets I_m\)
+            \State \( \mu \gets A(p+1:m, p) / A(p, p) \)
+		\State \( T(p+1:m, p) \gets -\mu \) 
+		\State \( A \gets T \cdot A \)
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+%\octavescript{./src/GPT.m}{}
+
+\newpage
 
 Pentru că $A$ este matricea extinsă trebuie să avem grijă cu indicii.
 Ultima comandă de \verb|display| demonstrează restabilirea ordinii inițiale a
@@ -525,8 +620,26 @@ recursiv (coeficienții primesi ecuații nu se modifică):
 Algoritmul în MATLAB îl construim folosind 4 vectori corespunzători
 coeficienților și termenilor liberi.
 
-\newpage
-\octavescript{./src/Thomas.m}{}
+\begin{algorithm}[h!]
+	\caption{Thomas}
+	\begin{algorithmic}[1]
+		\State \( n \gets \text{lungimea vectorului } d \)
+            \\
+            \State \(x \gets 0_{n, 1}\)
+            \\
+		\For{$p = 2$ to $n$}
+                \State \(\mu \gets a_i / b_{i-1}\)
+                \State \(b_i \gets b_i - \mu * c_{i - 1}\)
+                \State \(d_i \gets b_i - \mu * d_{i - 1}\)
+		\EndFor
+            \\
+            \State \(x_n \gets d_n / b_n\)
+            \For{$i = (n - 1)$ to $1$}
+            \State \(x_i \gets (d_i - c_i * x_{i + 1}) / b_i\)
+            \EndFor
+	\end{algorithmic}
+\end{algorithm}
+%\octavescript{./src/Thomas.m}{}
 
 Pentru analiza numerică, este suficient să analizăm ecuația:
 \begin{equation*}
