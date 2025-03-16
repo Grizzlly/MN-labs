@@ -6,7 +6,7 @@ maxP = min(m, n);
 for p = 1 : maxP
 	[~, idx] = max(A(p : m, p), [], "ComparisonMethod", "abs");
 	idx = idx + p - 1;  % ne trebuie index-ul din toata coloana,
-                    	% nu doar de la p : m
+	% nu doar de la p : m
 
 	P = eye(m);
 	P(p, p) = 0;
@@ -24,3 +24,4 @@ for p = 1 : maxP
 end
 
 disp(A);
+disp(A(1 : 3,1 : 3) \ A(:, 4));
