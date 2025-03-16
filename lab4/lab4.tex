@@ -273,7 +273,7 @@ $O(n^3)$.
 	\end{bmatrix}
 \end{equation*}
 
-\par Agoritmul în MATLAB poate fi gândit astfel:
+\par Algoritmul în MATLAB poate fi gândit astfel:
 
 \begin{enumerate}
 	\item Folosesc un $p$ ca să ma plimb pe coloane, până când $p$ este egal
@@ -281,14 +281,14 @@ $O(n^3)$.
 	\item Pivotul meu va fi $a_{pp}$.
 	\item Iau restul de elemente de pe coloană folosind un index $i$ și calculez
 	      $\mu_{ip} = \frac{a_{ip}}{a_{pp}}$. Acești coeficienți îi pun în
-	      matricea $S$, $S(i, p) = -\mu_{ip}$.
-	\item Calculez produsul $SA$ și continui cu următoarea coloană.
+	      matricea $T$, $T(i, p) = -\mu_{ip}$.
+	\item Calculez produsul $TA$ și continui cu următoarea coloană.
 \end{enumerate}
 
 \newpage
 \octavescript{./src/G.m}{}
 
-\par De notat că nu este nevoie să aduce matricea la forma eșalon redusă pentru
+\par De notat că nu este nevoie să aducem matricea la forma eșalon redusă pentru
 a rezolva un sistem, trebuie doar să fie triunghiulară. În codul de mai sus, $A$
 este matricea extinsă a sistemului. Ba mai mult, am putea afecta stabilitatea
 numerică din cauza efectuării mai multor operații.
