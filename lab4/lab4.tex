@@ -62,7 +62,8 @@
 
 \title{
 	\textmd{\textbf{\MNLabTitle}}
-	\author{Colaboratori: \MNAuthor}
+	\author{}
+	\date{}
 }
 
 \pagestyle{headandfoot}
@@ -75,16 +76,14 @@
 \begin{document}
 
 \begin{coverpages}
-
 	\maketitle
 	\thispagestyle{empty}
 	\tableofcontents
-
 \end{coverpages}
 
 \section{Obiective laborator}
 
-\par În urma parcurgerii acestui laborator, studentul va fi capabil să:
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
 \begin{itemize}
 	\item Transforme o matrice nesingulară într-o matrice superior sau inferior triunghiulară folosind una din metodele prezentate de eliminare gaussiană;
 	\item Implementeze algoritmii de eliminare gaussiană prezentați;
@@ -93,19 +92,19 @@
 
 \section{Noțiuni teoretice}
 
-\par Eliminarea Gaussiană sau \textit{reducerea coloanelor} este un algoritm
-fundamental în algebra liniară. Acesta poate fi folosit pentru rezolvarea
-sistemelor liniare, găsirea rang-ului unei matrice, inversarea unei matrice,
-sau calcularea determinantului.
+Eliminarea Gaussiană sau \textit{reducerea liniilor} (engl. \textit{row-reduction})
+este un algoritm fundamental în algebra liniară. Acesta poate fi folosit pentru
+rezolvarea sistemelor liniare, găsirea rang-ului unei matrice, inversarea unei
+matrice, sau calcularea determinantului.
 
-\par Algoritmul se bazează pe efectuarea unor operații elementarea pentru a
+Algoritmul se bazează pe efectuarea unor operații elementarea pentru a
 permuta, scala și combina liniile unei matrici. Gândindu-ne la un sistem de
 ecuații liniare, acesta nu se schimbă dacă facem aceste operații. Dacă mai
 adăugăm și permutarea coloanelor, atunci soluția sistemului se schimbă doar prin
 aceste permutări, ușor de inversat. Obiecivul este să aducem matricea la
 \textit{forma eșalon} sau \textit{forma eșalon redusă}.
 
-\par Așadar, opeațiile elementare cu liniile sunt:
+Așadar, operațiile elementare cu liniile sunt:
 
 \begin{enumerate}
 	\item permutarea liniilor;
@@ -115,13 +114,13 @@ aceste permutări, ușor de inversat. Obiecivul este să aducem matricea la
 
 \subsection{Forma eșalon a unei matrice}
 
-\par Pentru fiecare linie dintr-o matrice, numim prima valoare diferită de zero
+Pentru fiecare linie dintr-o matrice, numim prima valoare diferită de zero
 \textit{coeficient principal} sau \textit{pivot}. Dacă doi pivoți se găsesc pe
 aceeași coloană, putem mereu să facem pe unul dintre ei 0. Ne folosim apoi de
 permutari, pentru a aranja liniile în așa fel încât pivotul unei linii să fie
 la dreapta pivotului liniei anterioare.
 
-\par De exemplu, matricea de mai jos este în forma eșalon. Observați cum toate
+De exemplu, matricea de mai jos este în forma eșalon. Observați cum toate
 liniile pline de 0 sunt jos.
 
 \begin{equation*}
@@ -133,17 +132,17 @@ liniile pline de 0 sunt jos.
 	\end{bmatrix}
 \end{equation*}
 
-\par În plus, putem spune despre o matrice că este în
+În plus, putem spune despre o matrice că este în
 \textit{forma eșalon redusă} dacă toți pivoții sunt 1 (lucru care se poate
 obține prin scalare) și toate celelalte elemente de pe coloana unui pivot sunt 0
 (lucru care se poate obține prin adunarea unei linii scalate la altă linie).
 
 \subsection{Matrici elementare}
 
-\par O matrice elementară este o matrice care se obține din matricea identitate
+O matrice elementară este o matrice care se obține din matricea identitate
 prin efectuarea unei operații elementare cu liniile.
 
-\par \textbf{Matricea de permutare.} Interschimbă liniile $i$ și $j$.
+\textbf{Matricea de permutare.} Interschimbă liniile $i$ și $j$.
 
 \begin{equation*}
 	\begin{split}
@@ -166,13 +165,13 @@ prin efectuarea unei operații elementare cu liniile.
 	\end{split}
 \end{equation*}
 
-\par Proprietăți:
+Proprietăți:
 \begin{itemize}
 	\item $P = P^{-1} = P^T \implies P$ ortogonală
 	\item $\det P = -1 \implies \det (PA) = -\det A$
 \end{itemize}
 
-\par \textbf{Matricea de scalare.} Înmulțește linia $i$ cu un scalar $\alpha$.
+\textbf{Matricea de scalare.} Înmulțește linia $i$ cu un scalar $\alpha$.
 
 \begin{equation*}
 	\begin{split}
@@ -192,13 +191,13 @@ prin efectuarea unei operații elementare cu liniile.
 	\end{split}
 \end{equation*}
 
-\par Proprietăți:
+Proprietăți:
 \begin{itemize}
 	\item $D_i(m)^{-1} = D_i (\frac{1}{m})$
 	\item $\det S = \alpha \implies \det (SA) = \alpha \det A$
 \end{itemize}
 
-\par \textbf{Matricea de adunare.} Adună linia $i$ la linia $j$ înmulțită cu un
+\textbf{Matricea de adunare.} Adună linia $i$ la linia $j$ înmulțită cu un
 scalar $\alpha$.
 
 \begin{equation*}
@@ -221,7 +220,7 @@ scalar $\alpha$.
 	\end{split}
 \end{equation*}
 
-\par Proprietăți:
+Proprietăți:
 
 \begin{itemize}
 	\item $E_{ij}(\alpha)^{-1} = E_{ij}(-\alpha)$
@@ -230,9 +229,8 @@ scalar $\alpha$.
 
 \subsubsection{Descompunerea LU}
 
-\par Prin aplicare unor astfel de matrice și ajungând la forma eșalon, am ajuns
-practic la o matrice superior triunghiulară.
-
+Prin aplicare unor astfel de matrice și ajungând la forma eșalon, am ajuns
+la o matrice superior triunghiulară.
 \begin{align*}
 	T_nT_{n-1}\ldots T_1 A & = U                                             \\
 	A                      & = T_1^{-1}T_2^{-1}\ldots T_n^{-1}U              \\
@@ -241,19 +239,17 @@ practic la o matrice superior triunghiulară.
 
 \subsubsection{Calcularea determinantului}
 
-\par După cum am spus la primul laborator, determinantul se calculează prin
-formula lui Leibniz în $O(n!)$ operații. Eliminarea Gaussiană are complexitate
-$O(n^3)$.
+După cum am spus la primul laborator, determinantul se calculează în $O(n!)$
+operații. Eliminarea Gaussiană are complexitate $O(n^3)$.
 
-\par Pentru o matrice triunghiulară $U$ avem că $\det U = \prod_{i=1}^{n} u_{ii}$.
-
+Pentru o matrice triunghiulară $U$ avem că $\det U = \prod_{i=1}^{n} u_{ii}$.
 \begin{equation*}
 	\det A = \frac{\det U}{\prod_{i = 1}^{n} \det T_i}
 \end{equation*}
 
 \subsection{Eliminarea gaussiană - G}
 
-\par \textbf{Exemplu.}
+\textbf{Exemplu.}
 
 \begin{equation*}
 	\begin{bmatrix}
@@ -273,7 +269,7 @@ $O(n^3)$.
 	\end{bmatrix}
 \end{equation*}
 
-\par Algoritmul în MATLAB poate fi gândit astfel:
+Algoritmul în MATLAB poate fi gândit astfel:
 
 \begin{enumerate}
 	\item Folosesc un $p$ ca să ma plimb pe coloane, până când $p$ este egal
@@ -285,27 +281,42 @@ $O(n^3)$.
 	\item Calculez produsul $TA$ și continui cu următoarea coloană.
 \end{enumerate}
 
-\newpage
-\octavescript{./src/G.m}{}
+% \newpage
+% \octavescript{./src/G.m}{}
 
-\par De notat că nu este nevoie să aducem matricea la forma eșalon redusă pentru
+\begin{algorithm}
+	\caption{Eliminare gaussiană}
+	\begin{algorithmic}[1]
+		\State \( [m, n] \gets \text{dimensiunea matricei } A \)
+		\State \( \text{maxP} \gets \min(m, n) \) \Comment{Determinăm numărul de operații de eliminare}
+
+		\For{$p = 1$ to $\text{maxP}$}
+		\State \( T \gets I_m \) \Comment{Inițializăm matricea de transformare}
+		\State \( \mu \gets A(p+1:m, p) / A(p, p) \) \Comment{Calculăm coeficienții}
+		\State \( T(p+1:m, p) \gets -\mu \) \Comment{Actualizăm transformarea}
+		\State \( A \gets T \cdot A \) \Comment{Aplicăm transformarea}
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+De notat că nu este nevoie să aducem matricea la forma eșalon redusă pentru
 a rezolva un sistem, trebuie doar să fie triunghiulară. În codul de mai sus, $A$
-este matricea extinsă a sistemului. Ba mai mult, am putea afecta stabilitatea
-numerică din cauza efectuării mai multor operații.
+este matricea extinsă a sistemului. Mai mult, am introduce erori de calcul în
+plus din cauza efectuării mai multor operații.
 
-\par Alt lucru de observat este că dacă pivotul selectat este 0, atunci
+Alt lucru de observat este că dacă pivotul selectat este 0, atunci
 programul "crapă" (womp-womp). Pentru a rezolva acest lucru introducem
 conceptul de \textit{pivotare}.
 
 \subsection{Pivotare}
 
-\par Pivotarea constă în folosirea permutărilor și a scalării pentru a alege
+Pivotarea constă în folosirea permutărilor și a scalării pentru a alege
 cel mai bun pivot. Este clar că eliminearea Gauss poate fi aplicată pe orice
 matrice, deci în continuare discuția se va baza pe analiză numerică.
 
 \subsubsection{De ce este pivotarea importantă?}
 
-\par Fie un calculator care folosește aritmetică în virgulă mobilă, cu 3
+Fie un calculator care folosește aritmetică în virgulă mobilă, cu 3
 zecimale, cu trunchiere. Fie următorul sistem:
 
 \begin{equation*}
@@ -328,7 +339,7 @@ zecimale, cu trunchiere. Fie următorul sistem:
 	\mu = \frac{0.780}{0.913} = 0.854 \quad \text{(trunchiere)}
 \end{equation*}
 
-\par Sistemul devine:
+Sistemul devine:
 
 \begin{equation*}
 	\begin{bmatrix}
@@ -346,9 +357,9 @@ zecimale, cu trunchiere. Fie următorul sistem:
 	\end{bmatrix}
 \end{equation*}
 
-\par Soluțiile sunt $x_2 = 1$ și $x_1 = \frac{0.254 - 0.659}{0.913} = -0.417$.
+Soluțiile sunt $x_2 = 1$ și $x_1 = \frac{0.254 - 0.659}{0.913} = -0.417$.
 
-\par Comparăm soluția găsită, $x_* = \begin{bmatrix} -0.417 \\ 1 \end{bmatrix}$,
+Comparăm soluția găsită, $x_* = \begin{bmatrix} -0.417 \\ 1 \end{bmatrix}$,
 cu soluția reală, $x = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$:
 
 \begin{align*}
@@ -357,7 +368,7 @@ cu soluția reală, $x = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$:
 	\frac{||x - x_*||}{||x||} & = \frac{0.557}{\sqrt{2}} = 0.39
 \end{align*}
 
-\par Eroarea relativă este de aproape 40\%. Foarte mare! Dacă calculăm reziduul,
+Eroarea relativă este de aproape 40\%. Foarte mare! Dacă calculăm reziduul,
 am vedea că el este totuși mic, dar pe noi ne interesează soluția. Prezentăm
 următoarele strategii:
 
@@ -369,32 +380,32 @@ următoarele strategii:
 
 \subsubsection{Pivotare parţială - GPP}
 
-\par Pivotarea parțială are loc numai prin permutarea liniilor. La pasul $p$ al
+Pivotarea parțială are loc numai prin permutarea liniilor. La pasul $p$ al
 algoritmului se aduce în locul pivotului cel mai mare element din coloană de sub
 acesta.
 
-\par Algoritmul în MATLAB se gândește exact la fel, numai că înaintea calculării
+Algoritmul în MATLAB se gândește exact la fel, numai că înaintea calculării
 coeficienților $\mu_{ip}$ se face permutarea liniilor.
 
 \octavescript{./src/GPP.m}{}
 
-\par Este de observat că această metodă de pivotare încă nu rezolvă eroarea din
+Este de observat că această metodă de pivotare încă nu rezolvă eroarea din
 sistemul de mai sus, nu se efectuează nicio permutare. Totuși, în general, este
 suficientă pentru a face erorile rezonabile. Dacă pivotul ajunge să fie 0,
 atunci matricea este singulară.
 
 \subsection{Pivotare parţială cu pivot scalat - GPPS}
 
-\par Această tehnică este similară cu precedenta, doar că definim la început un
+Această tehnică este similară cu precedenta, doar că definim la început un
 factor de scalare pentru fiecare linie $i$, factor de forma:
 
 \begin{equation*}
 	s_i = \max_{j=p:n}{\{|a_{ij}|\}} \quad \text{sau} \quad s_i = \sum_{j=p}^{n}{|a_{ij}|}
 \end{equation*}
 
-\par Dacă $s_i = 0$ atunci matricea este singulară.
+Dacă $s_i = 0$ atunci matricea este singulară.
 
-\par Prin această metodă interschimbăm liniile în funcție de elementul cel mai
+Prin această metodă interschimbăm liniile în funcție de elementul cel mai
 mare relativ la celelelte elemente de pe linie. Practic, la fiecare pas $p$,
 vom căuta întregul $i_p$ astfel încât:
 
@@ -402,7 +413,7 @@ vom căuta întregul $i_p$ astfel încât:
 	\frac{|a_{i_p p}|}{s_{i_p}} = \max_{i=p:n}{\frac{|a_{i p}|}{s_i}}
 \end{equation*}
 
-\par De exemplu, considerând sistemul
+De exemplu, considerând sistemul
 $\begin{bmatrix}
 		1 & 10000  \\
 		1 & 0.0001
@@ -420,30 +431,30 @@ $, folosind GPP nu ar trebui sa interschimbăm liniile, dar avem exact aceeași
 problemă cu stabilitatea numerică. În consecință, interschimbăm liniile pentru
 că 1 este foarte mic relativ la 10000.
 
-\par Algorimtul în MATLAB este similar cu cel de la GPP, dar introducem
+Algorimtul în MATLAB este similar cu cel de la GPP, dar introducem
 calculul factorului de scalare.
 
 \octavescript{./src/GPPS.m}{}
 
 \subsection{Pivotare totală - GPT}
 
-\par Cea mai bună stabilitate numerică se obține atunci când pivotul este cel
+Cea mai bună stabilitate numerică se obține atunci când pivotul este cel
 mai mare element în modul, din toata submatricea rămasă. Această tehnică se
 numește pivotare totală. Totuși, în practică nu se folosește deoarece trebuie
 ca la fiecare iterație să parcurgi toată submatricea. Practic, costurile
 sunt mai mari decât beneficiile.
 
-\par Pentru că acum trebuie să permutăm și coloanele, trebuie să ținem minte
+Pentru că acum trebuie să permutăm și coloanele, trebuie să ținem minte
 aceste permutări. Acest lucru se datorează faptului că se schimbă ordinea
 necunoscutelor. Pentru aceste permutări, ne folosim tot de o matrice $P$ numai
 că o vom aplica la dreapta.
 
-\par Algoritmul în MATLAB este similar cu cel de la GPP, doar că modificăm
+Algoritmul în MATLAB este similar cu cel de la GPP, doar că modificăm
 căutarea maximului.
 
 \octavescript{./src/GPT.m}{}
 
-\par Pentru că $A$ este matricea extinsă trebuie să avem grijă cu indicii.
+Pentru că $A$ este matricea extinsă trebuie să avem grijă cu indicii.
 Ultima comandă de \verb|display| demonstrează restabilirea ordinii inițiale a
 necunoscutelor.
 
