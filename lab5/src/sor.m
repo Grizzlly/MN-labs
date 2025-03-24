@@ -1,13 +1,23 @@
-function [x, flag] = sor(A, x, b, w, max_it, tol)
-	% 	Metoda Suprarelaxarii
-	%   Functia rezolva sisteme liniare Ax=b folosind metoda suprarelaxarii
-	% Input:
-	%   A - matricea sistemului
-	%   x - aproximarea intiala a sistemului
-	%   b - vectorul termenilor liberi
-	%   w - factorul de relaxare
-	%   max_it - numarul maxim de iteratii
-	%   tol - toleranta
-	% Output:
-	%   x - solutia sistemului
-	%   flag - 0 = a fost gasita o solutie / 1 = metoda nu converge pentru max_it
+A = [10 -5 1; 1 4 3; 4 -3 -9];
+b = [1; 4; 6];
+
+max_iter = 1000;
+tol = 1e-6;
+omega = 1.5;
+
+x = zeros(length(b), 1);
+
+for i = 1 : max_iter
+	x_prev = x;
+	for j = 1 : length(x)
+		x(j) = (b(j) - A(j, 1:j-1) * x(1:j-1) - A(j, j+1:end) * x(j+1:end)) / A(j, j);
+	end
+	x = omega * x + (1 - omega) * x_prev;
+
+	if norm(x - x_prev) < tol
+		break;
+	end
+end
+
+disp(x);
+disp(A * x);

@@ -1,34 +1,20 @@
-function [x succes] = GaussSeidel(A, b, x0, tol, maxiter)
-	[m n] = size(A);
-	x = x0;
-	succes = 0;
-	
-	while maxiter > 0 
-		maxiter--;
-		xp = zeros(1, n);
-		
-		for i = 1 : m
-			suma1 = 0;
-			suma2 = 0;
+A = [10 -5 1; 1 4 3; 4 -3 -9];
+b = [1; 4; 6];
 
-			for j = 1 : i - 1
-				suma1 += A(i, j)*xp(j);
-			endfor
-			
-			for j = i + 1 : n
-				suma1 += A(i, j)*x(j);
-			endfor
+max_iter = 1000;
+tol = 1e-6;
 
-			xp(i) = (b(i)-suma1-suma2)/A(i, i);
-		endfor
-		
-		x = xp;
-		if norm(xp-x, 2) < tol
-			succes = 1;
-			break;
-		endif
-	endwhile
-endfunction
+x = zeros(length(b), 1);
 
+for i = 1 : max_iter
+	x_prev = x;
+	for j = 1 : length(x)
+		x(j) = (b(j) - A(j, 1:j-1) * x(1:j-1) - A(j, j+1:end) * x(j+1:end)) / A(j, j);
+	end
+	if norm(x - x_prev) < tol
+		break;
+	end
+end
 
-
+disp(x);
+disp(A * x);
