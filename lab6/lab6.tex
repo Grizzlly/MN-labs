@@ -78,12 +78,11 @@
 \end{coverpages}
 
 \section{Obiective laborator}
-
+În urma parcurgerii acestui laborator, studentul va fi capabil să:
 \begin{itemize}
-	\item Însuşirea noţiunilor privitoare la determinarea aproximativă a soluţiilor unei ecuaţii neliniare;
-	\item Rezolvarea iterativă a unui sistem de ecuaţii neliniare;
-	\item Comenzi Octave pentru lucrul cu polinoame;
-	\item Rădăcinile polinoamelor.
+	\item determine aproximativ soluţiile unei ecuaţii neliniare;
+	\item rezolve iterativ un sistem de ecuaţii neliniare;
+	\item lucreze în Octave cu polinoame.
 \end{itemize}
 
 \section{Noțiuni teoretice}
@@ -134,8 +133,7 @@ Se poate arăta că eroarea la iteraţia curentă este proporţională cu pătra
 În cazul acestei metode, ecuaţia $f(x)=0$ se rescrie ca $x=g(x)$, ceea ce are avantajul de a furniza o formulă prin care se poate calcula o nouă valoare a lui $x$ ca o funcţie $g$ aplicată vechii valori a lui $x$, adică:
 $$x_{i+1}=g(x_{i})$$
 
-Această metodă converge liniar (eroarea la pasul $i$ este proporţională cu eroarea la pasul $i-1$ inmulţită cu un factor subunitar) dacă $\left |g^{'}(x)  \right |<1,  \forall x\in (a,b)$. Altfel, metoda este divergentă.
-
+Această metodă converge liniar (eroarea la pasul $i$ este proporţională cu eroarea la pasul $i-1$ înmulţită cu un factor subunitar) dacă $\left |g^{'}(x)  \right |<1,  \forall x\in (a,b)$. Altfel, metoda este divergentă.
 \subsection{Rădăcinile polinoamelor}
 
 Fie $p$ un polinom de grad $n$, $p(x)= a_{n}x^{n}+a_{n-1}x^{n-1}+a_{n-2}x^{n-2}+...+a_{1}x+a_{0}, \: cu \: a_{n}\neq 0$.
