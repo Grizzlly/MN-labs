@@ -1,12 +1,17 @@
-function sol = bisect(a, b, f, tol)
-	m = 0;
-	while(((b-a)/(2^m)) > tol)
-		sol = (a+b)/2;
-		if (f(a)*f(sol) < 0)
-			b = sol;
-		elseif (f(sol)*f(b) < 0)
-			a = sol;
-		endif
-		m = m+1;
-	endwhile
-endfunction
+f = @(x) x.^3 - 2*x - 5;
+a = 2;
+b = 3;
+tol = 1e-10;
+
+c = (a + b) / 2;
+while abs(f(c)) > tol
+	if f(a) * f(c) < 0
+		b = c;
+	else
+		a = c;
+	end
+	c = (a + b) / 2;
+end
+
+disp(c);
+disp(f(c));

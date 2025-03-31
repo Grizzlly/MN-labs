@@ -1,19 +1,18 @@
 f = @(x) x.^3 - 2*x - 5;
+fder = @(x) 3*x^2 - 2;
 x0 = 2;
-x1 = 3;
 
 max_iter = 1000;
 tol = 1e-10;
+x = x0;
 
 for i = 1:max_iter
-	x = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0));
+	x_prev = x;
+	x = x - f(x) / fder(x);
 
-	if abs(x - x1) < tol
+	if abs(x - x_prev) < tol
 		break;
 	end
-
-	x0 = x1;
-	x1 = x;
 end
 
 disp(x);
