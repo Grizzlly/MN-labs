@@ -103,6 +103,21 @@ $[a, b]$ şi pentru orice $c \in [a, b]$ să fie satisfăcută inegalitatea:
 	|f'(c)| < 1
 \end{equation*}
 
+Ne dorim să găsim soluția pozitivă a ecuației $x^2 - x - 1 = 0$. Prima dată
+trebuie să transformăm ecuația într-o formă de punct fix:
+\begin{equation*}
+	x^2 - x - 1 = 0 \Rightarrow x = \sqrt{x + 1}
+\end{equation*}
+
+Calculăm derivata:
+\begin{equation*}
+	(\sqrt{x + 1})' = \frac{1}{2\sqrt{x + 1}}
+\end{equation*}
+
+Observăm că derivata este mai mică decât 1 pentru orice $x \geq 0$. Asta
+înseamnă că iterația de punct fix $x^{(k + 1)} = \sqrt{x^{(k)} + 1}$ converge
+către soluția pozitivă a ecuației.
+
 \textbf{Metoda bisecţiei}. Dacă o funcţie îşi schimbă semnul pe un interval,
 adică $f(a)\cdot f(b)<0$, atunci se evaluează valoarea funcţiei în punctul de
 mijloc al intervalului, $c = \frac{a + b}{2}$. Dacă  $f(c)\cdot f(b)<0$ atunci
@@ -404,10 +419,10 @@ Iar după ce se prelucrează se ajunge la formula lui $\beta$:
 	\end{algorithmic}
 \end{algorithm}
 
-\begin{figure}[H]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.3\textwidth]{conjugate_vs_steepest.png}
-	\caption{Metoda Gradientului Conjugat și a Pașilor descrescători}
+	\caption{Metoda Gradientului Conjugat și a Gradientului Descendent}
 	\label{fig:2}
 \end{figure}
 
@@ -462,22 +477,34 @@ $$x^{(k+1)} = x^{(k)} - J(x^{(k)})^{-1}F(x^{(k)}), k=0,1,2,... $$
 			\frac{\partial F_{n}}{ \partial x_{1}} & ...   & \frac{\partial F_{n}}{ \partial x_{n}}
 		\end{array} \right)\]
 
-Dacă matricea $J$ este neinversabilă, atunci pasul este nedefinit. Vom presupune că $J(x^*)$ este inversabilă, iar continuitatea lui $J$ va asigura că $J(x^{(k)})$ este inversabilă pentru orice $x^{(k)}$ suficient de apropiat de $x^*$.
-Secvenţa definită iterativ converge spre soluția $x^*$.
-Condiţia de oprire la iteraţia $k$, $\left \|x^{*}-x^{(k)}  \right \|<tol$, unde $tol$ este o toleranţă dată, se poate arăta că revine la $\left \|x^{(k)}-x^{(k-1)}  \right \|<tol.$
+Dacă matricea $J$ este neinversabilă, atunci pasul este nedefinit. Vom presupune
+că $J(x^*)$ este inversabilă, iar continuitatea lui $J$ va asigura că
+$J(x^{(k)})$ este inversabilă pentru orice $x^{(k)}$ suficient de apropiat de
+$x^*$. Secvenţa definită iterativ converge spre soluția $x^*$.
+Condiţia de oprire la iteraţia $k$, $\left \|x^{*}-x^{(k)}  \right \|<tol$, unde
+$tol$ este o toleranţă dată, se poate arăta că revine la
+$\left \|x^{(k)}-x^{(k-1)}  \right \|<tol.$
 
 \subsection{Polinoame}
 
 \subsubsection{Rădăcinile polinoamelor}
 
-Fie $p$ un polinom de grad $n$, $p(x)= a_{n}x^{n}+a_{n-1}x^{n-1}+a_{n-2}x^{n-2}+...+a_{1}x+a_{0}, \: cu \: a_{n}\neq 0$.
-Conform cu \textit{teorema fundamentală a algebrei}, polinomul $p$ are $n$ rădăcini reale sau complexe (numărând şi multiplicităţile). În cazul în care coeficienţii $a_{i}$ sunt toţi reali,  rădăcinile complexe apar conjugate (de forma $c+id$ şi $c-id$).
+Fie $p$ un polinom de grad $n$,
+$p(x)= a_{n}x^{n}+a_{n-1}x^{n-1}+a_{n-2}x^{n-2}+...+a_{1}x+a_{0}$, cu
+$a_{n}\neq 0$. Conform cu \textit{teorema fundamentală a algebrei}, polinomul
+$p$ are $n$ rădăcini reale sau complexe (numărând şi multiplicităţile). În cazul
+în care coeficienţii $a_{i}$ sunt toţi reali,  rădăcinile complexe apar
+conjugate (de forma $c+id$ şi $c-id$).
 
-Folosind regula semnelor a lui Descartes, putem număra câte rădăcini reale pozitive are polinomul $p$. Fie $v$ numărul variaţiilor de semn ale coeficienţilor $a_{n}, a_{n-1}, a_{n-2},.., a_{1},a_{0}$, ignorând coeficienţii care sunt nuli. Fie $n_{p}$ numărul de rădăcini pozitive. Avem următoarele două relaţii:
-
-1) $n_{p}\leq v;$
-
-2) $v-n_{p}$ este un număr par.
+Folosind regula semnelor a lui Descartes, putem număra câte rădăcini reale
+pozitive are polinomul $p$. Fie $v$ numărul variaţiilor de semn ale
+coeficienţilor $a_{n}, a_{n-1}, a_{n-2},.., a_{1},a_{0}$, ignorând coeficienţii
+care sunt nuli. Fie $n_{p}$ numărul de rădăcini pozitive. Avem următoarele două
+relaţii:
+\begin{enumerate}
+	\item $n_{p}\leq v$;
+	\item $v-n_{p}$ este un număr par.
+\end{enumerate}
 
 Analog, numărul de rădăcini reale negative ale lui $p(x)$ se obţine folosind numărul de schimbări de semn ale coeficienţilor polinomului  $p(-x)$.
 Pentru determinarea rădăcinilor, se pot aplica metodele descrise anterior la punctul $b)$, dacă nu se cunoaşte localizarea rădăcinilor pe intervale.
@@ -500,6 +527,12 @@ Pentru determinarea rădăcinilor, se pot aplica metodele descrise anterior la p
 
 	\question Să se determine tipul (dacă sunt reale pozitive sau negative,
 	complexe) rădăcinilor polinomului $p(x)=3x^{6}+x^{4}-2x^{3}-5$.
+
+	\question Să se rezolve următorul sistem prin puncte fixe:
+	\begin{align*}
+		 & \frac{x}{2} + \frac{1}{4}\ln(1 + y)   = 2 \\
+		 & \frac{y}{4} + \frac{1}{10}\arctan(x)  = 2
+	\end{align*}
 
 	\question Să se scrie în MATLAB un program care rezolvă un sistem de ecuaţii
 	neliniare prin metoda Newton. Ca intrare, se consideră un vector coloană care
