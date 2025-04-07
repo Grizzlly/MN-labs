@@ -48,15 +48,17 @@
 
 \renewcommand{\contentsname}{Cuprins}
 \renewcommand{\figurename}{Figura}
+\renewcommand{\refname}{Referințe}
+\renewcommand{\tablename}{Tabelul}
 
 \setlength{\parskip}{0.5\baselineskip}
 
 \graphicspath{{./img/}}
 
 \title{
-	\textmd{\textbf{\MNLabTitle}}
-	\author{}
-        \date{}
+\textmd{\textbf{\MNLabTitle}}
+\author{}
+\date{}
 }
 
 \pagestyle{headandfoot}
@@ -69,11 +71,9 @@
 \begin{document}
 
 \begin{coverpages}
-
 	\maketitle
-        \thispagestyle{empty}
+	\thispagestyle{empty}
 	\tableofcontents
-
 \end{coverpages}
 
 \section{Obiective laborator}
@@ -81,233 +81,336 @@
 În urma parcurgerii acestui laborator, studentul va fi capabil să:
 
 \begin{itemize}
-	\item utilizeze metoda puterii directe şi metoda puterii inverse pentru a determina valorile şi vectorii proprii ale unei matrice;
-	\item aplice metoda Householder pentru a determina valorile şi vectorii proprii ale unei matrice;
-	\item aplice proprietățile valorilor şi vectorilor proprii în rezolvarea unor probleme.
+	\item utilizeze metoda puterii directe şi metoda puterii inverse pentru a
+	      determina valorile şi vectorii proprii ale unei matrice;
+	\item aplice metoda deflației pentru a determina valorile şi vectorii
+	      proprii ale unei matrice;
+	\item aplice proprietățile valorilor şi vectorilor proprii în rezolvarea
+	      unor probleme.
 \end{itemize}
-
-
-%----------------------------------------------------------------------------------------
-%       TEORIE
-%----------------------------------------------------------------------------------------
 
 \section{Noțiuni teoretice}
 
-Vom începe prin a prezenta conceptul de valoare proprie și vector propriu pentru o matrice pătrată
-$A \in \mathbb{C}^{n\times n}$. Se numește \emph{valoare proprie} a lui $A$ orice număr complex
-$\lambda \in \mathbb{C}$ pentru care există un vector nenul $x \in \mathbb{C}^{n}$ (\emph{vector propriu}), astfel încât
-\[
-	A x = \lambda x.
-\]
+Vom începe prin a prezenta conceptul de valoare proprie și vector propriu pentru
+o matrice pătrată
+$A \in \mathbb{C}^{n\times n}$. Se numește \emph{valoare proprie} a lui $A$
+orice număr complex
+$\lambda \in \mathbb{C}$ pentru care există un vector nenul
+$x \in \mathbb{C}^{n}$ (\emph{vector propriu}), astfel încât
+\begin{equation*}
+	A x = \lambda x
+\end{equation*}
 
-Mulțimea tuturor valorilor proprii ale matricei $A$ se numește \emph{spectrul} matricei și se notează cu
-\[
+Mulțimea tuturor valorilor proprii ale matricei $A$ se numește \textit{spectrul}
+matricei și se notează cu
+\begin{equation*}
 	\lambda(A) = \{ \lambda_1, \lambda_2, \ldots, \lambda_n\}.
-\]
+\end{equation*}
+
 Două proprietăți importante ale valorilor proprii ale unei matrice $A\in\mathbb{C}^{n\times n}$ sunt:
 \begin{itemize}
-	\item \(\displaystyle \sum\limits_{i=1}^n \lambda_{i} = \mathrm{tr}(A)\), adică suma valorilor proprii este egală cu urma (suma diagonală) a matricei.
-	\item \(\displaystyle \prod\limits_{i=1}^n \lambda_{i} = \det(A)\), adică produsul valorilor proprii este determinantul matricei.
+	\item $\sum_{i=1}^n \lambda_{i} = \mathrm{tr}(A)$, adică suma
+	      valorilor proprii este egală cu urma (suma diagonală) a matricei.
+	\item $\prod_{i=1}^n \lambda_{i} = \det(A)$, adică produsul valorilor
+	      proprii este determinantul matricei.
 \end{itemize}
 
 Pentru a determina practic valorile proprii, se consideră polinomul caracteristic
 \(\ p(\lambda) = \det(\lambda I_n - A)\),
-iar valorile proprii sunt rădăcinile acestui polinom. Deși acest aspect este esențial din punct de vedere teoretic, în practică se apelează la metode numerice eficiente pentru a obține valorile și vectorii proprii, mai ales atunci când dimensiunea matricei este mare.
+iar valorile proprii sunt rădăcinile acestui polinom. Deși acest aspect este
+esențial din punct de vedere teoretic, în practică se apelează la Metode
+numerice iterative pentru a deterimna valorile și vectorii proprii.
 
-\subsection*{Matrici asemenea}
+\subsection{Matrice asemenea}
 
-Două matrici \(A, B \in \mathbb{C}^{n \times n}\) se numesc \emph{asemenea} dacă există o matrice nesingulară \(T\) astfel încât
-\[
-	B = T^{-1} A \, T.
-\]
-Este ușor de arătat că această relație de asemănare implică faptul că \(A\) și \(B\) au același polinom caracteristic și, în consecință, aceleași valori proprii. Mai mult, vectorii proprii corespunzători se leagă între ei prin transformarea dată de \(T\). Practic, asemănarea este o transformare ce nu modifică spectrul matricei, ci doar \emph{reprezentarea} acesteia.
+Două matrici $A, B \in \mathbb{C}^{n \times n}$ se numesc \textit{asemenea} dacă
+există o matrice nesingulară $T$ astfel încât
+\begin{equation*}
+	B = T^{-1} A T
+\end{equation*}
 
-\subsection*{Forma Schur}
+Ideea de asemănare are la bază simplificarea operațiilor. De exemplu, dacă vrem
+să rotim un vector din $\mathbb{R}^2$ în jurul altui vector, putem ca întâi să
+schimbăm baza astfel încât vectorul de rotație să devină un vector
+standard (de exemplu, să-l aducem pe axa $x$), să aplicăm rotația și apoi să
+schimbăm baza înapoi.
 
-O aplicație importantă a ideii de asemănare este \emph{Forma Schur}. Teorema Schur afirmă că pentru orice matrice \(A \in \mathbb{C}^{n\times n}\) există o matrice unitară \(\widehat{Q}\) astfel încât
-\[
-	S = \widehat{Q}^{\,T} \,A\, \widehat{Q}
-\]
-este o matrice superior triunghiulară (în cazul complex). Această matrice \(S\) se numește \emph{forma Schur complexă} a matricei \(A\). În cazul real, există o matrice ortogonală \(Q\) pentru care
-\[
-	S = Q^T \, A \, Q
-\]
-este cvasi-triunghiulară superior (pe diagonală putem avea blocuri de dimensiune \(1 \times 1\) sau \(2 \times 2\)), această formă fiind numită \emph{forma Schur reală}. Blocurile \(2\times 2\) corespund perechilor de valori proprii complexe (conjugate).
+Două matrice asemenea au același spectru.
 
-\textbf{Demonstrație (schiță):} Pornind de la faptul că orice matrice complexă \(A\) are cel puțin o valoare proprie, se poate construi un vector propriu și forma o bază în care primul vector propriu apare simplu. Se aplică inductiv aceeași idee pentru submatricea rămasă, iar la fiecare pas se folosesc transformări unitare (în cazul complex) sau ortogonale (în cazul real). Prin construcție, forma finală devine (cvasi-)triunghiulară.
+\textbf{Demonstrație.} Fie $A, B \in \mathbb{C}^{n \times n}$ asemenea, adică
+$B = T^{-1} A T$. Fie $\lambda \in \mathbb{C}$ o valoare proprie a lui $B$.
+\begin{align*}
+	B x          & = \lambda x                        \\
+	T^{-1} A T y & = \lambda x                        \\
+	A (T y)      & = \lambda (T y) \quad \blacksquare \\
+\end{align*}
 
-Forma Schur este utilă în multe algoritmi numerici pentru calculul valorilor proprii, deoarece odată ce matricea este adusă în formă Schur, valorile proprii apar direct pe diagonala sau în blocurile \(2\times 2\).
+\subsection{Forma Jordan a unei matrice}
+
+Forma Jordan a unei matrice este o formă canonică care permite simplificarea
+analizei matricelor, în special în ceea ce privește valorile și vectorii proprii.
+O matrice $A$ complexă este mereu similară unei matrice bloc-diagonale de forma:
+\begin{equation*}
+	J = \begin{bmatrix}
+		J_1    & 0      & \cdots & 0      \\
+		0      & J_2    & \cdots & 0      \\
+		\vdots & \vdots & \ddots & \vdots \\
+		0      & 0      & \cdots & J_k
+	\end{bmatrix}
+\end{equation*}
+
+Fiecare bloc se numește \textit{bloc Jordan} și are forma:
+\begin{equation*}
+	J_i = \begin{bmatrix}
+		\lambda_i & 1         & 0      & \cdots    & 0         \\
+		0         & \lambda_i & 1      & \cdots    & 0         \\
+		\vdots    & \vdots    & \ddots & \ddots    & \vdots    \\
+		0         & 0         & \cdots & \lambda_i & 1         \\
+		0         & 0         & \cdots & 0         & \lambda_i
+	\end{bmatrix}
+\end{equation*}
 
 \subsection{Determinarea vectorilor şi valorilor proprii}
 
-În continuare, vom descrie câteva metode numerice utilizate pentru a determina valorile şi vectorii proprii ai unei matrice.
+În continuare, vom descrie câteva metode numerice utilizate pentru a determina
+valorile şi vectorii proprii ai unei matrice.
 
 \subsubsection{Metoda puterii directe}
 
-Fie matricea $A \in \mathbb{R}^{n\times n}$, cu spectrul $\lambda(A) = \{\lambda_1,\lambda_2,\dots,\lambda_n\}$ și vectori proprii unitarizați $x_1,x_2,\dots,x_n$. Se presupune că
-\[
-	|\lambda_1| \ge |\lambda_2| \ge \dots \ge |\lambda_n|.
-\]
-Pentru un vector inițial $y \in \mathbb{R}^{n}$, cu normă euclidiană $1$, care are componentă nenulă pe direcția lui $x_1$, metoda puterii directe construiește șirul
-\[
-	y^{(k)} = \frac{A\,y^{(k-1)}}{\|A\,y^{(k-1)}\|_2}, \quad k \ge 1,
-\]
-pornind de la $y^{(0)} = y$. Simultan, se calculează
-\[
-	\lambda^{(k)} = (y^{(k)})^T A\,y^{(k)}.
-\]
-Se poate demonstra că $\lambda^{(k)}\to \lambda_1$ (valoarea proprie cu modul maxim), iar $y^{(k)}\to x_1$ (vectorul propriu asociat). Convergența apare pentru orice alegere inițială de $y$, atât timp cât proiecția pe $x_1$ nu este nulă.
+Fie matricea $A \in \mathbb{R}^{n\times n}$, cu spectrul
+$\lambda(A) = \{\lambda_1, \lambda_2, \dots, \lambda_n\}$ și vectori proprii
+normalizați $x_1, x_2, \dots, x_n$. Fie următoarea presupunere:
+\begin{equation*}
+	|\lambda_1| > |\lambda_2| \geq \dots \geq |\lambda_n|
+\end{equation*}
 
-\paragraph*{Forma Jordan}
-\emph{Forma Jordan} reprezintă o structură canonică în care poate fi adusă o matrice, printr-o transformare de asemănare. În forma Jordan, matricea este bloc diagonală, unde fiecare bloc (numit \emph{bloc Jordan}) corespunde unei valori proprii și are pe diagonală exact acea valoare proprie, iar deasupra diagonalei pot apărea $1$-uri (în cazul în care avem o rădăcină cu multiplicitate mai mare și spațiul propriu asociat nu este suficient pentru o diagonalizare completă). În esență, forma Jordan arată cum se “compun” spațiile proprii și spațiile generalizate proprii ale unei matrice.
+Pentru un vector inițial $y^{(0)} \in \mathbb{R}^{n}$, care are componentă
+nenulă pe direcția lui $x_1$, metoda puterii directe construiește șirul
+\begin{equation*}
+	y^{(k)} = \frac{A y^{(k-1)}}{\|A y^{(k-1)}\|}
+\end{equation*}
 
-\subparagraph{Legătura metodei puterii directe cu Forma Jordan.}  
-Pentru a înțelege de ce metoda puterii directe se focalizează pe valoarea proprie cu modul maxim, putem privi matricea $A$ în forma sa Jordan. Practic, dacă proiectăm vectorul inițial pe blocurile Jordan, componentele asociate valorilor proprii mai mici (în termeni de modul) vor deveni neglijabile pe măsură ce înmulțim în mod repetat cu $A$. Astfel, vectorul rezultat “se îndreaptă” către blocul Jordan dominant (valoarea proprie cu cel mai mare modul), iar direcția finală tinde să fie determinată de vectorul propriu asociat acelei valori proprii. Chiar și atunci când $A$ nu este diagonalizabilă în sens strict, interpretarea prin forma Jordan arată clar că iterațiile favorizează valoarea proprie dominantă, făcând din metoda puterii directe o alegere practică pentru găsirea acesteia.
+Șirul $y^{(k)}$ converge către vectorul propriu $x_1$.
+
+\textbf{Demonstrație.} Fie $P^{-1} A P = J$, unde $J$ este matricea Jordan
+corespunzătoare lui $A$. Fie $y^{(0)} = \alpha_1 p_1 + \alpha_2 p_2 + \dots + \alpha_n p_n$, unde
+$\alpha_1 \neq 0$ și $p_i$ sunt coloanele matricei $P$.
+\begin{align*}
+	y^{(k)} & = \frac{A y^{(k-1)}}{\|A y^{(k-1)}\|} = \frac{A^k y^{(0)}}{\|A^k y^{(0)}\|}      \\
+	        & = \frac{P^{-1} J^k P \sum_i \alpha_i p_i }{\|P^{-1} J^k P \sum_i \alpha_i p_i\|} \\
+	        & = \frac{P^{-1} J^k \sum_i \alpha_i e_i}{\|P^{-1} J^k \sum_i \alpha_i e_i\|}      \\
+\end{align*}
+
+Din expresia de mai sus, se dă factor comun forțat pe $\lambda_1$ și la numitor
+dar și la numărător și trecând la limita $k \to \infty$, ajungem la $y^{(k)} \to v_1$.
+Mult mai simplu, dacă $A$ este diagonalizabilă, și $b^{(0)}$ este o combinație
+liniară a vectorilor proprii, atunci:
+\begin{align*}
+	b^{(k)} & = A^k b^{(0)} = A^k \sum_{i=1}^n \alpha_i v_i                                                               \\
+	        & = \sum_{i=1}^n \alpha_i A^k v_i = \sum_{i=1}^n \alpha_i \lambda_i^k v_i                                     \\
+	        & = \alpha_1 \lambda_1^k ( v_1 +  \sum_{i=2}^n \frac{\alpha_i}{\alpha_1} \frac{\lambda_i^k}{\lambda_1^k} v_i) \\
+	b^{(k)} & \to \alpha_1 \lambda_1^k v_1 \quad \blacksquare                                                             \\
+\end{align*}
+
+Rata de convergență este dată de $\frac{|\lambda_2|}{|\lambda_1|}$, iar
+convergența este rapidă dacă $|\lambda_2| \ll |\lambda_1|$.
 
 \subsubsection{Metoda puterii inverse}
 
-Metoda puterii inverse aplică ideea puterii directe la matricea $B = (A - \mu I)^{-1}$. Dacă $\mu$ se află în apropierea uneia dintre valorile proprii ale lui $A$, atunci valoarea proprie a lui $B$ cu modul cel mai mare (adică cea dominantă) corespunde acelei valori proprii a lui $A$. Concret, dacă $\mu \approx \lambda_j$, atunci $\lambda_j - \mu \approx 0$, iar inversul $(A - \mu I)^{-1}$ devine “mare” pe direcția asociată lui $\lambda_j$. 
+Metoda puterii inverse aplică ideea puterii directe la matricea
+$B = A^{-1}$. Valorile proprii ale lui $B$ sunt inversul valorilor proprii ale lui
+$A$, deci cea mai mică valoare proprie a lui $A$ corespunde celei mai mari
+valori proprii ale matricei $B$. În plus, se poate introduce o deplasare $\mu$,
+astfel încât $B = (A - \mu I)^{-1}$. Dacă $\mu$ se află în apropierea uneia
+dintre valorile proprii ale lui $A$, atunci iterația va converge către vectorul
+propriu asociat lui $\lambda_j$, cu $|\lambda_j - \mu|$ minim.
 
-\paragraph{Iterarea câtului Rayleigh.}  
-O versiune mult mai eficientă a metodei puterii inverse o constituie \emph{iterarea câtului Rayleigh} (sau metoda puterii inverse cu deplasare variabilă). Pentru o aproximație curentă $x^{(k)}$ a vectorului propriu, se calculează valoarea:
-\[
-	\rho^{(k)} = \frac{(x^{(k)})^T A \, x^{(k)}}{(x^{(k)})^T x^{(k)}}.
-\]
-Această mărime, numită \emph{cât Rayleigh}, reprezintă o estimare a valorii proprii asociate lui $x^{(k)}$. Apoi, în pasul următor, se folosește $\mu = \rho^{(k)}$ drept noua deplasare. Cu alte cuvinte, la fiecare iterație:
+\textbf{Iterarea câtului Rayleigh.} O versiune mult mai eficientă a metodei
+puterii inverse o constituie \textit{iterarea câtului Rayleigh} (sau metoda
+puterii inverse cu deplasare variabilă). Aceasta se aplică matricelor hermitice
+(simetrice). Pentru o aproximație curentă $x^{(k)}$
+a vectorului propriu, se calculează valoarea:
+\begin{equation*}
+	\rho^{(k)} = \frac{x^{(k) T} A x^{(k)}}{x^{(k) T} x^{(k)}}.
+\end{equation*}
 
-\[
-	(A - \rho^{(k)} I)\, z = x^{(k)}, 
-\]
-\[
-	x^{(k+1)} = \frac{z}{\|z\|_2},
-\]
-\[
-	\rho^{(k+1)} = \frac{(x^{(k+1)})^T A \, x^{(k+1)}}{(x^{(k+1)})^T x^{(k+1)}}.
-\]
+Această mărime, numită \textit{cât Rayleigh}, reprezintă o estimare a valorii
+proprii asociate lui $x^{(k)}$. Apoi, în pasul următor, se folosește
+$\mu = \rho^{(k)}$ drept noua deplasare. Cu alte cuvinte, la fiecare iterație:
+\begin{align*}
+	y^{(k)}                    & = (A - \rho^{(k)} I)^{-1} x^{(k)} \\
+	(A - \rho^{(k)} I) y^{(k)} & = x^{(k)}                         \\
+	x^{(k+1)}                  & = \frac{y^{(k)}}{\|y^{(k)}\|}     \\
+\end{align*}
 
-Repetând acest procedeu, vectorul și valoarea proprie estimate converg rapid spre vectorul și valoarea reală asociate lui $\lambda_j$. Această strategie este extrem de utilă atunci când avem deja un indiciu despre poziția unei valori proprii, întrucât viteza de convergență devine foarte mare după ce $\rho^{(k)}$ se apropie suficient de $\lambda_j$. În practică, iterarea câtului Rayleigh se folosește pe scară largă în algoritmi de diagonalizare numerică și este adesea componenta centrală în metode avansate de calculul valorilor proprii.
+Repetând acest procedeu, vectorul și valoarea proprie estimate converg rapid
+spre vectorul și valoarea reală asociate lui $\lambda_j$. Această strategie este
+extrem de utilă atunci când avem deja un indiciu despre poziția unei valori
+proprii, întrucât viteza de convergență devine foarte mare după ce $\rho^{(k)}$
+se apropie suficient de $\lambda_j$. În practică, iterarea câtului Rayleigh se
+folosește pe scară largă în algoritmi de diagonalizare numerică și este adesea
+componenta centrală în metode avansate de calculul valorilor proprii.
 
+\subsection{Deflația}
 
-\subsubsection{Metoda deflației}
-
-Metoda \emph{deflației} permite, după ce s-a găsit o valoare proprie și un vector propriu asociat, să se “reducă” problema la o submatrice pentru determinarea celorlalte valori proprii. O abordare simplă este \emph{deflația Wielandt}:
+\textit{Deflația} ne permite ca după ce s-a găsit o valoare proprie și un vector
+propriu asociat, să se “reducă” problema la o submatrice pentru determinarea
+celorlalte valori proprii. O abordare simplă este \textit{deflația Wielandt}:
 
 \begin{itemize}
-	\item Se consideră că am aflat valoarea proprie dominantă $\lambda_1$ și vectorul propriu asociat $x_1$ (de pildă, prin metoda puterii directe).
+	\item Se consideră că am aflat valoarea proprie dominantă $\lambda_1$ și
+	      vectorul propriu asociat $x_1$ (de pildă, prin metoda puterii directe).
 	\item Se construiește matricea
-	      \[
-	      	B = (I_n - x_1\,y^T)\,A,
-	      \]
-	      unde $y \in \mathbb{R}^n$ se alege astfel încât $y^T x_1 = 1$. Se poate arăta că $B$ “blochează” componenta pe direcția $x_1$ și are valorile proprii
-	      \(\{0, \lambda_2, \lambda_3, \dots,\lambda_n\}\).
-	\item Apoi se elimină prima linie și prima coloană (corespunzătoare valorii proprii 0), obținându-se o submatrice care își păstrează celelalte valori proprii $\lambda_2,\ldots,\lambda_n$. Peste această submatrice, se aplică din nou o metodă (de exemplu, puterea directă) pentru a găsi următoarea valoare proprie dominantă.
+	      \begin{equation*}
+		      B = (I_n - x_1 y^T) A
+	      \end{equation*}
+	      unde $y \in \mathbb{R}^n$ se alege astfel încât $y^T x_1 = 1$. Se
+	      poate arăta că $B$ “blochează” componenta pe direcția $x_1$ și are
+	      valorile proprii $\{0, \lambda_2, \lambda_3, \dots,\lambda_n\}$.
+	\item Apoi se elimină prima linie și prima coloană (corespunzătoare valorii
+	      proprii 0), obținându-se o submatrice care își păstrează celelalte valori
+	      proprii $\lambda_2,\ldots,\lambda_n$. Peste această submatrice, se aplică
+	      din nou o metodă (de exemplu, puterea directă) pentru a găsi următoarea
+	      valoare proprie.
 \end{itemize}
 
-\paragraph{Exemplu: Matricea Google (PageRank).}  
-Matricea Google este un exemplu faimos de matrice stocastică, folosită în \emph{algoritmul PageRank}. Ideea de bază este că fiecare pagină web este un nod, iar legăturile (link-urile) către alte pagini definesc o probabilitate de \emph{tranziție} de la o pagină la alta. Pentru a rezolva probleme de tip “pagină izolată” sau sub-componente care nu influențează semnificativ restul rețelei, se folosesc tehnici de \emph{deflație}, prin care se separă anumite sub-blocuri ale matricei și se rezolvă problema pe blocuri mai mici.
+\subsection{Algoritmul PageRank}
+
+Matricea Google este un exemplu faimos de matrice stocastică, folosită în
+\textit{algoritmul PageRank}. Ideea de bază este că fiecare pagină web este un
+nod, iar legăturile (link-urile) către alte pagini definesc o probabilitate de
+\textit{tranziție} de la o pagină la alta. Pentru a rezolva probleme de tip
+“pagină izolată” sau sub-componente care nu influențează semnificativ restul
+rețelei, se folosesc tehnici de \textit{deflație}, prin care se separă anumite
+sub-blocuri ale matricei și se rezolvă problema pe blocuri mai mici.
 
 \begin{itemize}
-  \item \textbf{Cum se construiește Matricea Google?} Se consideră că avem $n$ pagini web, notate $P_1, P_2, \ldots, P_n$. Dacă pagina $P_i$ are link-uri către paginile $P_j$, atunci probabilitatea de a sări din $P_i$ în $P_j$ (prin navigare directă) va fi reprezentată ca un element nenul în matricea noastră. Pentru a asigura că matricea este stocastică (fiecare coloană însumează 1), se normalizează după numărul de link-uri ieșite.
+	\item \textbf{Cum se construiește Matricea Google?} Se consideră că avem $n$
+	      pagini web, notate $P_1, P_2, \ldots, P_n$. Dacă pagina $P_i$ are link-uri
+	      către paginile $P_j$, atunci probabilitatea de a sări din $P_i$ în $P_j$
+	      (prin navigare directă) va fi reprezentată ca un element nenul în matricea
+	      noastră. Pentru a asigura că matricea este stocastică
+	      (fiecare coloană însumează 1), se normalizează după numărul de link-uri
+	      ieșire.
 
-  \item \textbf{Exemplu concret cu 4 pagini.} Considerăm 4 pagini web: $P_1, P_2, P_3, P_4$ și următoarea structură de link-uri:
-  \[
-    P_1 \to \{P_2, P_3\}, \quad
-    P_2 \to \{P_3\}, \quad
-    P_3 \to \{P_1, P_4\}, \quad
-    P_4 \to \{P_2\}.
-  \]
-  Matricea de \emph{adiacență} (prin linii) ar putea arăta astfel:
-  \[
-    A = \begin{bmatrix}
-    0 & 1 & 1 & 0 \\[0.3em]
-    0 & 0 & 1 & 0 \\[0.3em]
-    1 & 0 & 0 & 1 \\[0.3em]
-    0 & 1 & 0 & 0
-    \end{bmatrix}.
-  \]
-  Pentru a obține \emph{matricea de tranziție} $M$ (stocastică), fiecare coloană se normalizează la 1, iar apoi se aplică un factor de \emph{damping} (de ex. $0.85$) pentru a reflecta probabilitatea ca un utilizator să revină aleator la oricare pagină.
+	\item \textbf{Exemplu concret cu $N=4$ pagini.} Considerăm 4 pagini web:
+	      $P_1, P_2, P_3, P_4$ și următoarea structură de link-uri:
+	      \begin{equation*}
+		      P_1 \to \{P_2, P_3\}, \quad
+		      P_2 \to \{P_3\}, \quad
+		      P_3 \to \{P_1, P_4\}, \quad
+		      P_4 \to \{P_2\}.
+	      \end{equation*}
+	      Matricea de \emph{adiacență} (prin linii) ar putea arăta astfel:
+	      \begin{equation*}
+		      A = \begin{bmatrix}
+			      0 & 1 & 1 & 0 \\
+			      0 & 0 & 1 & 0 \\
+			      1 & 0 & 0 & 1 \\
+			      0 & 1 & 0 & 0
+		      \end{bmatrix}.
+	      \end{equation*}
+	      Pentru a obține \emph{matricea de stocastică} $M$, fiecare
+	      coloană se normalizează la 1.
+	      \begin{equation*}
+		      M = \begin{bmatrix}
+			      0 & 1/2 & 1/2 & 0 \\
+			      0 & 0   & 1/2 & 0 \\
+			      1 & 0   & 0   & 1 \\
+			      0 & 1/2 & 0   & 0
+		      \end{bmatrix}.
+	      \end{equation*}
 
-  \item \textbf{Rolul valorii proprii $\lambda=1$.} În matricea Google rezultată, valoarea proprie de interes este $\lambda=1$. Vectorul propriu asociat acestei valori reprezintă \emph{PageRank-ul}, adică un vector care oferă “importanța” fiecărei pagini. Pentru a-l determina, se rezolvă
-  \[
-    (M - I)x = 0 \quad \Longrightarrow \quad Mx = x,
-  \]
-  unde $x$ este vectorul propriu asociat lui $\lambda=1$. Practic, $x$ se obține prin iterații de putere directă (sau metode similare).
+	\item \textbf{Calculul PageRank.} PageRank-ul este o distribuție de
+	      probabilitate care indică importanța fiecărei pagini web. PageRank-ul
+	      rămâne neschimbat indiferent de ce face utilizatorul, deci satisface
+	      ecuația:
+	      \begin{equation*}
+		      M R = R
+	      \end{equation*}
+	      Totuși, există șansa ca utilizatorul să nu continue click-urile. Fie
+	      $d$ probabilitatea de a continua să navigheze și $1-d$ probabilitatea
+	      de a sări la o pagină aleatorie. Astfel, definim matricea Google:
+	      \begin{equation*}
+		      G = d M + \frac{(1-d)}{N} ONES(N)
+	      \end{equation*}
+	      PageRank-ul va fi vectorul propriu asociat lui $\lambda=1$ al matricei
+	      Google $G$. Cum $\lambda=1$ este și valoare proprie dominantă, se
+	      poate aplica metoda puterii.
 
-  \item \textbf{Deflația în PageRank.} Dacă anumite pagini sunt “izolate” sau formează sub-componente, se pot crea blocuri separate pentru care vectorul propriu asociat lui $\lambda=1$ se calculează ușor, după care aceste blocuri pot fi \emph{deflate} pentru a reduce dimensiunea problemei și, implicit, efortul de calcul.
+	\item \textbf{Deflația în PageRank.} Dacă anumite pagini sunt “izolate” sau
+	      formează sub-componente, se pot crea blocuri separate pentru care vectorul
+	      propriu asociat lui $\lambda=1$ se calculează ușor, după care aceste blocuri
+	      pot fi \textit{deflate} pentru a reduce dimensiunea problemei și, implicit,
+	      efortul de calcul.
 \end{itemize}
 
 
-\subsubsection{Metoda Householder}
+% \subsubsection{Metoda Householder}
 
-Spre deosebire de metodele puterii (care furnizează aproximări ale valorilor și vectorilor proprii), metoda Householder urmărește explicit construirea, prin transformări ortogonale (sau unitare), a unei forme Schur pentru matricea inițială. Această abordare se poate organiza sub forma \emph{algoritmului QR}, care conține două etape:
+% Spre deosebire de metodele puterii (care furnizează aproximări ale valorilor și vectorilor proprii), metoda Householder urmărește explicit construirea, prin transformări ortogonale (sau unitare), a unei forme Schur pentru matricea inițială. Această abordare se poate organiza sub forma \emph{algoritmului QR}, care conține două etape:
 
-\begin{enumerate}
-	\item \textbf{Etapa directă}, de reducere a matricei date la forma Hessenberg superior prin transformări ortogonale de asemănare.
-	\item \textbf{Etapa iterativă}, de construcţie recurentă a unui şir de matrici convergent către forma Schur reală. Această etapă folosește ideea factorizării $QR$ a matricei, la care se adaugă eventual \emph{deplasări} (shift-uri) pentru a accelera convergența.
-\end{enumerate}
+% \begin{enumerate}
+% 	\item \textbf{Etapa directă}, de reducere a matricei date la forma Hessenberg superior prin transformări ortogonale de asemănare.
+% 	\item \textbf{Etapa iterativă}, de construcţie recurentă a unui şir de matrici convergent către forma Schur reală. Această etapă folosește ideea factorizării $QR$ a matricei, la care se adaugă eventual \emph{deplasări} (shift-uri) pentru a accelera convergența.
+% \end{enumerate}
 
-Există mai multe variante ale algoritmului QR (cu deplasare simplă, deplasare dublă etc.), însă ideea principală este aceeași: se aplică în mod repetat factorizări și transformări ortogonale, iar în final se ajunge la o matrice aproape triunghiulară, din care citim valorile proprii (pe diagonală sau în blocuri de dimensiune \(2\times 2\)).
-
-
-%----------------------------------------------------------------------------------------
-%       PROBLEME PROPUSE
-%----------------------------------------------------------------------------------------
+% Există mai multe variante ale algoritmului QR (cu deplasare simplă, deplasare dublă etc.), însă ideea principală este aceeași: se aplică în mod repetat factorizări și transformări ortogonale, iar în final se ajunge la o matrice aproape triunghiulară, din care citim valorile proprii (pe diagonală sau în blocuri de dimensiune \(2\times 2\)).
 
 \section{Probleme}
 
 \begin{questions}
-        \boxedpoints
-	\pointsinmargin
-    \question Fie matricea tridiagonală:
 
-\[
-	A = \begin{bmatrix}
-			a_1 & c_1 & \dots &        &        \\
-			b_2 & a_2 & c_2   & \dots  &        \\
-			\vdots & \vdots & \ddots & \ddots &        \\
-			      &        & b_{n-1} & a_{n-1} & c_{n-1} \\
-			      &        &        & b_n     & a_n
-	\end{bmatrix}.
-\]
+	\question Fie matricea tridiagonală:
 
-Se construieşte şirul de polinoame:
+	\[
+		A = \begin{bmatrix}
+			a_1    & c_1    & \dots   &         &         \\
+			b_2    & a_2    & c_2     & \dots   &         \\
+			\vdots & \vdots & \ddots  & \ddots  &         \\
+			       &        & b_{n-1} & a_{n-1} & c_{n-1} \\
+			       &        &         & b_n     & a_n
+		\end{bmatrix}.
+	\]
 
-\[
-	p_0(\lambda) = 1,\quad
-	p_1(\lambda) = \lambda - a_1,\quad
-	p_n(\lambda) = (\lambda - a_n)\,p_{n-1}(\lambda) - b_n c_{n-1}\,p_{n-2}(\lambda).
-\]
+	Se construieşte şirul de polinoame:
 
-\begin{enumerate}
-	\item Arătaţi că $p_{n}(\lambda)$ este polinomul caracteristic al matricei $A$.
-	\item Scrieţi o funcţie OCTAVE care calculează valorile şi vectorii proprii ale matricei $A$.
-\end{enumerate}
+	\[
+		p_0(\lambda) = 1,\quad
+		p_1(\lambda) = \lambda - a_1,\quad
+		p_n(\lambda) = (\lambda - a_n)\,p_{n-1}(\lambda) - b_n c_{n-1}\,p_{n-2}(\lambda).
+	\]
 
-\question
+	\begin{enumerate}
+		\item Arătaţi că $p_{n}(\lambda)$ este polinomul caracteristic al matricei $A$.
+		\item Scrieţi o funcţie OCTAVE care calculează valorile şi vectorii proprii ale matricei $A$.
+	\end{enumerate}
 
-Să se demonstreze pentru o matrice $A \in \mathbb{R}^{n \times n}$ proprietăţile următoare:
+	\question
 
-\begin{enumerate}
-	\item $\sigma(A^{-1}) = \left\lbrace \tfrac{1}{\lambda _{1}}, \tfrac{1}{\lambda _{2}}, \ldots, \tfrac{1}{\lambda _{n}}\right\rbrace $;
-	\item $\sigma(A - \mu I_{n}) = \left\lbrace \lambda_{i} - \mu \right\rbrace , \forall \mu \in \mathbb{R}$;
-	\item $\sigma(A^{k}) = \left\lbrace \lambda_{i}^{k} \right\rbrace , \forall k \in \mathbb{N}$;
-	\item $\sigma((A - \mu I_{n})^{- 1}) = \left\lbrace \tfrac{1}{\lambda_{i} - \mu} \right\rbrace , \forall \mu \in \mathbb{R}$.
-\end{enumerate}
+	Să se demonstreze pentru o matrice $A \in \mathbb{R}^{n \times n}$ proprietăţile următoare:
 
-\question
-Calculaţi valorile şi vectorii proprii ai unui reflector Householder.
+	\begin{enumerate}
+		\item $\sigma(A^{-1}) = \left\lbrace \tfrac{1}{\lambda _{1}}, \tfrac{1}{\lambda _{2}}, \ldots, \tfrac{1}{\lambda _{n}}\right\rbrace $;
+		\item $\sigma(A - \mu I_{n}) = \left\lbrace \lambda_{i} - \mu \right\rbrace , \forall \mu \in \mathbb{R}$;
+		\item $\sigma(A^{k}) = \left\lbrace \lambda_{i}^{k} \right\rbrace , \forall k \in \mathbb{N}$;
+		\item $\sigma((A - \mu I_{n})^{- 1}) = \left\lbrace \tfrac{1}{\lambda_{i} - \mu} \right\rbrace , \forall \mu \in \mathbb{R}$.
+	\end{enumerate}
 
-\emph{Indicaţie:} $G^T u = e_1G$  - este un reflector. Coloanele lui $G$ sunt vectori proprii.
+	\question
+	Calculaţi valorile şi vectorii proprii ai unui reflector Householder.
 
-\question
-Pentru matricea:
-\[
-	A = \begin{bmatrix}
+	\emph{Indicaţie:} $G^T u = e_1G$  - este un reflector. Coloanele lui $G$ sunt vectori proprii.
+
+	\question
+	Pentru matricea:
+	\[
+		A = \begin{bmatrix}
 			c & -s \\
 			s & c
 		\end{bmatrix}
-	\in \mathbb{R}^{2 \times 2}, \quad c^2 + s^2 = 1,
-\]
-calculaţi valorile şi vectorii proprii.
+		\in \mathbb{R}^{2 \times 2}, \quad c^2 + s^2 = 1,
+	\]
+	calculaţi valorile şi vectorii proprii.
 \end{questions}
 \end{document}
