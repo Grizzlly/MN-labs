@@ -7,6 +7,8 @@
 \usepackage{fancyvrb}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
 
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
@@ -215,6 +217,22 @@ liniară a vectorilor proprii, atunci:
 Rata de convergență este dată de $\frac{|\lambda_2|}{|\lambda_1|}$, iar
 convergența este rapidă dacă $|\lambda_2| \ll |\lambda_1|$.
 
+\begin{algorithm}
+	\caption{Metoda puterii directe}
+	\begin{algorithmic}[1]
+		\State \( v \gets \text{vectorul initial normalizat} \)
+		\For{$i = 1$ to $\text{max\_iter}$}
+		\State \( v_{\text{prev}} \gets v \)
+		\State \( v \gets A \cdot v \)
+		\State \( v \gets \frac{v}{\| v \|} \)
+		\If{$\| v - v_{\text{prev}} \| < \text{tol}$}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+		\State \( \lambda \gets v^\top A v \)
+	\end{algorithmic}
+\end{algorithm}
+
 \subsubsection{Metoda puterii inverse}
 
 Metoda puterii inverse aplică ideea puterii directe la matricea
@@ -224,6 +242,39 @@ valori proprii ale matricei $B$. În plus, se poate introduce o deplasare $\mu$,
 astfel încât $B = (A - \mu I)^{-1}$. Dacă $\mu$ se află în apropierea uneia
 dintre valorile proprii ale lui $A$, atunci iterația va converge către vectorul
 propriu asociat lui $\lambda_j$, cu $|\lambda_j - \mu|$ minim.
+
+\begin{algorithm}
+	\caption{Metoda Puterii Inverse}
+	\begin{algorithmic}[1]
+		\State \( v \gets \text{vectorul initial normalizat} \)
+		\For{$i = 1$ to $\text{max\_iter}$}
+		\State \( v_{\text{prev}} \gets v \)
+		\State Rezolv \( A \cdot v \gets v_{\text{prev}} \) pentru \( v \)
+		\State \( v \gets \frac{v}{\| v \|} \)
+		\If{$\| v - v_{\text{prev}} \| < \text{tol}$}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+		\State \( \lambda \gets v^\top A v \)
+	\end{algorithmic}
+\end{algorithm}
+
+\newpage
+\begin{algorithm}
+	\caption{Metoda Puterii Inverse cu deplasare}
+	\begin{algorithmic}[1]
+		\State \( v \gets \text{normalized initial vector} \)
+		\For{$i = 1$ to $\text{max\_iter}$}
+		\State \( v_{\text{prev}} \gets v \)
+		\State Rezolv \( (A - \mu I) \cdot v = v_{\text{prev}} \) pentru \( v \)
+		\State \( v \gets \frac{v}{\| v \|} \)
+		\If{$\| v - v_{\text{prev}} \| < \text{tol}$}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+		\State \( \lambda \gets v^\top A v \)
+	\end{algorithmic}
+\end{algorithm}
 
 \textbf{Iterarea câtului Rayleigh.} O versiune mult mai eficientă a metodei
 puterii inverse o constituie \textit{iterarea câtului Rayleigh} (sau metoda
@@ -251,28 +302,74 @@ se apropie suficient de $\lambda_j$. În practică, iterarea câtului Rayleigh s
 folosește pe scară largă în algoritmi de diagonalizare numerică și este adesea
 componenta centrală în metode avansate de calculul valorilor proprii.
 
+\begin{algorithm}
+	\caption{Iterarea Rayleigh}
+	\begin{algorithmic}[1]
+		\State \( v \gets \frac{v}{\|v\|} \)
+		\For{$i = 1$ to $\text{max\_iter}$}
+		\State \( v_{\text{prev}} \gets v \)
+		\State \( \mu \gets v^\top A v \)
+		\State Rezolv \( (A - \mu I) v = v_{\text{prev}} \) pentru \( v \)
+		\State \( v \gets \frac{v}{\|v\|} \)
+		\If{$\| v - v_{\text{prev}} \| < \text{tol}$}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+		\State \( \lambda \gets v^\top A v \)
+	\end{algorithmic}
+\end{algorithm}
+
 \subsection{Deflația}
 
 \textit{Deflația} ne permite ca după ce s-a găsit o valoare proprie și un vector
 propriu asociat, să se “reducă” problema la o submatrice pentru determinarea
-celorlalte valori proprii. O abordare simplă este \textit{deflația Wielandt}:
+celorlalte valori proprii.
+
+Fie $\lambda_1, \lambda_2, \ldots, \lambda_n$ valorile proprii ale matricei $A$
+cu vectorii proprii asociați $v_1, v_2, \ldots, v_n$. Fie $x$ un vector astfel
+încât $x^T v_1 = 1$. Se consideră matricea:
+\begin{equation*}
+	B = A - \lambda_1 v_1 x^T
+\end{equation*}
+
+Spectrul matricei $B$ este dat de:
+\begin{equation*}
+	\sigma(B) = \left\lbrace 0, \lambda_2, \lambda_3, \ldots, \lambda_n \right\rbrace
+\end{equation*}
+
+\textbf{Cum alegem vectorul x?} O abordare simplă este \textit{deflația Wielandt}:
 
 \begin{itemize}
 	\item Se consideră că am aflat valoarea proprie dominantă $\lambda_1$ și
-	      vectorul propriu asociat $x_1$ (de pildă, prin metoda puterii directe).
-	\item Se construiește matricea
-	      \begin{equation*}
-		      B = (I_n - x_1 y^T) A
-	      \end{equation*}
-	      unde $y \in \mathbb{R}^n$ se alege astfel încât $y^T x_1 = 1$. Se
-	      poate arăta că $B$ “blochează” componenta pe direcția $x_1$ și are
-	      valorile proprii $\{0, \lambda_2, \lambda_3, \dots,\lambda_n\}$.
-	\item Apoi se elimină prima linie și prima coloană (corespunzătoare valorii
-	      proprii 0), obținându-se o submatrice care își păstrează celelalte valori
-	      proprii $\lambda_2,\ldots,\lambda_n$. Peste această submatrice, se aplică
-	      din nou o metodă (de exemplu, puterea directă) pentru a găsi următoarea
-	      valoare proprie.
+	      vectorul propriu asociat $v_1$ (de pildă, prin metoda puterii directe).
+	\item Considerăm $x = \frac{1}{\lambda_1 v_i^{(i)}} A_i$. $A_i$ este linia
+	      $i$ din matricea $A$, iar $v_i^{(i)}$ este componenta $i$ a vectorului
+	      propriu $v_i$. Se obsevă că $x^T c_i = 1$. Construind, matricea $B$,
+	      linia $i$ devine $0$.
+	\item Eliminăm linia $i$ și coloana $i$ din matricea $B$, obținând o
+	      matrice de dimensiune $(n-1) \times (n-1)$.
 \end{itemize}
+
+\begin{algorithm}
+	\caption{MP cu deflație}
+	\begin{algorithmic}[1]
+		\State \( \text{eigarray} \gets \text{zero vector of length } n \)
+
+		\While{\( \text{size}(A, 1) > 0 \)}
+		\State \( v \gets \text{vector de 1 de lungime } \text{size}(A, 1) \)
+		\State \( v \gets v / \|v\| \)
+
+		\State \( v \gets \text{vector obtinut din MP }\)
+
+		\State \( \lambda \gets v^\top A v \)
+		\State \( \text{eigarray}[\text{size}(A, 1)] \gets \lambda \)
+
+		\State \( y \gets A_{1,:} / (\lambda \cdot v_1) \)
+		\State \( A \gets A - \lambda \cdot (v \cdot y) \)
+		\State \( A \gets A_{2:\text{end}, 2:\text{end}} \)
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
 
 \subsection{Algoritmul PageRank}
 
@@ -344,6 +441,26 @@ sub-blocuri ale matricei și se rezolvă problema pe blocuri mai mici.
 	      pot fi \textit{deflate} pentru a reduce dimensiunea problemei și, implicit,
 	      efortul de calcul.
 \end{itemize}
+
+\begin{algorithm}
+	\caption{PageRank}
+	\begin{algorithmic}[1]
+		\State \( n \gets \text{number of rows of } M \)
+		\State \( v \gets \textbf{1}_n \)
+		\State \( G \gets d \cdot M + \frac{1 - d}{n} \cdot \textbf{1}_{n \times n} \)
+
+		\While{true}
+		\State \( v_{\text{prev}} \gets v \)
+		\State \( v \gets G \cdot v \)
+		\State \( v \gets \frac{v}{\| v \|} \)
+		\If{$\| v - v_{\text{prev}} \| < \text{tol}$}
+		\State \textbf{break}
+		\EndIf
+		\EndWhile
+
+		\State \( v \gets \frac{v}{\| v \|_1} \)
+	\end{algorithmic}
+\end{algorithm}
 
 
 % \subsubsection{Metoda Householder}
