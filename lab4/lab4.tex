@@ -312,8 +312,8 @@ zecimale, cu trunchiere. Fie următorul sistem:
 
 \begin{equation*}
 	\begin{bmatrix}
-		0.913 & 0.659 \\
-		0.780 & 0.563
+		0.001 & 1 \\
+		      1 & 1
 	\end{bmatrix}
 	\begin{bmatrix}
 		x_1 \\
@@ -321,21 +321,21 @@ zecimale, cu trunchiere. Fie următorul sistem:
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-		0.254 \\
-		0.217
+		1 \\
+		2
 	\end{bmatrix}
 \end{equation*}
 
 \begin{equation*}
-	\mu = \frac{0.780}{0.913} = 0.854 \quad \text{(trunchiere)}
+	\mu = \frac{1}{0.001} = 1000 \quad
 \end{equation*}
 
 Sistemul devine:
 
 \begin{equation*}
 	\begin{bmatrix}
-		0.913 & 0.659 \\
-		0     & 0.001
+		0.001 & 1 \\
+		0     & -999
 	\end{bmatrix}
 	\begin{bmatrix}
 		x_1 \\
@@ -343,23 +343,23 @@ Sistemul devine:
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-		0.254 \\
-		0.001
+		1 \\
+		-998
 	\end{bmatrix}
 \end{equation*}
 
-Soluțiile sunt $x_2 = 1$ și $x_1 = \frac{0.254 - 0.659}{0.913} = -0.417$.
+Soluțiile sunt $x_2 = \frac{-998}{-999}$ = 0.998 și $x_1 = \frac{1 - 0.998}{0.001} = 2$.
 
-Comparăm soluția găsită, $x_* = \begin{bmatrix} -0.417 \\ 1 \end{bmatrix}$,
-cu soluția reală, $x = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$:
+Comparăm soluția găsită, $x_* = \begin{bmatrix} 2 \\ 0.998 \end{bmatrix}$,
+cu soluția reală, $x = \begin{bmatrix} 1.001 \\ 0.999 \end{bmatrix}$:
 
 \begin{align*}
-	||x - x_*||               & = ||\begin{bmatrix} -0.557 \\ 0 \end{bmatrix}|| = 0.557 \\
-	||x||                     & = ||\begin{bmatrix} -1 \\ 1 \end{bmatrix}|| = \sqrt{2}  \\
-	\frac{||x - x_*||}{||x||} & = \frac{0.557}{\sqrt{2}} = 0.39
+	||x - x_*||               & = ||\begin{bmatrix} -0.999 \\ 0.001 \end{bmatrix}|| = 0.999 \\
+	||x||                     & = ||\begin{bmatrix} 1.001 \\ 0.999 \end{bmatrix}|| = \sqrt{2}  \\
+	\frac{||x - x_*||}{||x||} & = \frac{0.999}{\sqrt{2}} = 0.71
 \end{align*}
 
-Eroarea relativă este de aproape 40\%. Foarte mare! Dacă calculăm reziduul,
+Eroarea relativă este de aproximativ 71\%. Foarte mare! Dacă calculăm reziduul,
 am vedea că el este totuși mic, dar pe noi ne interesează soluția. Prezentăm
 următoarele strategii:
 
