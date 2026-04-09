@@ -393,8 +393,11 @@ pentru $x_j^{(p+1)}$ cu $j < i$.
 De observat la metodele Jacobi și Gauss-Seidel este că o condiție suficientă dar
 nu necesară pentru convergența acestora este ca matricea $A$ să fie diagonal
 dominantă. Metodele Jacobi și Gauss-Seidel au proprietatea că ori sunt ambele
-convergente, ori niciuna nu este convergentă (teorema Stein-Rosenberg). Atunci
-când converg, Gauss-Seidel converge mai rapid decât Jacobi, $\rho(GS) < \rho(J) < 1$.
+convergente, ori niciuna nu este convergentă, dacă matricea are toate elementele
+nenule pe diagonală și restul mai mici sau egale cu 0 (teorema Stein-Rosenberg).
+Atunci când converg, Gauss-Seidel converge mai rapid decât Jacobi,
+$\rho(GS) < \rho(J) < 1$. În general, se poate presupune că $GS$ converge
+mai rapid decât $J$.
 
 \subsubsection{Metoda suprarelaxării}
 
