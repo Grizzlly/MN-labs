@@ -468,13 +468,13 @@ Atunci,
 Numitorul lui $\epsilon_{xy}$ este foarte mic dacă $x \approx y$, deci
 eroarea devine foarte mare. $\blacksquare$
 
-În concluzie, obținem următoarea formulă pentru $d$: $d = v - sign(v_1) ||v||_2 e_1$.
+În concluzie, obținem următoarea formulă pentru $d$: $d = v + sign(v_1) ||v||_2 e_1$.
 
 Pentru a oferi un exemplu practic a descompunerii QR cu Householder, mai
 e utilă următoarea informație: putem "umple" vectorul $d$ cu 0-uri în locurile
 unde ne dorim ca vectorii să nu fie afectați. De exmeplu, dacă avem 3 dimensiuni
-și vrem să punem 0 \textbf{doar} pe poziția 3, atunci $d = \begin{bmatrix} 0 \\ v2 - sign(v_2) ||v'||_2 \\ v3 \end{bmatrix}$
-sau $d = \begin{bmatrix} v1 - sign(v_1) ||v'||_2 \\ 0 \\ v3 \end{bmatrix}$, unde $v' = \begin{bmatrix} v2 \\ v3 \end{bmatrix}$,
+și vrem să punem 0 \textbf{doar} pe poziția 3, atunci $d = \begin{bmatrix} 0 \\ v2 + sign(v_2) ||v'||_2 \\ v3 \end{bmatrix}$
+sau $d = \begin{bmatrix} v1 + sign(v_1) ||v'||_2 \\ 0 \\ v3 \end{bmatrix}$, unde $v' = \begin{bmatrix} v2 \\ v3 \end{bmatrix}$,
 respectiv $v' = \begin{bmatrix} v1 \\ v3 \end{bmatrix}$.
 
 \textbf{Exemplu.} Fie matricea $A_1 = \begin{bmatrix} 2 & 4 & 5 \\ 1 & -1 & 1 \\ 2 & 1 & -1 \end{bmatrix}$.
@@ -482,22 +482,22 @@ Ne dorim să găsim matricea $Q$ și $R$ astfel încât $A = QR$ și $Q$ să fie
 
 La prima iterație ne dorim să punem 0-uri pe pozițiile (2, 1) și (3, 1).
 \begin{equation*}
-	v = \begin{bmatrix} 2 \\ 1 \\ 2 \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 2 -sign(2) * 3 \\ 1 \\ 2 \end{bmatrix} = \begin{bmatrix} -1 \\ 1 \\ 2 \end{bmatrix}, \quad ||d||_2^2 = 6
+	v = \begin{bmatrix} 2 \\ 1 \\ 2 \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 2 + sign(2) * 3 \\ 1 \\ 2 \end{bmatrix} = \begin{bmatrix} 5 \\ 1 \\ 2 \end{bmatrix}, \quad ||d||_2^2 = 30
 \end{equation*}
 \begin{align*}
-	H_1           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{3} \begin{bmatrix} -1 \\ 1 \\ 2 \end{bmatrix} \begin{bmatrix} -1 & 1 & 2 \end{bmatrix}                                        \\
-	H_1           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{3} \begin{bmatrix} 1 & -1 & -2 \\ -1 & 1 & 2 \\ -2 & 2 & 4 \end{bmatrix} = \frac{1}{3} \begin{bmatrix} 2 & 1 & 2 \\ 1 & 2 & -2 \\ 2 & -2 & -1 \end{bmatrix} \\
-	A_2 = H_1 A_1 & = \frac{1}{3} \begin{bmatrix} 2 & 1 & 2 \\ 1 & 2 & -2 \\ 2 & -2 & -1 \end{bmatrix} \begin{bmatrix} 2 & 4 & 5 \\ 1 & -1 & 1 \\ 2 & 1 & -1 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix}
+	H_1           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{15} \begin{bmatrix} 5 \\ 1 \\ 2 \end{bmatrix} \begin{bmatrix} 5 & 1 & 2 \end{bmatrix}                                                                                    \\
+	H_1           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{15} \begin{bmatrix} 25 & 5 & 10 \\ 5 & 1 & 2 \\ 10 & 2 & 4 \end{bmatrix} = \frac{1}{15} \begin{bmatrix} -10 & -5 & -10 \\ -5 & 14 & -2 \\ -10 & -2 & 11 \end{bmatrix}                                  \\
+	A_2 = H_1 A_1 & = \frac{1}{15} \begin{bmatrix} -10 & -5 & -10 \\ -5 & 14 & -2 \\ -10 & -2 & 11 \end{bmatrix} \begin{bmatrix} 2 & 4 & 5 \\ 1 & -1 & 1 \\ 2 & 1 & -1 \end{bmatrix} = \begin{bmatrix} -3 & -3 & -3 \\ 0 & -\frac{12}{5} & -\frac{3}{5} \\ 0 & -\frac{9}{5} & -\frac{21}{5} \end{bmatrix}
 \end{align*}
 
-La a doua iterație ne dorim să punem 0 pe poziția (2, 3).
+La a doua iterație ne dorim să punem 0 pe poziția (3, 2).
 \begin{equation*}
-	v = \begin{bmatrix} 0 \\ 3 \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 0 \\ -sign(0) * 3 \\ 3 \end{bmatrix} = \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix}, \quad ||d||_2^2 = 18
+	v = \begin{bmatrix} -\frac{12}{5} \\ -\frac{9}{5} \end{bmatrix}, \quad ||v||_2 = 3, \quad d = \begin{bmatrix} 0 \\ -\frac{12}{5} + sign(-\frac{12}{5}) * 3 \\ -\frac{9}{5} \end{bmatrix} = \begin{bmatrix} 0 \\ -\frac{27}{5} \\ -\frac{9}{5} \end{bmatrix} = - \frac{9}{5} \begin{bmatrix} 0 \\ 3 \\ 1 \end{bmatrix}, \quad ||d||_2^2 = \frac{162}{5}
 \end{equation*}
 \begin{align*}
-	H_2           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 \\ -3 \\ 3 \end{bmatrix} \begin{bmatrix} 0 & -3 & 3 \end{bmatrix}                       \\
-	H_2           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{9} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 9 & -9 \\ 0 & -9 & 9 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 1 & 0 \end{bmatrix} \\
-	A_3 = H_2 A_2 & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 1 & 0 \end{bmatrix} \begin{bmatrix} 3 & 3 & 3 \\ 0 & 0 & 3 \\ 0 & 3 & 3 \end{bmatrix} = \begin{bmatrix} 3 & 3 & 3 \\ 0 & 3 & 3 \\ 0 & 0 & 3 \end{bmatrix}
+	H_2           & = I_3 - 2 \frac{d d^T}{d^T d} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{5}{81} \frac{81}{25} \begin{bmatrix} 0 \\ 3 \\ 1 \end{bmatrix} \begin{bmatrix} 0 & 3 & 1 \end{bmatrix}                                                              \\
+	H_2           & = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} - \frac{1}{5} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 9 & 3 \\ 0 & 3 & 1 \end{bmatrix} = \frac{1}{5} \begin{bmatrix} 1 & 0 & 0 \\ 0 & -4 & -3 \\ 0 & -3 & 4 \end{bmatrix}                                        \\
+	A_3 = H_2 A_2 & = \frac{1}{5} \begin{bmatrix} 1 & 0 & 0 \\ 0 & -4 & -3 \\ 0 & -3 & 4 \end{bmatrix} \begin{bmatrix} -3 & -3 & -3 \\ 0 & -\frac{12}{5} & -\frac{3}{5} \\ 0 & -\frac{9}{5} & -\frac{21}{5} \end{bmatrix} = \begin{bmatrix} -3 & -3 & -3 \\ 0 & 3 & 3 \\ 0 & 0 & -3 \end{bmatrix}
 \end{align*}
 
 $A_3$ este matricea $R$, iar $Q = H_1^T H_2^T = H_1 H_2$ este matricea
@@ -512,7 +512,7 @@ ortogonală.
 		\For{$i = 1$, $\min(m-1, n)$}
 		\State \( v \gets \text{vector plin de 0 de dimensiune } m \)
 		\State \( v(i:m) \gets A(i:m, i) \)
-		\State \( v(i) \gets v(i) - \text{sign}(v(i)) \times \text{norm}(v) \)
+		\State \( v(i) \gets v(i) + \text{sign}(v(i)) \times \text{norm}(v) \)
 		\State \( v \gets v / \text{norm}(v) \)
 		\State \( H \gets I - 2 \times (v \cdot v^T) \)
 		\State \( Q \gets H \cdot Q \)
